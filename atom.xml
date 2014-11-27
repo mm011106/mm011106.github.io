@@ -1,23 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
-  <link href="http://yoursite.com/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2014-11-27T14:46:20+09:00</updated>
-  <id>http://yoursite.com/</id>
+  <title><![CDATA[MQTT and ..]]></title>
+  <link href="http://mm011106.github.io/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-11-27T17:21:56+09:00</updated>
+  <id>http://mm011106.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[mckc]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
+    <title type="html"><![CDATA[ちょっと落ち着きました]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/27/page3/"/>
+    <updated>2014-11-27T15:27:38+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/27/page3</id>
+    <content type="html"><![CDATA[<p>とりあえず、こんな感じで始めてみましょう。</p>
+
+<p>いろいろと勉強するべきことが多いのですが、ボケ防止には役立ちそうです。</p>
+
+<p>まずは、このブログの書き方から、いや日本語から勉強せねばならないようにも思います。<br/>
+改行するには、行末に半角スペースを2つ <br/>
+でしょうか？</p>
+
+<p>プログラム言語用の自動フォーマットはこんな感じ　　ですが思ったとおり動きません。。。。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>test
+</span><span class='line'>test2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>それは、テーマが悪いのでしょうか？</p>
+
+<p>これはこれでok</p>
+
+<p>たとえばリンクは<br/>
+<a href="http://www.eagletech.jp/">イーグルテクノロジ</a><br/>
+なんてかんじ。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[はじめてのブログポストです]]></title>
-    <link href="http://yoursite.com/blog/2014/11/27/testposting/"/>
+    <link href="http://mm011106.github.io/blog/2014/11/27/testposting/"/>
     <updated>2014-11-27T14:43:27+09:00</updated>
-    <id>http://yoursite.com/blog/2014/11/27/testposting</id>
+    <id>http://mm011106.github.io/blog/2014/11/27/testposting</id>
     <content type="html"><![CDATA[<p>こんにちは、初めてのブログです。
 不本意ながら、windowsで書いています。</p>
 ]]></content>
