@@ -4,7 +4,7 @@
   <title><![CDATA[Category: fromat examples | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/fromat-examples/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T12:17:21+09:00</updated>
+  <updated>2014-11-29T12:18:00+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -29,7 +29,7 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 
 <p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
 
-<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。
+<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。<br/>
 日本語も大丈夫。</p>
 ]]></content>
   </entry>
