@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T11:40:31+09:00</updated>
+  <updated>2014-11-29T12:06:36+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,22 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[手始めに、色々と試してみます]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/29/first-step/"/>
+    <updated>2014-11-29T11:56:59+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/29/first-step</id>
+    <content type="html"><![CDATA[<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">echo</span> <span class="k">${</span><span class="nv">test</span><span class="k">}</span>
+</span><span class='line'>cat /var/log/syslog <span class="p">|</span> grep <span class="s1">&#39;test_log&#39;</span> &gt; temp.txt
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[hello world]]></title>
