@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:46:27+09:00</updated>
+  <updated>2014-11-29T14:47:32+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -115,6 +115,8 @@
 <p>それは、それで正しいフォーマッティングかと思います。<br/>
 この行数では、safari上で行数が足りません。<br/>
 firefoxよりも文字が小さく表示されるようです。</p>
+
+<h2>この状態で「区切り」を入れてみます。</h2>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img right /images/hana_small.jpg <span class="s1">&#39;Shrinked HANA!&#39;</span>　<span class="s1">&#39;ハナさん&#39;</span> %<span class="o">}</span>
