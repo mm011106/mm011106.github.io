@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:10:25+09:00</updated>
+  <updated>2014-11-29T14:12:47+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -86,10 +86,10 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 <p>それは、それで正しいフォーマッティングかと思います。<br/>
 文字を書くほうが気をつければいいことかと。</p>
 
-<pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'" >
+<pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'　'ハナさん'" >
 </code></pre>
 
-<p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo;" ></p>
+<p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo; &lsquo;ハナさん&rsquo;" ></p>
 
 <p>ここにも少し文章が必要です。<br/>
 ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
