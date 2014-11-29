@@ -12,8 +12,7 @@
   <meta name="description" content="シェルコマンドの表示例です。 1
 2
 echo ${test}
-cat /var/log/syslog | grep &#39;test_log&#39; &gt; temp.txt 1
-rake watch を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake &hellip;">
+cat /var/log/syslog | grep &#39;test_log&#39; &gt; temp.txt ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -92,116 +91,12 @@ rake watch を別のコンソールから起動しておけば、ポスト用の
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>rake watch
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
-
-<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。<br/>
-日本語も大丈夫。</p>
-
-<p>改行するときは行末に２文字の半角空白を置くと、<br/>
-こんなふうに改行できます。</p>
-
-<p>現在、octopressのディレクトリ内からソースファイルをエディットして、自動でgenerate、適当なところで手動でweb用のgitリポジトリ内にコピー、そこからcommit &amp; pushしています。<br/>
-ちょっと効率が悪い、ソースがローカルに保存されてしまう、という欠点があるので何とかしたいと思います。<br/>
-世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。<br/>
-やはり大元の<a href="http://octopress.org/docs/deploying/github/">ここ</a>が詳しいか？</p>
-
-<p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは写真です<span class="o">](</span>/images/hana.jpg <span class="s2">&quot;HANA!&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" />
-写真の次のテキストはこんな位置に来ます。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは小さい写真です<span class="o">](</span>/images/hana_small.jpg <span class="s2">&quot;Shrinked HANA!&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
-
-<p>改行を１行入れたあとの、写真の次のテキストはこんな位置に来ます。<br/>
-次に、octopressでのタグフォーマットです。
-フォーマットはこんな形になります。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img <span class="o">[</span>class names<span class="o">]</span> /path/to/image <span class="o">[</span>width<span class="o">]</span> <span class="o">[</span>height<span class="o">]</span> <span class="o">[</span>title text <span class="o">[</span>alt text<span class="o">]]</span> %<span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img /images/hana.jpg <span class="s1">&#39;HANA!&#39;</span> %<span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img src="/images/hana.jpg" title="'HANA!'" ></p>
-
-<p>このフォーマットだと左右に寄せることができ、サイズも指定できます。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img center /images/hana.jpg <span class="m">400</span> <span class="s1">&#39;center 400 HANA!&#39;</span> %<span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img class="center" src="/images/hana.jpg" width="400" title="'center 400 HANA!'" ></p>
-
-<p>すぐ次の行に文字を入れるとこんなかんじです。<br/>
-多分写真の下に文字が来ると思いますが。。。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img left /images/hana.jpg <span class="m">300</span> <span class="s1">&#39;300 HANA!&#39;</span> %<span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" ></p>
-
-<p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br/>
-写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
-
-<p>それは、それで正しいフォーマッティングかと思います。<br/>
-文字を書くほうが気をつければいいことかと。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img right /images/hana_small.jpg <span class="s1">&#39;Shrinked HANA!&#39;</span>　<span class="s1">&#39;ハナさん&#39;</span> %<span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><img class="right" src="/images/hana_small.jpg" title="Shrinked HANA!" alt="ハナさん"></p>
-
-<p>ここにも少し文章が必要です。<br/>
-ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
-  　　<br/>
-　　<br/>
-　　<br/>
-　　　　</p>
-
-<p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
-
-<p><img class="left" src="/images/hana.jpg" width="200" title="'left HANA!'" >
-<img class="right" src="/images/hana.jpg" width="200" title="'right HANA!'" ></p>
-
-<p>そして、この文章は写真の次の行です。<br/>
-写真と写真の間に流し込まれているかしら？</p>
-
-<p>　　</p>
-
-<p>　　</p>
-
-<p>　　
-　　</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/11/29/first-step/">Read on &rarr;</a>
+    </footer>
   
 
 
