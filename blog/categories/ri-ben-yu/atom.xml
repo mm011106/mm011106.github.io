@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:16:01+09:00</updated>
+  <updated>2014-11-29T14:17:00+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -93,8 +93,12 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 
 <p>ここにも少し文章が必要です。<br/>
 ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
-　　
-右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
+  　　<br/>
+　　<br/>
+　　<br/>
+　　　　</p>
+
+<p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
 
 <p><img class="left" src="/images/hana.jpg" width="100" title="&lsquo;left HANA!&rsquo;" >
 <img class="right" src="/images/hana.jpg" width="100" title="&lsquo;right HANA!&rsquo;" ></p>
