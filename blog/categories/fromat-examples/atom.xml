@@ -4,7 +4,7 @@
   <title><![CDATA[Category: fromat examples | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/fromat-examples/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:47:32+09:00</updated>
+  <updated>2014-11-29T14:49:18+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -93,10 +93,11 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
 
 <p>それは、それで正しいフォーマッティングかと思います。<br/>
-この行数では、safari上で行数が足りません。<br/>
-firefoxよりも文字が小さく表示されるようです。</p>
+この行数では、safari上で行数が足りません。firefoxよりも文字が小さく表示されるようです。</p>
 
 <h2>この状態で「区切り」を入れてみます。</h2>
+
+<p>やっぱりうまく行きませんね。</p>
 
 <pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'　'ハナさん'" >
 </code></pre>
