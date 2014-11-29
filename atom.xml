@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[MQTT and ...]]></title>
-  <link href="http://mm011106.github.io/test/atom.xml" rel="self"/>
-  <link href="http://mm011106.github.io/test/"/>
-  <updated>2014-11-29T11:06:45+09:00</updated>
-  <id>http://mm011106.github.io/test/</id>
+  <link href="http://mm011106.github.io/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-11-29T11:40:31+09:00</updated>
+  <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[hello world]]></title>
-    <link href="http://mm011106.github.io/test/blog/2014/11/28/hello-world/"/>
+    <link href="http://mm011106.github.io/blog/2014/11/28/hello-world/"/>
     <updated>2014-11-28T20:57:55+09:00</updated>
-    <id>http://mm011106.github.io/test/blog/2014/11/28/hello-world</id>
+    <id>http://mm011106.github.io/blog/2014/11/28/hello-world</id>
     <content type="html"><![CDATA[<p>hello world!</p>
 
 <p>here is my test web site for octopress.</p>

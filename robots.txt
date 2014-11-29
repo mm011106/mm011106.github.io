@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://mm011106.github.io/test/sitemap.xml 
+Sitemap: http://mm011106.github.io/sitemap.xml 
