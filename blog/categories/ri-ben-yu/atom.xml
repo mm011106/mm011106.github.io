@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T13:08:56+09:00</updated>
+  <updated>2014-11-29T13:12:22+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -86,7 +86,16 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 
 <p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo;" ></p>
 
-<p>ちょっとフォーマットが崩れるかな？</p>
+<p>ここにも少し文章が必要です。<br/>
+ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
+　　</p>
+
+<p>　　</p>
+
+<p>　　</p>
+
+<p>　　
+　　</p>
 ]]></content>
   </entry>
   
