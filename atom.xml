@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:18:19+09:00</updated>
+  <updated>2014-11-29T14:20:23+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -62,8 +62,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="http://mm011106.github.io/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" />
-写真の次のテキストはこんな位置に来ます。<br/>
+<p><img src="http://mm011106.github.io/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
+
+<p>改行を１行入れたあとの、写真の次のテキストはこんな位置に来ます。<br/>
 次に、octopressでのタグフォーマットです。
 フォーマットはこんな形になります。</p>
 
