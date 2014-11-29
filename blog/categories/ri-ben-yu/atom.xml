@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T12:44:47+09:00</updated>
+  <updated>2014-11-29T12:49:45+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -51,6 +51,24 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 </code></pre>
 
 <p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
+
+<p>次に、octopressでのタグフォーマットです。
+<code>
+<img class="[class names]" src="/path/to/image" title="[width] [height] [title text [alt text]]" >
+<img src="/images/hana.jpg" title="'HANA!'" >
+</code></p>
+
+<p><img src="/images/hana.jpg" title="&lsquo;HANA!&rsquo;" ></p>
+
+<pre><code><img class="left" src="/images/hana.jpg" width="200" title="'200 HANA!'" >
+</code></pre>
+
+<p><img class="left" src="/images/hana.jpg" width="200" title="&lsquo;200 HANA!&rsquo;" ></p>
+
+<pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'" >
+</code></pre>
+
+<p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo;" ></p>
 ]]></content>
   </entry>
   

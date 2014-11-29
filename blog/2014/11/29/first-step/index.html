@@ -124,6 +124,31 @@ rake watch を別のコンソールから起動しておけば、ポスト用の
 
 
 <p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
+
+<p>次に、octopressでのタグフォーマットです。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img <span class="o">[</span>class names<span class="o">]</span> /path/to/image <span class="o">[</span>width<span class="o">]</span> <span class="o">[</span>height<span class="o">]</span> <span class="o">[</span>title text <span class="o">[</span>alt text<span class="o">]]</span> %<span class="o">}</span>
+</span><span class='line'><span class="o">{</span>% img /images/hana.jpg <span class="s1">&#39;HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="/images/hana.jpg" title="'HANA!'" ></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img left /images/hana.jpg <span class="m">200</span> <span class="s1">&#39;200 HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="left" src="/images/hana.jpg" width="200" title="'200 HANA!'" ></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img right /images/hana_small.jpg <span class="s1">&#39;Shrinked HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'" ></p>
 </div>
 
 
