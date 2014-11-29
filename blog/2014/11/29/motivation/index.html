@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>motivation - MQTT and &#8230;</title>
+  <title>このｗｅｂでは&#8230; - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="
-">
+  <meta name="description" content="このwebは、IoTデバイスを開発する経過をメモするために設けました。
+最初のアイディアは２０１２年の春頃に、データロガーのデータをユーザに向けて一定時間ごとに報告するようなシステムを作る必要に駆られて設計することになり、まずは、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -54,7 +54,7 @@
   
   <header>
     
-      <h1 class="entry-title">Motivation</h1>
+      <h1 class="entry-title">このｗｅｂでは&#8230;</h1>
     
     
       <p class="meta">
@@ -77,7 +77,16 @@
   </header>
 
 
-<div class="entry-content">
+<div class="entry-content"><p>このwebは、IoTデバイスを開発する経過をメモするために設けました。
+最初のアイディアは２０１２年の春頃に、データロガーのデータをユーザに向けて一定時間ごとに報告するようなシステムを作る必要に駆られて設計することになり、まずは、メールベースでデータを送信するようなハードウエアをArduinoとMac（！）でプロトタイピングしました。<br/>
+このシステムは一応うまく動いて、半年間の間、データを１時間ごとにクラウド（といっても事務所の中のlinuxサーバ）に向け「メール」し、その中でデータをまとめ、６時間毎にgnuplotで作成したPDFファイルのグラフをユーザ送ることが出来ました。</p>
+
+<p>その後、２０１３年にRaspberryPIにエッジデバイス機能を実装して試していましたが、なんかちょっと腑に落ちない感じでした。<br/>
+そんなところに、MQTTというプロトコルがあるということをつい最近（２０１４年夏頃）知って、それに飛びついたわけです。
+現在、MQTTに移行してRaspberryPI上で同様の機能が動作しています。</p>
+
+<p>まずは、このデバイスのプロトタイピングの内容をブログにまとめておければいいかなと思います。<br/>
+将来自分が見て「ああ、こんなことやってたのね」と思えると同時に、同じようなことをやろうとしている人の助けになればと思います。</p>
 </div>
 
 
@@ -163,7 +172,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/11/29/motivation/">motivation</a>
+        <a href="/blog/2014/11/29/motivation/">このｗｅｂでは&#8230;</a>
       </li>
     
       <li class="post">
