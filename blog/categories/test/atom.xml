@@ -4,7 +4,7 @@
   <title><![CDATA[Category: test | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/test/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T13:03:25+09:00</updated>
+  <updated>2014-11-29T13:06:09+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -62,10 +62,10 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 
 <p>このフォーマットだと左右に寄せることができ、サイズも指定できます。
 <code>
-<img src="/images/hana.jpg" width="300" title="'center 300 HANA!'" >
+<img class="center" src="/images/hana.jpg" width="300" title="'center 300 HANA!'" >
 </code></p>
 
-<p><img src="/images/hana.jpg" width="300" title="&lsquo;center 300 HANA!&rsquo;" ></p>
+<p><img class="center" src="/images/hana.jpg" width="300" title="&lsquo;center 300 HANA!&rsquo;" ></p>
 
 <pre><code><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" >
 </code></pre>
