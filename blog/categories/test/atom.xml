@@ -4,7 +4,7 @@
   <title><![CDATA[Category: test | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/test/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T13:12:22+09:00</updated>
+  <updated>2014-11-29T14:10:25+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -45,18 +45,23 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 ![これは写真です](/images/hana.jpg "HANA!")
 </code></p>
 
-<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" /></p>
+<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" />
+写真の次のテキストはこんな位置に来ます。</p>
 
 <pre><code>![これは小さい写真です](/images/hana_small.jpg "Shrinked HANA!")
 </code></pre>
 
-<p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
-
-<p>次に、octopressでのタグフォーマットです。
+<p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" />
+写真の次のテキストはこんな位置に来ます。<br/>
+次に、octopressでのタグフォーマットです。
+フォーマットはこんな形になります。
 <code>
 <img class="[class names]" src="/path/to/image" title="[width] [height] [title text [alt text]]" >
-<img src="/images/hana.jpg" title="'HANA!'" >
-</code></p>
+</code>
+class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
+
+<pre><code><img src="/images/hana.jpg" title="'HANA!'" >
+</code></pre>
 
 <p><img src="/images/hana.jpg" title="&lsquo;HANA!&rsquo;" ></p>
 

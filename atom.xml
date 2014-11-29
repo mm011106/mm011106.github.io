@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T13:12:22+09:00</updated>
+  <updated>2014-11-29T14:10:25+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -54,21 +54,28 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="http://mm011106.github.io/images/hana.jpg" title="HANA!" alt="これは写真です" /></p>
+<p><img src="http://mm011106.github.io/images/hana.jpg" title="HANA!" alt="これは写真です" />
+写真の次のテキストはこんな位置に来ます。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは小さい写真です<span class="o">](</span>/images/hana_small.jpg <span class="s2">&quot;Shrinked HANA!&quot;</span><span class="o">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="http://mm011106.github.io/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
-
-<p>次に、octopressでのタグフォーマットです。</p>
+<p><img src="http://mm011106.github.io/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" />
+写真の次のテキストはこんな位置に来ます。<br/>
+次に、octopressでのタグフォーマットです。
+フォーマットはこんな形になります。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img <span class="o">[</span>class names<span class="o">]</span> /path/to/image <span class="o">[</span>width<span class="o">]</span> <span class="o">[</span>height<span class="o">]</span> <span class="o">[</span>title text <span class="o">[</span>alt text<span class="o">]]</span> %<span class="o">}</span>
-</span><span class='line'><span class="o">{</span>% img /images/hana.jpg <span class="s1">&#39;HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img /images/hana.jpg <span class="s1">&#39;HANA!&#39;</span> %<span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
