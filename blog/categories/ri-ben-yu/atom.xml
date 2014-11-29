@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T12:37:40+09:00</updated>
+  <updated>2014-11-29T12:39:58+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -42,10 +42,10 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 
 <p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた<br/>
 <code>
-![これは写真です](hana.jpg "HANA!")
+![これは写真です](/images/hana.jpg "HANA!")
 </code></p>
 
-<p><img src="hana.jpg" title="HANA!" alt="これは写真です" /></p>
+<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" /></p>
 ]]></content>
   </entry>
   

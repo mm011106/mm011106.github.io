@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T12:37:40+09:00</updated>
+  <updated>2014-11-29T12:39:58+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -50,11 +50,11 @@
 <p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは写真です<span class="o">](</span>hana.jpg <span class="s2">&quot;HANA!&quot;</span><span class="o">)</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは写真です<span class="o">](</span>/images/hana.jpg <span class="s2">&quot;HANA!&quot;</span><span class="o">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="hana.jpg" title="HANA!" alt="これは写真です" /></p>
+<p><img src="http://mm011106.github.io/images/hana.jpg" title="HANA!" alt="これは写真です" /></p>
 ]]></content>
   </entry>
   
