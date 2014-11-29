@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: fromat examples | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/fromat-examples/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-11-29T12:14:18+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[手始めに、色々と試してみます]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/29/first-step/"/>
+    <updated>2014-11-29T11:56:59+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/29/first-step</id>
+    <content type="html"><![CDATA[<p>シェルコマンドの例です。</p>
+
+<pre><code class="sh">echo ${test}
+cat /var/log/syslog | grep 'test_log' &gt; temp.txt
+</code></pre>
+
+<pre><code class="sh">rake watch
+</code></pre>
+
+<p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
+
+<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。</p>
+]]></content>
+  </entry>
+  
+</feed>
