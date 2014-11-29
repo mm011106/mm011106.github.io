@@ -1,56 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[MQTT and ..]]></title>
-  <link href="http://mm011106.github.io/atom.xml" rel="self"/>
-  <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-27T17:21:56+09:00</updated>
-  <id>http://mm011106.github.io/</id>
+  <title><![CDATA[MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/test/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/test/"/>
+  <updated>2014-11-29T11:06:45+09:00</updated>
+  <id>http://mm011106.github.io/test/</id>
   <author>
-    <name><![CDATA[mckc]]></name>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
-    <title type="html"><![CDATA[ちょっと落ち着きました]]></title>
-    <link href="http://mm011106.github.io/blog/2014/11/27/page3/"/>
-    <updated>2014-11-27T15:27:38+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/11/27/page3</id>
-    <content type="html"><![CDATA[<p>とりあえず、こんな感じで始めてみましょう。</p>
+    <title type="html"><![CDATA[hello world]]></title>
+    <link href="http://mm011106.github.io/test/blog/2014/11/28/hello-world/"/>
+    <updated>2014-11-28T20:57:55+09:00</updated>
+    <id>http://mm011106.github.io/test/blog/2014/11/28/hello-world</id>
+    <content type="html"><![CDATA[<p>hello world!</p>
 
-<p>いろいろと勉強するべきことが多いのですが、ボケ防止には役立ちそうです。</p>
-
-<p>まずは、このブログの書き方から、いや日本語から勉強せねばならないようにも思います。<br/>
-改行するには、行末に半角スペースを2つ <br/>
-でしょうか？</p>
-
-<p>プログラム言語用の自動フォーマットはこんな感じ　　ですが思ったとおり動きません。。。。</p>
+<p>here is my test web site for octopress.</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>test
-</span><span class='line'>test2</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">[</span><span class="n">rectangle</span> <span class="nl">setX</span><span class="p">:</span> <span class="mi">10</span> <span class="nl">y</span><span class="p">:</span> <span class="mi">10</span> <span class="nl">width</span><span class="p">:</span> <span class="mi">20</span> <span class="nl">height</span><span class="p">:</span> <span class="mi">20</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>それは、テーマが悪いのでしょうか？</p>
 
-<p>これはこれでok</p>
-
-<p>たとえばリンクは<br/>
-<a href="http://www.eagletech.jp/">イーグルテクノロジ</a><br/>
-なんてかんじ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[はじめてのブログポストです]]></title>
-    <link href="http://mm011106.github.io/blog/2014/11/27/testposting/"/>
-    <updated>2014-11-27T14:43:27+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/11/27/testposting</id>
-    <content type="html"><![CDATA[<p>こんにちは、初めてのブログです。
-不本意ながら、windowsで書いています。</p>
 ]]></content>
   </entry>
   
