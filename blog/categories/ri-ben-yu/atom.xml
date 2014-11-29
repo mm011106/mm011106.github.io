@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:40:43+09:00</updated>
+  <updated>2014-11-29T14:43:19+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -46,11 +46,6 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 <h2>写真</h2>
 
 <p>本題に入る前に、区切り線の挿入。
-上記の区切り線は以下のようにしています。
-<code>
-写真
-/---
-</code>
 区切り線の前の行は文字が大きくなり、タイトルっぽくなります。</p>
 
 <p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた<br/>
