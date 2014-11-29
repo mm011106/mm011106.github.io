@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:29:49+09:00</updated>
+  <updated>2014-11-29T14:34:32+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -47,9 +47,10 @@
 
 <p>現在、octopressのディレクトリ内からソースファイルをエディットして、自動でgenerate、適当なところで手動でweb用のリポジトリ内にコピー、そこからcommit &amp; pushしています。<br/>
 ちょっと効率が悪い、ソースがローカルに保存されてしまう、という欠点があるので何とかしたいと思います。<br/>
-世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。</p>
+世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。<br/>
+やはり大元の<a href="http://octopress.org/docs/deploying/github/">ここ</a>が詳しいか？</p>
 
-<h2>やはり大元の<a href="http://octopress.org/docs/deploying/github/">ここ</a>が詳しいか？</h2>
+<h2>写真</h2>
 
 <p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた</p>
 
