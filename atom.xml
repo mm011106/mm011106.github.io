@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:17:00+09:00</updated>
+  <updated>2014-11-29T14:18:19+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -122,8 +122,11 @@
 
 <p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
 
-<p><img class="left" src="http://mm011106.github.io/images/hana.jpg" width="100" title="'left HANA!'" >
-<img class="right" src="http://mm011106.github.io/images/hana.jpg" width="100" title="'right HANA!'" ></p>
+<p><img class="left" src="http://mm011106.github.io/images/hana.jpg" width="200" title="'left HANA!'" >
+<img class="right" src="http://mm011106.github.io/images/hana.jpg" width="200" title="'right HANA!'" ></p>
+
+<p>そして、この文章は写真の次の行です。<br/>
+写真と写真の間に流し込まれているかしら？</p>
 
 <p>　　</p>
 

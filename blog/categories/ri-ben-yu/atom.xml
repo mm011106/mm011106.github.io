@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T14:17:00+09:00</updated>
+  <updated>2014-11-29T14:18:19+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -100,8 +100,11 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 
 <p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
 
-<p><img class="left" src="/images/hana.jpg" width="100" title="&lsquo;left HANA!&rsquo;" >
-<img class="right" src="/images/hana.jpg" width="100" title="&lsquo;right HANA!&rsquo;" ></p>
+<p><img class="left" src="/images/hana.jpg" width="200" title="&lsquo;left HANA!&rsquo;" >
+<img class="right" src="/images/hana.jpg" width="200" title="&lsquo;right HANA!&rsquo;" ></p>
+
+<p>そして、この文章は写真の次の行です。<br/>
+写真と写真の間に流し込まれているかしら？</p>
 
 <p>　　</p>
 
