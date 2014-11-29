@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 日本語 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ri-ben-yu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T12:58:55+09:00</updated>
+  <updated>2014-11-29T13:03:25+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -65,7 +65,7 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 <img src="/images/hana.jpg" width="300" title="'center 300 HANA!'" >
 </code></p>
 
-<p><img src="　/images/hana.jpg" width="300" title="&lsquo;center 300 HANA!&rsquo;" ></p>
+<p><img src="/images/hana.jpg" width="300" title="&lsquo;center 300 HANA!&rsquo;" ></p>
 
 <pre><code><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" >
 </code></pre>
