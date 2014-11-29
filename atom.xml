@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-29T13:06:09+09:00</updated>
+  <updated>2014-11-29T13:08:56+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -77,11 +77,14 @@
 <p>このフォーマットだと左右に寄せることができ、サイズも指定できます。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img center /images/hana.jpg <span class="m">300</span> <span class="s1">&#39;center 300 HANA!&#39;</span> %<span class="o">}</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img center /images/hana.jpg <span class="m">400</span> <span class="s1">&#39;center 400 HANA!&#39;</span> %<span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img class="center" src="http://mm011106.github.io/images/hana.jpg" width="300" title="'center 300 HANA!'" ></p>
+<p><img class="center" src="http://mm011106.github.io/images/hana.jpg" width="400" title="'center 400 HANA!'" ></p>
+
+<p>すぐ次の行に文字を入れるとこんなかんじです。<br/>
+多分写真の下に文字が来ると思いますが。。。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img left /images/hana.jpg <span class="m">300</span> <span class="s1">&#39;300 HANA!&#39;</span> %<span class="o">}</span>
@@ -90,9 +93,7 @@
 
 <p><img class="left" src="http://mm011106.github.io/images/hana.jpg" width="300" title="'300 HANA!'" ></p>
 
-<p>ここに文章を入れないと<br/>
-すこしフォーマットがおかしくなる<br/>
-感じですね<br/>
+<p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br/>
 写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
 
 <p>それは、それで正しいフォーマッティングかと思います。<br/>
