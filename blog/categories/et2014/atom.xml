@@ -4,7 +4,7 @@
   <title><![CDATA[Category: et2014 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/et2014/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-30T15:12:56+09:00</updated>
+  <updated>2014-11-30T17:43:32+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -321,13 +321,10 @@
 
 <ul>
 <li>データ活用をどこに適用するか　「バリューチェーン」の明確化と最適な情報フィードバック</li>
-<li><p>生産性・生産品質は当たり前の物になるだろう。</p>
+<li><p>生産性・生産品質は当たり前の物になるだろう。</p></li>
+<li><p><strong>品質が当たり前になればその他のところで製品の評価が決まる。（デザイン？）</strong></p>
 
-<ul>
-<li><strong>品質が当たり前になればその他のところで製品の評価が決まる。（デザイン？）</strong></li>
-</ul>
-</li>
-<li><p>-> これにより「プロダクト」のパラダイムシフトが起こるであろう</p></li>
+<p> -> これにより「プロダクト」のパラダイムシフトが起こるであろう</p></li>
 </ul>
 </li>
 <li><p>　14:45〜15:30　　<strong>IoTを夢で終わらせないために必要な事は何か</strong>　　　桑原 一悦 氏　日本電気株式会社</p>
