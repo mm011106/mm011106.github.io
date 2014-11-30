@@ -4,7 +4,7 @@
   <title><![CDATA[Category: et2014 | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/et2014/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-30T12:20:16+09:00</updated>
+  <updated>2014-11-30T12:33:47+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -84,23 +84,21 @@
 
 <p> インターネットで目指したことを「街」を対象にやってみる。</p>
 
-<pre><code> + コンテキストキャプチャー: 現状をいかにサンプリングするか
-</code></pre>
-
 <ul>
+<li>コンテキストキャプチャー: 現状をいかにサンプリングするか</li>
 <li>Visualizing context: コンテキストをビジュアルか（見える化）</li>
 <li>optimal control: contextをもとに最適制御</li>
 <li>prediction: 状態の予測</li>
 </ul>
 
 
-<p> ClouT = cloud of things:</p>
+<p> <strong>ClouT = cloud of things:</strong></p>
 
 <p> ClouTプロジェクトのコンセプトは，クラウドコンピューティングを活用することにより，「モノのインターネット」と「人のインターネット」を「サービスのインターネット」を通してつなぐこと。</p>
 
-<p> 街の仮想化のベースとなる場所</p>
+<p> 　　->  街の仮想化のベースとなる場所</p>
 
-<p> 言葉：</p>
+<p> <strong>言葉：</strong></p>
 
 <ul>
 <li><p>core heavy , Edge heavy :<br/>
@@ -122,7 +120,19 @@
  なんてことが頭をよぎりました。</p></li>
 <li><p>　11:15〜12:00　　<strong>総解説・IoTを支える技術</strong>　　竹之下 航洋 氏　株式会社アットマークテクノ</p></li>
 <li><p>　13:30〜14:30　　<strong>【IoT基調講演】IoTの活用でビジネスイノベーションを加速しよう</strong>　　　稲田 修一 氏　東京大学</p></li>
-<li><p>　14:45〜15:30　　<strong>IoTを夢で終わらせないために必要な事は何か</strong>　　　桑原 一悦 氏　日本電気株式会社</p></li>
+<li><p>　14:45〜15:30　　<strong>IoTを夢で終わらせないために必要な事は何か</strong>　　　桑原 一悦 氏　日本電気株式会社</p>
+
+<ul>
+<li>IoTに必要なことは　アーキテクチャの理解</li>
+<li><p>IoTを活用しようとしている場所の「アーキテクチャ」を理解することでデータ活用の仕組みを効率的に作ることが出来る<br/>
+(これは、ソフトウエアの構造化のところでやったデータ構造＋アルゴリズム＝プログラムというのの逆の話？)</p></li>
+<li><p>ステークホルダの相関関係を明確に</p></li>
+<li>情報の入出力、解析、コスト、処理、使いやすさのバランスを考えた「機能配置」</li>
+</ul>
+
+
+<p> <strong>感想</strong><br/>
+ IoTを使ったシステムのアーキテクチャを理解せよ、という話。全体を見ないと最適制御、最適配置、最適利益配分はできないということですね。時に組み込み技術者は全体を見ることを忘れてしまいますので、このことばに自戒をこめて。</p></li>
 </ol>
 
 
