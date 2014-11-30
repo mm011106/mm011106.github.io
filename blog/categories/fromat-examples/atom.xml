@@ -4,7 +4,7 @@
   <title><![CDATA[Category: fromat examples | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/fromat-examples/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-30T15:11:35+09:00</updated>
+  <updated>2014-11-30T15:12:56+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -65,29 +65,29 @@ cat /var/log/syslog | grep 'test_log' &gt; temp.txt
 次に、octopressでのタグフォーマットです。
 フォーマットはこんな形になります。
 <code>
-<img class="[class names]" src="/path/to/image" title="[width] [height] [title text [alt text]]" >
+{% img [class names] /path/to/image [width] [height] [title text [alt text]] %}
 </code>
 class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
 
-<pre><code><img src="/images/hana.jpg" title="'HANA!'" >
+<pre><code>{% img /images/hana.jpg 'HANA!' %}
 </code></pre>
 
-<p><img src="/images/hana.jpg" title="&lsquo;HANA!&rsquo;" ></p>
+<p>{% img /images/hana.jpg &lsquo;HANA!&rsquo; %}</p>
 
 <p>このフォーマットだと左右に寄せることができ、サイズも指定できます。
 <code>
-<img class="center" src="/images/hana.jpg" width="400" title="'center 400 HANA!'" >
+{% img center /images/hana.jpg 400 'center 400 HANA!' %}
 </code></p>
 
-<p><img class="center" src="/images/hana.jpg" width="400" title="&lsquo;center 400 HANA!&rsquo;" ></p>
+<p>{% img center /images/hana.jpg 400 &lsquo;center 400 HANA!&rsquo; %}</p>
 
 <p>すぐ次の行に文字を入れるとこんなかんじです。<br/>
 多分写真の下に文字が来ると思いますが。。。</p>
 
-<pre><code><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" >
+<pre><code>{% img left /images/hana.jpg 300 '300 HANA!' %}
 </code></pre>
 
-<p><img class="left" src="/images/hana.jpg" width="300" title="&lsquo;300 HANA!&rsquo;" ></p>
+<p>{% img left /images/hana.jpg 300 &lsquo;300 HANA!&rsquo; %}</p>
 
 <p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br/>
 写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
@@ -99,10 +99,10 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 
 <p>やっぱりうまく行きませんね。</p>
 
-<pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'　'ハナさん'" >
+<pre><code>{% img right /images/hana_small.jpg 'Shrinked HANA!'　'ハナさん' %}
 </code></pre>
 
-<p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo; &lsquo;ハナさん&rsquo;" ></p>
+<p>{% img right /images/hana_small.jpg &lsquo;Shrinked HANA!&rsquo; &lsquo;ハナさん&rsquo; %}</p>
 
 <p>ここにも少し文章が必要です。<br/>
 ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
@@ -113,8 +113,8 @@ class name の選択肢がわかりませんが、とりあえず例を参考に
 
 <p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
 
-<p><img class="left" src="/images/hana.jpg" width="200" title="&lsquo;left HANA!&rsquo;" >
-<img class="right" src="/images/hana.jpg" width="200" title="&lsquo;right HANA!&rsquo;" ></p>
+<p>{% img left /images/hana.jpg 200 &lsquo;left HANA!&rsquo; %}
+{% img right /images/hana.jpg 200 &lsquo;right HANA!&rsquo; %}</p>
 
 <p>そして、この文章は写真の次の行です。<br/>
 写真と写真の間に流し込まれているかしら？</p>
