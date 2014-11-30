@@ -4,7 +4,7 @@
   <title><![CDATA[Category: report | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/report/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-30T11:02:45+09:00</updated>
+  <updated>2014-11-30T11:04:17+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -30,8 +30,7 @@
 <li><p>10:00〜11:00     【IoT基調講演】IoTによる新ビジネスの可能性 武居 輝好 氏　株式会社野村総合研究所</p></li>
 <li><p>11:15〜12:00     IoT時代を牽引するセンサ・ソリューション 野口 洋 氏　STマイクロエレクトロニクス株式会社</p>
 
-<pre><code> センサ、プロセッサ、通信と、IoTで必要なものは全てありますよ、的な内容。あまりSTの半導体は使ったことないのだけれど、MEMS関係はこれからお世話になるかもしれません。
-</code></pre></li>
+<p> センサ、プロセッサ、通信と、IoTで必要なものは全てありますよ、的な内容。あまりSTの半導体は使ったことないのだけれど、MEMS関係はこれからお世話になるかもしれません。</p></li>
 <li><p>13:30〜14:30     【IoT基調講演】ウェアラブルコンピューティングのための組込み技術とソリューション 塚本 昌彦 氏　神戸大学大学院</p>
 
 <pre><code> 特に記載することはないです。タイトルとはだいぶかけ離れた内容で、話題もnet上の話題を超えてはいません。
