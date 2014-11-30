@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-11-30T12:16:36+09:00</updated>
+  <updated>2014-11-30T12:20:16+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -84,8 +84,10 @@
 
 <p> インターネットで目指したことを「街」を対象にやってみる。</p>
 
+<pre><code> + コンテキストキャプチャー: 現状をいかにサンプリングするか
+</code></pre>
+
 <ul>
-<li>コンテキストキャプチャー: 現状をいかにサンプリングするか</li>
 <li>Visualizing context: コンテキストをビジュアルか（見える化）</li>
 <li>optimal control: contextをもとに最適制御</li>
 <li>prediction: 状態の予測</li>
