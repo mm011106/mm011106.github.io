@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>試作システムの概要 - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="概略の仕様 試作しようとしているシステムの概要は以下のような感じです。 用意するもの Edge device:　センシング用マイコン+ネットワーク接続
+MQTT ブローカ：　通信プロトコルはMQTTを使いますので、ブローカが必要です。
+Core device: linux 計算機 動作 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/01/overview/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">試作システムの概要</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>概略の仕様</h3>
+
+<p>試作しようとしているシステムの概要は以下のような感じです。</p>
+
+<!-- more -->
+
+
+<p><strong>用意するもの</strong></p>
+
+<ul>
+<li>Edge device:　センシング用マイコン+ネットワーク接続</li>
+<li>MQTT ブローカ：　通信プロトコルはMQTTを使いますので、ブローカが必要です。</li>
+<li>Core device: linux 計算機</li>
+</ul>
+
+
+<p><strong>動作</strong></p>
+
+<ul>
+<li>センサで状態を数値化（現状、温度とアナログ計測装置のモニタ電圧（直流）を想定）</li>
+<li>規定の時間毎（1分〜1時間ぐらい）に送信</li>
+<li>Core Deviceでデータを保持</li>
+<li>規定の時間毎（数時間）に経時変化をグラフ化し指定されたユーザにメールで返信</li>
+</ul>
+
+
+<p><strong>その他</strong></p>
+
+<ul>
+<li>現状ではEdge deviceのコントロールは考えていません。</li>
+<li>接続はSSHを使ったポートフォワーディング</li>
+<li>Edge device、　MQTTブローカにはRaspberry Piを使用</li>
+</ul>
+
+
+<p><strong>Edgeデバイスのこと</strong></p>
+
+<p>Raspberry Piはアナログ入力ポート（ADコンバータ）が少ないので増設します。<br/>
+OSがSDカードに乗っているのでSDカードの寿命がどれぐらいか気になるところですが、今回の試作で実際のSDカードへのアクセス量の実績が出れば、それで寿命が想定できると思います。工業用のSDカードはめちゃくちゃ高いので、きちんと設計してから必要な容量を購入したいです。一応目標としては、最低でも5年ぐらいは連続動作するようなものがほしいですね。<br/>
+将来的には、mbedに移行したいと思っています。RaspberryPiは値段は十分に安いですが、ちょっとオーバースペック的なところがあり、ミニマムにした時にどこまで削ぎ落とせるかという点では、mbedぐらいの規模がコストやメンテナンス、応用範囲を考えるとベストなサイズじゃないかという感じがします。特に、OSがリリースされれば開発しやすさも変わるかな、とちょっと期待しています。</p>
+
+<p><strong>プロトコルのこと</strong></p>
+
+<p>2年ほど前、このシステムのフィジビリティテストみたいなことで最初のシステムをプロトタイピングしたのですが、その時には<a href="http://mqtt.org/">MQTT</a>のことを知らずに、メールでデータを送るシステムをつくりました。httpでも良かったのかもしれませんが、プッシュでデータを送るとなるとちょっと面倒かなあ、と思ったのとApachサーバを立てることになり、ちょっと面倒だ（というかこれでくじけるかも）と感じたので、gmailのアカウントを作ってEdge deviceはそこに対してメールすればそれでおしまい、というような構成にしました。<br/>
+Edge device のプログラミングで使ったpythonは、幸いなことにモジュールがすごく良く完備されていて、データを読み込んでメールするまでの処理がほんの60行程度のコードで収まってしまいました。初めてのpythonでしたが、1日程度でざっくり動くものができ、2〜3日でだいたい完成しました。<br/>
+ただ、リアルタイム性を求めないような用途、たとえば1時間に1回程度のサンプリングならこれでも十分ですが、たとえば1分に1回とか、10秒に1回となるとメールでいちいち送ってはいられません。まとめて1000個分のデータを送るとか言うような、バッチ処理的アプローチも考えましたが、あまり面白くないなあとおもいつつ、フィジビリティテストのプロトタイピングは終わりました。<br/>
+そしてつい最近、MQTTというプロトコルの存在を知り、「ああ、これだ！」という直感で飛びつきました。</p>
+
+<p><strong>Coreデバイスのこと</strong></p>
+
+<p>コアデバイスという呼び方でいいのかどうかわかりませんが、データを集計する側のセットアップです。<br/>
+こちらは定番でubuntuを使うことにします。昔々はFreeBSDを使っていたのですが、しばらくunix系OSから離れているうちにlinuxがすごく使いやすくなっていたのでそちらに転向しました。<br/>
+この上で使うのはシェルとgnuplot程度です。（それと、ps2pdf）</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/01/overview/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/01/overview/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/30/et2014-report/" title="Previous Post: ET2014コンファレンス　レポート">&laquo; ET2014コンファレンス　レポート</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/01/overview/">試作システムの概要</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/30/et2014-report/">ET2014コンファレンス　レポート</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/29/motivation/">このwebでは&#8230;</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/11/29/first-step/">手始めに、色々と試してみます</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> with <a href="https://github.com/bijumon/oct2">oct2</a> theme. </span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
