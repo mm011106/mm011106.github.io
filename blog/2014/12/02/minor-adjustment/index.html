@@ -5,14 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - MQTT and &#8230;</title>
+  <title>Octopress+OCT2のちょっとした修正 - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="Blog Archive 2014 Octopress+OCT2のちょっとした修正
-Dec 02 2014 posted in oct2, octopress, 試作システムの概要
-Dec 01 2014 ET2014コンファレンス　レポート
-Nov 30 2014 posted in &hellip;">
+  <meta name="description" content="今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +18,7 @@ Nov 30 2014 posted in &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/archives/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/02/minor-adjustment/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -52,83 +49,95 @@ Nov 30 2014 posted in &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">Octopress+OCT2のちょっとした修正</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">Dec 2nd, 2014</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
+<div class="entry-content"><p>今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、ブログページに日付が入っていることを発見。なら、この部分だけ持ってきて入れなおしてみるかな、とやってみたところうまく行きました！</p>
 
-  
-  <h2>2014</h2>
-
-<article>
-  
-<h1><a href="/blog/2014/12/02/minor-adjustment/">Octopress+OCT2のちょっとした修正</a></h1>
-<time datetime="2014-12-02T20:28:23+09:00" pubdate><span class='month'>Dec</span> <span class='day'>02</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/oct2/'>oct2</a>, <a class='category' href='/blog/categories/octopress/'>octopress,</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<p>このページはOCT2というテーマを使っているのですが、そのソース<code>source/_include/date.html</code>では日付が代入されている（と思われる）変数が<code>post.date_formatted</code>となっているのですが、これではうまく表示できないようです。ポスト日時が表示できていた昔のソースではここが<code>post.date</code>になっていました。<br/>
+中身がわからないまま使っているので、この変数がどこでどのように定義されているのかいまいちわかっていませんが、<code>post.date_formatted</code>にはうまく値が入っていないようです。あるいは、<code>formatted</code>にするために何か他のモジュールのようなものがいるのかもしれません。<br/>
+やったことは、もともとある<code>octopress/_include/date.html</code>のファイル名を変更してオリジナルを保存。次に、うまく時間表示ができていた以前のテーマの同じテンプレートをコピー。それだけ。</p>
 
-
-
-<article>
-  
-<h1><a href="/blog/2014/12/01/overview/">試作システムの概要</a></h1>
-<time datetime="2014-12-01T20:20:23+09:00" pubdate><span class='month'>Dec</span> <span class='day'>01</span> <span class='year'>2014</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/11/30/et2014-report/">ET2014コンファレンス　レポート</a></h1>
-<time datetime="2014-11-30T10:18:25+09:00" pubdate><span class='month'>Nov</span> <span class='day'>30</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/et2014/'>et2014</a>, <a class='category' href='/blog/categories/report/'>report</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/11/29/motivation/">このwebでは&#8230;</a></h1>
-<time datetime="2014-11-29T14:52:11+09:00" pubdate><span class='month'>Nov</span> <span class='day'>29</span> <span class='year'>2014</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2014/11/29/first-step/">手始めに、色々と試してみます</a></h1>
-<time datetime="2014-11-29T14:52:11+09:00" pubdate><span class='month'>Nov</span> <span class='day'>29</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/fromat-examples/'>fromat examples</a>, <a class='category' href='/blog/categories/test/'>test</a>, <a class='category' href='/blog/categories/ri-ben-yu/'>日本語</a></span>
-</footer>
-
-
-</article>
-
+<p>あまり深く詮索せず、とりえあず表示できたので良しとします。日付のフォーマットも西洋風ですが、まああまり違和感ないのでこのまま。</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">Dec 2nd, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/oct2/'>oct2</a>, <a class='category' href='/blog/categories/octopress/'>octopress,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/02/minor-adjustment/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/02/minor-adjustment/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/01/overview/" title="Previous Post: 試作システムの概要">&laquo; 試作システムの概要</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>

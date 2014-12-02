@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: octopress, | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-12-02T21:03:37+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress+OCT2のちょっとした修正]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/02/minor-adjustment/"/>
+    <updated>2014-12-02T20:28:23+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/02/minor-adjustment</id>
+    <content type="html"><![CDATA[<p>今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、ブログページに日付が入っていることを発見。なら、この部分だけ持ってきて入れなおしてみるかな、とやってみたところうまく行きました！</p>
+
+<!-- more -->
+
+
+<p>このページはOCT2というテーマを使っているのですが、そのソース<code>source/_include/date.html</code>では日付が代入されている（と思われる）変数が<code>post.date_formatted</code>となっているのですが、これではうまく表示できないようです。ポスト日時が表示できていた昔のソースではここが<code>post.date</code>になっていました。<br/>
+中身がわからないまま使っているので、この変数がどこでどのように定義されているのかいまいちわかっていませんが、<code>post.date_formatted</code>にはうまく値が入っていないようです。あるいは、<code>formatted</code>にするために何か他のモジュールのようなものがいるのかもしれません。<br/>
+やったことは、もともとある<code>octopress/_include/date.html</code>のファイル名を変更してオリジナルを保存。次に、うまく時間表示ができていた以前のテーマの同じテンプレートをコピー。それだけ。</p>
+
+<p>あまり深く詮索せず、とりえあず表示できたので良しとします。日付のフォーマットも西洋風ですが、まああまり違和感ないのでこのまま。</p>
+]]></content>
+  </entry>
+  
+</feed>
