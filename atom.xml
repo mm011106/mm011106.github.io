@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-02T21:27:37+09:00</updated>
+  <updated>2014-12-03T22:13:34+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,33 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
+    <updated>2014-12-03T20:43:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
+    <content type="html"><![CDATA[<p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
+
+<p><strong><code>-c, --disable-clean-session</code></strong></p>
+
+<!-- more -->
+
+
+<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
+<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
+
+<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
+
+<p>週末に試してみよう。</p>
+
+<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
+もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
+<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
+
+<p>これも試す必要があります。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Octopress+OCT2のちょっとした修正]]></title>
@@ -23,8 +50,41 @@
 <!-- more -->
 
 
-<p>このページはOCT2というテーマを使っているのですが、そのソース<code>source/_include/date.html</code>では日付が代入されている（と思われる）変数が<code>post.date_formatted</code>となっているのですが、これではうまく表示できないようです。ポスト日時が表示できていた昔のソースではここが<code>post.date</code>になっていました。<br/>
-中身がわからないまま使っているので、この変数がどこでどのように定義されているのかいまいちわかっていませんが、<code>post.date_formatted</code>にはうまく値が入っていないようです。あるいは、<code>formatted</code>にするために何か他のモジュールのようなものがいるのかもしれません。<br/>
+<p>このページはOCT2というテーマを使っているのですが、そのソース<code>source/_include/date.html</code>では日付が代入されている（と思われる）変数が<code>post.date_formatted</code>となっているのですが、これではうまく表示できないようです。ポスト日時が表示できていた昔のソースではここが<code>post.date</code>になっていました。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{% capture date %}{{ page.date }}{{ post.date }}{% endcapture %}
+</span><span class='line'>{% capture date_text %}{{ page.date_text }}{{ post.date_text }}{% endcapture %}
+</span><span class='line'>{% capture has_date %}{{ date | size }}{% endcapture %}
+</span><span class='line'>
+</span><span class='line'>{% capture updated %}{{ page.updated }}{{ post.updated }}{% endcapture %}
+</span><span class='line'>{% capture updated_text %}{{ page.updated_text }}{{ post.updated_text }}{% endcapture %}
+</span><span class='line'>{% capture was_updated %}{{ updated | size }}{% endcapture %}
+</span><span class='line'>
+</span><span class='line'>{% if has_date != '0' %}
+</span><span class='line'>  {% capture time %}&lt;time datetime="{{ date | datetime | date_to_xmlschema }}" pubdate{% if updated %} data-updated="true"{% endif %}>{{ date_text }}&lt;/time>{% endcapture %}
+</span><span class='line'>{% endif %}
+</span><span class='line'>
+</span><span class='line'>{% if was_updated != '0' %}
+</span><span class='line'>  {% capture updated %}&lt;time datetime="{{ updated | datetime | date_to_xmlschema }}" class="updated">Updated {{ updated_text }}&lt;/time>{% endcapture %}
+</span><span class='line'>{% else %}{% assign updated = false %}{% endif %}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>中身がわからないまま使っているので、この変数がどこでどのように定義されているのかいまいちわかっていませんが、<code>post.date_formatted</code>にはうまく値が入っていないようです。あるいは、<code>formatted</code>にするために何か他のモジュールのようなものがいるのかもしれません。<br/>
 やったことは、もともとある<code>octopress/_include/date.html</code>のファイル名を変更してオリジナルを保存。次に、うまく時間表示ができていた以前のテーマの同じテンプレートをコピー。それだけ。</p>
 
 <p>あまり深く詮索せず、とりえあず表示できたので良しとします。日付のフォーマットも西洋風ですが、まああまり違和感ないのでこのまま。</p>
