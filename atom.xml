@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-03T22:13:34+09:00</updated>
+  <updated>2014-12-03T22:30:05+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
+    <title type="html"><![CDATA[`mosquitto_sub`のオプション]]></title>
     <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
     <updated>2014-12-03T20:43:00+09:00</updated>
     <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
@@ -24,6 +24,8 @@
 
 <!-- more -->
 
+
+<p></p>
 
 <p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
 <code>If using this option, it is recommended that the client id is set manually with --id</code></p>
