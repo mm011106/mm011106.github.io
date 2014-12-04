@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-03T22:30:05+09:00</updated>
+  <updated>2014-12-04T21:21:35+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,80 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.confを見てみた]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf/"/>
+    <updated>2014-12-04T20:21:14+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf</id>
+    <content type="html"><![CDATA[<p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
+原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
+
+<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
+
+<!-- more -->
+
+
+<p><strong>mount_point</strong>  <em>topic prefix</em></p>
+
+<p>This option is used with the listener option to isolate groups of clients. When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p>
+
+<p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># The listener can be restricted to operating within a topic hierarchy using
+</span><span class='line'># the mount_point option. This is achieved be prefixing the mount_point string
+</span><span class='line'># to all topics for any clients connected to this listener. This prefixing only
+</span><span class='line'># happens internally to the broker; the client will not see the prefix.
+</span><span class='line'>#mount_point</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっています。</p>
+
+<p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
+
+<p>The network ports that mosquitto listens on can be controlled using listeners.とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
+「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
+
+<p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Listen on a port/ip address combination. By using this variable 
+</span><span class='line'># multiple times, mosquitto can listen on more than one port. If 
+</span><span class='line'># this variable is used and neither bind_address nor port given, 
+</span><span class='line'># then the default listener will not be started.
+</span><span class='line'># The port number to listen on must be given. Optionally, an ip 
+</span><span class='line'># address or host name may be supplied as a second argument. In 
+</span><span class='line'># this case, mosquitto will attempt to bind the listener to that 
+</span><span class='line'># address and so restrict access to the associated network and 
+</span><span class='line'># interface. By default, mosquitto will listen on all interfaces.
+</span><span class='line'># listener port-number [ip address/host name]
+</span><span class='line'>#listener</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
+listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
+
+<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。
+サブスクライブ側はそこでコントロール？？そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？</p>
+
+<p>奥深し。。。。。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[`mosquitto_sub`のオプション]]></title>
