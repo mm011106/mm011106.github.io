@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-05T22:38:06+09:00</updated>
+  <updated>2014-12-05T22:46:34+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -110,7 +110,7 @@ the process id of the client. Cannot be used at the same time as the <strong> <e
 <p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
 
 <p>関連するところで<br/>
-ブローカの方の設定で<code>clientid_prefixe ; mosquitto_sub -h _s</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
+ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
 
 <p><strong>clientid_prefixes</strong> <em>prefix</em></p>
 
