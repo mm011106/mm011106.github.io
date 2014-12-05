@@ -9,8 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="やっぱりmanは見ないとダメ、ということで、まずはmosquitto.confを紐解いています。
-原文はこちらman mosquitto.conf(5) つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。 ">
+  <meta name="description" content="一昨日から気になっていたmosquitto_sub --disable-clean-sessionオプションですが、試してみました。 ブローカに向かって--desiable-clean-sessionと--idの2つのオプションをつけてサブスクライブを要求します。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +50,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">Disable-clean-sessionオプション</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">Dec 5th, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
+
+<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/05/mosquitto-sub-c-option/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -407,6 +450,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a>
       </li>
     
@@ -420,10 +467,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/01/overview/">試作システムの概要</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/30/et2014-report/">ET2014コンファレンス　レポート</a>
       </li>
     
   </ul>

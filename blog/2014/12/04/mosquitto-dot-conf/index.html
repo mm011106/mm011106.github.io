@@ -88,7 +88,8 @@
 
 <p><strong>mount_point</strong>  <em>topic prefix</em></p>
 
-<p>This option is used with the listener option to isolate groups of clients. When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p>
+<blockquote><p>This option is used with the listener option to isolate groups of clients.
+When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p></blockquote>
 
 <p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
 
@@ -108,7 +109,9 @@
 
 <p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
 
-<p>The network ports that mosquitto listens on can be controlled using listeners.とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
+<blockquote><p>The network ports that mosquitto listens on can be controlled using listeners.</p></blockquote>
+
+<p>とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
 「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
 
 <p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
@@ -140,8 +143,9 @@
 <p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
 listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
 
-<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。
-サブスクライブ側はそこでコントロール？？そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？</p>
+<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。</p>
+
+<p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
 
 <p>奥深し。。。。。</p>
 </div>
@@ -187,6 +191,8 @@ listenerごとにipアドレスやホストネームをバインドできるの�
         <a class="basic-alignment left" href="/blog/2014/12/03/mqtt-option/" title="Previous Post: `mosquitto_sub`のオプション">&laquo; `mosquitto_sub`のオプション</a>
       
       
+        <a class="basic-alignment right" href="/blog/2014/12/05/mosquitto-sub-c-option/" title="Next Post: disable-clean-sessionオプション">disable-clean-sessionオプション &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -230,6 +236,10 @@ listenerごとにipアドレスやホストネームをバインドできるの�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a>
       </li>
     
@@ -243,10 +253,6 @@ listenerごとにipアドレスやホストネームをバインドできるの�
     
       <li class="post">
         <a href="/blog/2014/12/01/overview/">試作システムの概要</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/30/et2014-report/">ET2014コンファレンス　レポート</a>
       </li>
     
   </ul>
