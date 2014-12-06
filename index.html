@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="一昨日から気になっていたmosquitto_sub --disable-clean-sessionオプションですが、試してみました。 ブローカに向かって--desiable-clean-sessionと--idの2つのオプションをつけてサブスクライブを要求します。 ">
+  <meta name="description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。 max_queued_messages ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +50,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/06/again/">　mosquitto.conf 再び</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">Dec 6th, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/06/again/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -450,6 +497,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/06/again/">　mosquitto.conf 再び</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a>
       </li>
     
@@ -463,10 +514,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/02/minor-adjustment/">Octopress+OCT2のちょっとした修正</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/01/overview/">試作システムの概要</a>
       </li>
     
   </ul>
