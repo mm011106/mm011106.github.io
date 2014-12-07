@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-07T10:55:54+09:00</updated>
+  <updated>2014-12-07T13:32:14+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,33 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ubuntuのランチャとかが消えてしまう件]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/ubuntu-problem/"/>
+    <updated>2014-12-07T13:19:44+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/ubuntu-problem</id>
+    <content type="html"><![CDATA[<p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
+
+<!-- more -->
+
+
+<p>検索してみたところ、<a href="http://m12i.hatenablog.com/entry/2014/05/24/100539">この</a>ページにあるような症状にぴったりだったので、書かれている復活手順を踏んでみました。以下はその引用です。　<strong>　<em>mizukyfさん、ありがとうございます。</em> </strong></p>
+
+<ul>
+<li><p>ログイン後 Ctrl＋Alt＋F1キー入力 でコンソール画面に遷移。</p></li>
+<li><p>「（マシン名） login:_」という表示されるのでログイン。</p></li>
+<li><p>「DISPLAY=:0.0 gnome-terminal」と入力しEnter。gnomeの上のターミナルを起動</p></li>
+<li><p>Alt＋F7キーを押下するとデスクトップ画面に復帰するが端末ウィンドウが新たに表示されている。</p></li>
+<li><p>このターミナル上で「dconf reset -f /org/compiz/」と入力してEnter。</p></li>
+<li><p>「sudo shutdown -r now」と入力してEnter。OSが再起動する。</p></li>
+</ul>
+
+
+<p>多分、<code>dconf reset -f /org/compiz/</code>が重要なので、コンソールでログインしたあとにこれを実行すればいい、という気もします。
+今度不具合になったら試してみましょう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
@@ -374,7 +401,7 @@ listenerごとにipアドレスやホストネームをバインドできるの�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[`mosquitto_sub`のオプション]]></title>
+    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
     <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
     <updated>2014-12-03T20:43:00+09:00</updated>
     <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>

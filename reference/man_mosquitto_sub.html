@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>man mosquitto_sub - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="man mosquitto_sub 2014 / 12 / 06 mosquitto_sub(1) 日本語： 名前 mosquitto_sub トピックを購読するためのMQTTバージョン3.1クライアント 概要 mosquitto_sub は、トピックを購読し受信したメッセージを印刷する、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/reference/man_mosquitto_sub.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">man mosquitto_sub</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T00:00:00+09:00" pubdate data-updated="true">2014 / 12 / 06</time></p>
+  </header>
+  
+  <p><a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub(1)</code></a></p>
+
+<p>日本語：</p>
+
+<h3>名前</h3>
+
+<p><strong> mosquitto_sub </strong>    トピックを購読するためのMQTTバージョン3.1クライアント</p>
+
+<h3>概要</h3>
+
+<p><strong> mosquitto_sub </strong>は、トピックを購読し受信したメッセージを印刷する、シンプルなMQTT3.1のクライアントです。</p>
+
+<h3>オプション</h3>
+
+<ul>
+<li><p>-A<br/>
+出て行く接続先をローカルのIP/ホスト名に固定します。
+特定のインターフェイスとのネットワークコミュニケーションに制限する必要がある場合にこのオプションを使用してください。</p></li>
+<li><p>-c, - - disable-clean-session<br/>
+celan-sessionフラグを無効にします。これは、クライアントへのすべての購読をQoS1,2のメッセージの受信については維持するものです。クライアントが再接続をした時点で、溜まっていたメッセージが受信されます。<br/>
+このオプションを使う場合、<code>--id</code>f オプションを使ってメッセージIDを手動でセットすることをおすすめします。</p></li>
+<li><p>- - cafile<br/>
+信頼できるPEMエンコードされたCA認証<strong>ファイルへのパス</strong>を指定します。SSL通信を有効にするために使用されます。  <code>--capath</code>も参照のこと。</p></li>
+<li><p>- - capath<br/>
+信頼できるPEMエンコードされたCA認証が入っている<strong>ディレクトリへのパス</strong>を指定します。SSL通信を有効にするために使用されます。<br/>
+<code>--capath</code>を正しく動作させるために、認証フィアル名の終わりは&#8221;.crt&#8221;にしてください。さらに、<code>c_refresh &lt;path to capath&gt;</code>を認証ファイルの追加・削除ごとに実行してください。</p></li>
+<li><p>- - cert<br/>
+サーバが必要とする場合、このクライアントのPEMエンコードされた認証があるファイルへのパスを指定します。　<code>-- key</code>も参照のこと。</p></li>
+<li><p>- - ciphers<br/>
+クライアントをサポートするためのopenSSLにコンパチブルなTLS　ciphersリストです。詳しくは<code>chiphers(1)</code>を見てください。</p></li>
+<li><p>-d, - - debug<br/>
+デバグメッセージを有効にします。</p></li>
+<li><p>- - help<br/>
+使い方を表示します。</p></li>
+<li><p>-h, - - host<br/>
+接続するホストを指定します。デフォルトは<code>localhost</code>です。</p></li>
+<li><p>-i, - - id<br/>
+このクライアントのためのidで、デフォルトでは<code>mosquitto_sub</code>にクライアントのプロセスidがついたものです。<code>--id-prefix</code>オプションと同時には使えません。</p></li>
+<li><p>-I, - - id-prefix<br/>
+クライアントプロセスのプロセスｉｄを元にクライアントidを作るために使われるプリフィックスを指定します。<code>--id</code>オプションとは同時に使えません。</p></li>
+<li><p>- - insecure<br/>
+証明書ベースの暗号化を行う場合、このオプションはサーバ証明にあるホスト名の確認を無効にします。これは、初期のサーバ設定をテストするのに便利ですが、たとえば、悪意のあるサードパーティよってDNSスプーリングが偽装されることを可能にします。このオプションは <strong> テストのためだけに </strong> 使用してください。このオプションを製品環境で使うことに陥ってしまうのなら、その構成はダメなもので暗号化の意味は全くありません。</p></li>
+<li><p>-k, - - keepalive<br/>
+接続していて、機能しているということを知らせるための、ブローカへのPINGコマンドの発信間隔[s]を設定します。デフォルトでは<code>60s</code>です。</p></li>
+<li><p>- - key<br/>
+サーバが必要とする場合、このクライアントのPEMエンコードされたプライベートキーファイルが入っている<strong>ファイルへのパス</strong>を指定します。<code>--cert</code>も見てください。</p></li>
+<li><p>-N<br/>
+印刷の時にペイロードに対して改行コードを付加しません。これによってペイロードを直接ほかのいくつものアプリケーションに対してストリーミングすることが可能です。<code>-v</code>オプションを使っていない時だけ動作します。</p></li>
+</ul>
+
+
+  
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/07/ubuntu-problem/">ubuntuのランチャとかが消えてしまう件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/07/max-quieued-messages/">max_queued_messagesオプションの動作</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/06/again/">mosquitto.conf 再び</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> with <a href="https://github.com/bijumon/oct2">oct2</a> theme. </span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

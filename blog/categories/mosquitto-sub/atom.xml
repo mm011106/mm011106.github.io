@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mosquitto_sub | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/mosquitto-sub/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-07T10:55:54+09:00</updated>
+  <updated>2014-12-07T13:32:14+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -94,7 +94,7 @@ all client ids are valid.</p></blockquote>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[`mosquitto_sub`のオプション]]></title>
+    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
     <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
     <updated>2014-12-03T20:43:00+09:00</updated>
     <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
