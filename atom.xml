@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-06T20:46:23+09:00</updated>
+  <updated>2014-12-07T10:55:54+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -14,7 +14,64 @@
 
   
   <entry>
-    <title type="html"><![CDATA[　mosquitto.conf 再び]]></title>
+    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
+    <updated>2014-12-07T10:14:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
+    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+<!-- more -->
+
+
+<p>確認手順：</p>
+
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
+
+
+<p>で、送られたデータを確認してみると。。。。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat reconnect.txt <span class="p">|</span> awk -F , <span class="s1">&#39;{ command = &quot;date -d @&quot; $1 ; printf NR&quot;   &quot; ; system(command) }&#39;</span>
+</span><span class='line'><span class="m">1</span>   Sat Dec  <span class="m">6</span> 21:33:01 JST 2014
+</span><span class='line'><span class="m">2</span>   Sat Dec  <span class="m">6</span> 21:34:02 JST 2014
+</span><span class='line'><span class="m">3</span>   Sat Dec  <span class="m">6</span> 21:35:01 JST 2014
+</span><span class='line'>  <span class="o">(</span>...snip..<span class="o">)</span>
+</span><span class='line'><span class="m">27</span>   Sat Dec  <span class="m">6</span> 21:59:01 JST 2014
+</span><span class='line'><span class="m">28</span>   Sat Dec  <span class="m">6</span> 22:00:01 JST 2014
+</span><span class='line'><span class="m">29</span>   Sat Dec  <span class="m">6</span> 22:01:01 JST 2014
+</span><span class='line'><span class="m">30</span>   Sat Dec  <span class="m">6</span> 22:02:02 JST <span class="m">2014</span> &lt;指定した数だけ古いデータがあって
+</span><span class='line'><span class="m">31</span>   Sun Dec  <span class="m">7</span> 09:57:01 JST <span class="m">2014</span> &lt;そのあと最新の配信データが届く
+</span><span class='line'><span class="m">32</span>   Sun Dec  <span class="m">7</span> 09:58:02 JST 2014
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
     <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
     <updated>2014-12-06T19:58:41+09:00</updated>
     <id>http://mm011106.github.io/blog/2014/12/06/again</id>

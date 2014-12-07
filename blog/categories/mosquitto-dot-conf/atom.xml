@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mosquitto.conf | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/mosquitto-dot-conf/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-06T20:46:23+09:00</updated>
+  <updated>2014-12-07T10:55:54+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -14,7 +14,52 @@
 
   
   <entry>
-    <title type="html"><![CDATA[　mosquitto.conf 再び]]></title>
+    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
+    <updated>2014-12-07T10:14:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
+    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+<!-- more -->
+
+
+<p>確認手順：</p>
+
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
+
+
+<p>で、送られたデータを確認してみると。。。。</p>
+
+<pre><code class="sh">$ cat reconnect.txt | awk -F , '{ command = "date -d @" $1 ; printf NR"   " ; system(command) }'
+1   Sat Dec  6 21:33:01 JST 2014
+2   Sat Dec  6 21:34:02 JST 2014
+3   Sat Dec  6 21:35:01 JST 2014
+  (...snip..)
+27   Sat Dec  6 21:59:01 JST 2014
+28   Sat Dec  6 22:00:01 JST 2014
+29   Sat Dec  6 22:01:01 JST 2014
+30   Sat Dec  6 22:02:02 JST 2014 &lt;指定した数だけ古いデータがあって
+31   Sun Dec  7 09:57:01 JST 2014 &lt;そのあと最新の配信データが届く
+32   Sun Dec  7 09:58:02 JST 2014
+</code></pre>
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
     <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
     <updated>2014-12-06T19:58:41+09:00</updated>
     <id>http://mm011106.github.io/blog/2014/12/06/again</id>
@@ -90,6 +135,68 @@
 
 <p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
 「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.confを見てみた]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf/"/>
+    <updated>2014-12-04T20:21:14+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf</id>
+    <content type="html"><![CDATA[<p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
+原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
+
+<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
+
+<!-- more -->
+
+
+<p><strong>mount_point</strong>  <em>topic prefix</em></p>
+
+<blockquote><p>This option is used with the listener option to isolate groups of clients.
+When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p></blockquote>
+
+<p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
+
+<pre><code># The listener can be restricted to operating within a topic hierarchy using
+# the mount_point option. This is achieved be prefixing the mount_point string
+# to all topics for any clients connected to this listener. This prefixing only
+# happens internally to the broker; the client will not see the prefix.
+#mount_point
+</code></pre>
+
+<p>となっています。</p>
+
+<p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
+
+<blockquote><p>The network ports that mosquitto listens on can be controlled using listeners.</p></blockquote>
+
+<p>とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
+「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
+
+<p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
+
+<pre><code class=""># Listen on a port/ip address combination. By using this variable 
+# multiple times, mosquitto can listen on more than one port. If 
+# this variable is used and neither bind_address nor port given, 
+# then the default listener will not be started.
+# The port number to listen on must be given. Optionally, an ip 
+# address or host name may be supplied as a second argument. In 
+# this case, mosquitto will attempt to bind the listener to that 
+# address and so restrict access to the associated network and 
+# interface. By default, mosquitto will listen on all interfaces.
+# listener port-number [ip address/host name]
+#listener
+</code></pre>
+
+<p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
+listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
+
+<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。</p>
+
+<p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
+
+<p>奥深し。。。。。</p>
 ]]></content>
   </entry>
   

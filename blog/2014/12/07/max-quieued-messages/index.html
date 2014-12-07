@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>`mosquitto_sub`のオプション - MQTT and &#8230;</title>
+  <title>max_queued_messagesオプションの動作 - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="今日も何気なく検索しながら、webを眺めていたら、mosquitto_subのこんなオプションを発見。 -c, --disable-clean-session Disable the 'clean session' flag. This means that all of the &hellip;">
+  <meta name="description" content="ということで、先のmax_queued_messagesオプションを試してみました。 結論から言うと、バッファリングしているのは指定した数の最も古いデータでした。 確認手順： mosquitto.confにmax_queued_messages 30と設定
+これで、30個のデータが保持されるはず &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -53,7 +54,7 @@
   
   <header>
     
-      <h1 class="entry-title">`mosquitto_sub`のオプション</h1>
+      <h1 class="entry-title">max_queued_messagesオプションの動作</h1>
     
     
       <p class="meta">
@@ -70,34 +71,62 @@
 
 
 
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
+<time datetime="2014-12-07T10:14:05+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
+<div class="entry-content"><p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
 
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
 
 <!-- more -->
 
 
-<p></p>
+<p>確認手順：</p>
 
-<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
-<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
 
-<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
 
-<p>週末に試してみよう。</p>
+<p>で、送られたデータを確認してみると。。。。</p>
 
-<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
-もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
-<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat reconnect.txt <span class="p">|</span> awk -F , <span class="s1">&#39;{ command = &quot;date -d @&quot; $1 ; printf NR&quot;   &quot; ; system(command) }&#39;</span>
+</span><span class='line'><span class="m">1</span>   Sat Dec  <span class="m">6</span> 21:33:01 JST 2014
+</span><span class='line'><span class="m">2</span>   Sat Dec  <span class="m">6</span> 21:34:02 JST 2014
+</span><span class='line'><span class="m">3</span>   Sat Dec  <span class="m">6</span> 21:35:01 JST 2014
+</span><span class='line'>  <span class="o">(</span>...snip..<span class="o">)</span>
+</span><span class='line'><span class="m">27</span>   Sat Dec  <span class="m">6</span> 21:59:01 JST 2014
+</span><span class='line'><span class="m">28</span>   Sat Dec  <span class="m">6</span> 22:00:01 JST 2014
+</span><span class='line'><span class="m">29</span>   Sat Dec  <span class="m">6</span> 22:01:01 JST 2014
+</span><span class='line'><span class="m">30</span>   Sat Dec  <span class="m">6</span> 22:02:02 JST <span class="m">2014</span> &lt;指定した数だけ古いデータがあって
+</span><span class='line'><span class="m">31</span>   Sun Dec  <span class="m">7</span> 09:57:01 JST <span class="m">2014</span> &lt;そのあと最新の配信データが届く
+</span><span class='line'><span class="m">32</span>   Sun Dec  <span class="m">7</span> 09:58:02 JST 2014
+</span></code></pre></td></tr></table></div></figure>
 
-<p>これも試す必要があります。</p>
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
 </div>
 
 
@@ -121,12 +150,12 @@
 
 
 
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
+<time datetime="2014-12-07T10:14:05+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/mosquitto-sub/'>mosquitto_sub</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>
+    <a class='category' href='/blog/categories/max-queued-messages/'>max_queued_messages</a>, <a class='category' href='/blog/categories/mosquitto-dot-conf/'>mosquitto.conf</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>
   
 </span>
 
@@ -135,7 +164,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/03/mqtt-option/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/03/mqtt-option/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/" >Tweet</a>
   
   
   
@@ -144,10 +173,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/12/02/minor-adjustment/" title="Previous Post: Octopress+OCT2のちょっとした修正">&laquo; Octopress+OCT2のちょっとした修正</a>
+        <a class="basic-alignment left" href="/blog/2014/12/06/again/" title="Previous Post: mosquitto.conf 再び">&laquo; mosquitto.conf 再び</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/12/04/mosquitto-dot-conf/" title="Next Post: mosquitto.confを見てみた">mosquitto.confを見てみた &raquo;</a>
       
     </p>
   </footer>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mosquitto_sub | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/mosquitto-sub/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-12-07T10:55:54+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[disable-clean-sessionオプション]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/"/>
+    <updated>2014-12-05T21:14:40+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option</id>
+    <content type="html"><![CDATA[<p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
+
+<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
+
+<!-- more -->
+
+
+<pre><code class="sh">$ mosquitto_sub -h HOSTNAME -t YOUR/TOPIC/NAME --qos 1 --disable-clean-session --id CONNECTION-ID
+
+1417781342, 1691, 0, 0, 0
+1417781402, 1691, 0, 0, 0
+1417781461, 1691, 0, 0, 0
+1417781522, 1691, 0, 0, 0　　&lt;&lt;時刻 21:12:02　で中断
+^C
+</code></pre>
+
+<p><code>--id</code>オプションはサブスクライバが同一であることを主張するためのもののようですので、これが一致することで「再接続だから配信していないデータを送らなきゃ」と認識してくれます。<code>--id</code>を指定しないとデフォルトのプロセス番号を元にしたものになるので、プロセスを止めて再度起動した場合「再接続」と認識してもらえません。
+また、&ndash;qosが1もしくは2でないとダメみたいです。QoS　0は配信保証がなされないクオリティ指定ですので、当然といえば当然。</p>
+
+<p>データが来たところで、適当に中断します。このトピックではパブリッシャが1分毎に1データを送ってきます。データの最初のフィールドがエポックタイムです。よく見ると60づつ増えていっているのがわかります。</p>
+
+<p>そしてCtrl-Cでプロセスを止めます。</p>
+
+<p>では、ここでしばらく待って。。。。。</p>
+
+<p>わかりやすいように、タイムスタンプを印刷してからサブスクライブを再開します。</p>
+
+<pre><code class="sh">$ date ; mosquitto_sub -h __host-name__ -t YOUR/TOPIC/NAME --qos 1 --disable-clean-session --id  testclient
+
+Fri Dec  5 21:24:54 JST 2014
+1417781581, 1692, 0, 0, 0　　&lt;&lt;　再開したのは21:24:54だけど、21:13:01のデータから配信されている。
+1417781642, 1691, 0, 0, 0
+1417781701, 1691, 0, 0, 0
+1417781761, 1692, 0, 0, 0
+1417781822, 1691, 0, 0, 0
+1417781881, 1691, 0, 0, 0
+1417781942, 1692, 0, 0, 0
+1417782002, 1692, 0, 0, 0
+1417782061, 1692, 0, 0, 0
+1417782121, 1692, 0, 0, 0
+1417782182, 1692, 0, 0, 0
+1417782241, 1692, 0, 0, 0
+1417782302, 1692, 0, 0, 0
+1417782361, 1692, 0, 0, 0
+   ：
+   :
+</code></pre>
+
+<p>おお、きちんと中断している間のデータも配信されました。</p>
+
+<p><code>--id</code>オプションには次のように書かれています。</p>
+
+<p><strong> -i, - -id </strong></p>
+
+<blockquote><p>The id to use for this client. If not given, defaults to mosquitto_sub_ appended with
+the process id of the client. Cannot be used at the same time as the <strong> <em>&ndash;id-prefix</em> </strong> argument.</p></blockquote>
+
+<p>通常、IDは<code>mosquitto_sub_${PID}</code>になるようです。でもpidは起動するたびに変わってしまうので、同じクライアントとは認識されませんね。物理経路のトラブル等で通信が途絶えた場合は大丈夫でしょうけれど。</p>
+
+<p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
+
+<p>関連するところで<br/>
+ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
+
+<p><strong>clientid_prefixes</strong> <em>prefix</em></p>
+
+<blockquote><p>If defined, only clients that have a clientid with a prefix that matches clientid_prefixes will be
+allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;</em> here would mean a client
+&ldquo;<em>secure-</em>client&rdquo; could connect but another with clientid &ldquo;mqtt&rdquo; couldn&rsquo;t. By default,
+all client ids are valid.</p></blockquote>
+
+<p>となるようです。セキュリティの一助になるかしら？</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[`mosquitto_sub`のオプション]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
+    <updated>2014-12-03T20:43:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
+    <content type="html"><![CDATA[<p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
+
+<p><strong><code>-c, --disable-clean-session</code></strong></p>
+
+<!-- more -->
+
+
+<p>
+</p>
+
+<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
+<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
+
+<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
+
+<p>週末に試してみよう。</p>
+
+<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
+もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
+<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
+
+<p>これも試す必要があります。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。 max_queued_messages ">
+  <meta name="description" content="ということで、先のmax_queued_messagesオプションを試してみました。 結論から言うと、バッファリングしているのは指定した数の最も古いデータでした。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -56,7 +56,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/06/again/">　mosquitto.conf 再び</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/12/07/max-quieued-messages/">max_queued_messagesオプションの動作</a></h1>
     
     
       <p class="meta">
@@ -73,7 +73,51 @@
 
 
 
-<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">Dec 6th, 2014</time>
+<time datetime="2014-12-07T10:14:05+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/07/max-quieued-messages/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/06/again/">mosquitto.conf 再び</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">2014 / 12 / 06</time>
         
       </p>
     
@@ -103,7 +147,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">Disable-clean-sessionオプション</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a></h1>
     
     
       <p class="meta">
@@ -120,7 +164,7 @@
 
 
 
-<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">Dec 5th, 2014</time>
+<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
         
       </p>
     
@@ -164,7 +208,7 @@
 
 
 
-<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">Dec 4th, 2014</time>
+<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">2014 / 12 / 04</time>
         
       </p>
     
@@ -209,7 +253,7 @@
 
 
 
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">Dec 3rd, 2014</time>
+<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
         
       </p>
     
@@ -253,7 +297,7 @@
 
 
 
-<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">Dec 2nd, 2014</time>
+<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">2014 / 12 / 02</time>
         
       </p>
     
@@ -295,7 +339,7 @@
 
 
 
-<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true">Dec 1st, 2014</time>
+<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true">2014 / 12 / 01</time>
         
       </p>
     
@@ -339,7 +383,7 @@
 
 
 
-<time datetime="2014-11-30T10:18:25+09:00" pubdate data-updated="true">Nov 30th, 2014</time>
+<time datetime="2014-11-30T10:18:25+09:00" pubdate data-updated="true">2014 / 11 / 30</time>
         
       </p>
     
@@ -385,7 +429,7 @@
 
   
 
-<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">Nov 29th, 2014</time>
+<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">2014 / 11 / 29</time>
         
       </p>
     
@@ -427,7 +471,7 @@
 
 
 
-<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">Nov 29th, 2014</time>
+<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">2014 / 11 / 29</time>
         
       </p>
     
@@ -497,7 +541,11 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/12/06/again/">　mosquitto.conf 再び</a>
+        <a href="/blog/2014/12/07/max-quieued-messages/">max_queued_messagesオプションの動作</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/06/again/">mosquitto.conf 再び</a>
       </li>
     
       <li class="post">
@@ -510,10 +558,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/03/mqtt-option/">`mosquitto_sub`のオプション</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/02/minor-adjustment/">Octopress+OCT2のちょっとした修正</a>
       </li>
     
   </ul>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: max_queued_messages | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/max-queued-messages/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2014-12-07T10:55:54+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
+    <updated>2014-12-07T10:14:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
+    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+<!-- more -->
+
+
+<p>確認手順：</p>
+
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
+
+
+<p>で、送られたデータを確認してみると。。。。</p>
+
+<pre><code class="sh">$ cat reconnect.txt | awk -F , '{ command = "date -d @" $1 ; printf NR"   " ; system(command) }'
+1   Sat Dec  6 21:33:01 JST 2014
+2   Sat Dec  6 21:34:02 JST 2014
+3   Sat Dec  6 21:35:01 JST 2014
+  (...snip..)
+27   Sat Dec  6 21:59:01 JST 2014
+28   Sat Dec  6 22:00:01 JST 2014
+29   Sat Dec  6 22:01:01 JST 2014
+30   Sat Dec  6 22:02:02 JST 2014 &lt;指定した数だけ古いデータがあって
+31   Sun Dec  7 09:57:01 JST 2014 &lt;そのあと最新の配信データが届く
+32   Sun Dec  7 09:58:02 JST 2014
+</code></pre>
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
+]]></content>
+  </entry>
+  
+</feed>
