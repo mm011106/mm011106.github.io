@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-07T13:32:14+09:00</updated>
+  <updated>2014-12-08T20:49:07+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -37,6 +37,10 @@
 
 <p>多分、<code>dconf reset -f /org/compiz/</code>が重要なので、コンソールでログインしたあとにこれを実行すればいい、という気もします。
 今度不具合になったら試してみましょう。</p>
+
+<p>PS:<br/>
+<a href="http://ja.wikipedia.org/wiki/Compiz">compiz</a>を調べてみたところ、ウインドーマネージャなのですねえ。<br/>
+<a href="http://en.wikipedia.org/wiki/Dconf">dconf</a>はいろいろな設定を一気に引き受けるユーティリティ。あるwebの解説によれば「Windowsのレジストリシステムのようなもの」とのこと。</p>
 ]]></content>
   </entry>
   
