@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="man mosquitto_sub 2014 / 12 / 06 mosquitto_sub(1) 日本語： 名前 mosquitto_sub トピックを購読するためのMQTTバージョン3.1クライアント 概要 mosquitto_sub は、トピックを購読し受信したメッセージを印刷する、 &hellip;">
+  <meta name="description" content="man mosquitto_sub 2014 / 12 / 06 mosquitto_sub(1) 日本語： 名前 mosquitto_sub トピックを購読するためのMQTTバージョン3.1クライアント コマンド mosquitto_sub [-A bind_address] [-c] [-d &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,13 +73,27 @@
 
 <p>日本語：</p>
 
+<hr />
+
 <h3>名前</h3>
 
 <p><strong> mosquitto_sub </strong>    トピックを購読するためのMQTTバージョン3.1クライアント</p>
 
+<hr />
+
+<h3>コマンド</h3>
+
+<p>mosquitto_sub [-A bind_address] [-c] [-d] [-h hostname] [-i client_id] [-I client id prefix] [-k keepalive time] [-p port number] [-q message QoS] [-R] [-S] [-N] [&ndash;quiet] [-v] [ [-u username] [-P password] ] [ &ndash;will-topic topic [&ndash;will-payload payload] [&ndash;will-qos qos] [&ndash;will-retain] ] [[ { &ndash;cafile file | &ndash;capath dir } [&ndash;cert file] [&ndash;key file] [&ndash;tls-version version] [&ndash;insecure] ] | [ &ndash;psk hex-key &ndash;psk-identity identity [&ndash;tls-version version] ]] [-T filter-out&hellip;] -t message-topic&hellip;</p>
+
+<p>mosquitto_sub [&ndash;help]</p>
+
+<hr />
+
 <h3>概要</h3>
 
 <p><strong> mosquitto_sub </strong>は、トピックを購読し受信したメッセージを印刷する、シンプルなMQTT3.1のクライアントです。</p>
+
+<hr />
 
 <h3>オプション</h3>
 
@@ -145,9 +159,78 @@ TLS-PSKで使われるcleient identitiyです。ブローカの設定によっ�
 ブローカと接続するために使うTLSプロトコルのバージョンを選びます。選択肢は<code>tlsv1.2</code>　<code>tlsv1.1</code>　<code>tlsv1</code>です。<br/>
 デフォルトは<code>tlsv1.2</code>です。インストールされているopenSSLのバージョンが古いと<code>tlsv1</code>だけが有効かもしれません。これはブローカで使われているバージョンと一致する必要があります。</p></li>
 <li><p>-u, - -username<br/>
-ブローカに認証してもらうためのユーザ名を提供します。このオプションにはMQTT v3.1をサポートするブローカが必要です。<code>--pw</code>オプションも参照してください。</p></li>
+ブローカに認証してもらうためのユーザ名を提供します。このオプションにはMQTT　v3.1をサポートするブローカが必要です。<code>--pw</code>オプションも参照してください。</p></li>
+<li><p>-v, - -verbose<br/>
+受信したメッセージを詳しく表示します。このオプションではメッセージを&#8221;topic payload&#8221;のように表示します。このオプションがない場合には&#8221;payload&#8221;のみの表示になります。</p></li>
+<li><p>- -will-payload<br/>
+ブローカに保存されるメッセージを指定します。これはこのクライアントが予期せずに切断された場合送信されます。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-qos<br/>
+WillのQoSを指定します。デフォルトでは0になります。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-retain<br/>
+これが与えられた場合、クライアントが予期せずに切断された場合のメッセージはリテインメッセージとして扱われます。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-topic<br/>
+クライアントが予期せずに切断された場合のWillを送るトピックを指定します。</p></li>
 </ul>
 
+
+<hr />
+
+<h3>Will（遺言）</h3>
+
+<p><code>mosquitto_sub</code>はクライアントが予期せずに切断された場合のメッセージをブローカに登録することが出来ます。くわしくは<code>mqtt(7)</code>をご覧ください。</p>
+
+<p>最小限必要なことは<code>--will-topic</code>オプションを使ってWill（遺言）を送り出す先のトピックを指定することです。これにより、リテインしない、長さ0のメッセージをQoS0で送信することになります。</p>
+
+<p>その他のWill(遺言）パラメタを設定するために<code>--will-retain</code> <code>--will-payload</code> <code>--will-qos</code>オプションを調整してください。</p>
+
+<hr />
+
+<h3>例</h3>
+
+<p>以下は本当にただの例です。トピックの購読指示はうまく動くかもしれませんが、何かを受信するためには、当該のトピックにデータが送られないといけません。</p>
+
+<p>ローカルホストからQoS1で温度の情報を購読します。</p>
+
+<pre><code>mosquitto_sub -t sensors/temperature -q 1
+</code></pre>
+
+<p>ハードディスクからの温度情報を複数の計算機・ハードディスクから購読します。この例ではそれぞれの計算機のハードディスクの温度が&#8221;sensors/machines/HOSTNAME/temperature/HD_NAME&#8221;に発行されている必要があります。</p>
+
+<pre><code>mosquitto_sub -t sensors/machines/+/temperature/+
+</code></pre>
+
+<p>すべてのブローカのステータスメッセージを購読するには</p>
+
+<pre><code>mosquitto_sub -v -t \$SYS/#
+</code></pre>
+
+<hr />
+
+<h3>バグ</h3>
+
+<p><strong>mosquitto_sub</strong> のバグについての情報は[<a href="http://launchpad.net/mosquitto/">http://launchpad.net/mosquitto/</a>]で見つかるかもしれません。</p>
+
+<hr />
+
+<h3>こちらもご覧ください</h3>
+
+<p> mqtt(7) , mosquitto_pub(1) , mosquitto(8) , libmosquitto(3) , mosquitto-tls(7)</p>
+
+<hr />
+
+<h3>謝辞</h3>
+
+<p>This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. (<a href="http://www.openssl.org/">http://www.openssl.org/</a>)</p>
+
+<p>This product includes cryptographic software written by Eric Young (<a href="&#x6d;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#101;&#x61;&#121;&#64;&#99;&#x72;&#121;&#x70;&#x74;&#x73;&#x6f;&#x66;&#116;&#x2e;&#99;&#x6f;&#109;">&#101;&#97;&#x79;&#x40;&#99;&#114;&#121;&#x70;&#x74;&#115;&#111;&#102;&#116;&#46;&#99;&#x6f;&#x6d;</a>)</p>
+
+<p>This product includes software written by Tim Hudson (<a href="&#109;&#x61;&#105;&#108;&#116;&#x6f;&#x3a;&#116;&#106;&#x68;&#x40;&#99;&#114;&#x79;&#x70;&#116;&#x73;&#111;&#x66;&#x74;&#x2e;&#99;&#111;&#x6d;">&#x74;&#106;&#104;&#x40;&#99;&#x72;&#121;&#112;&#x74;&#x73;&#111;&#x66;&#116;&#x2e;&#x63;&#x6f;&#x6d;</a>)</p>
+
+<hr />
+
+<h3>著者</h3>
+
+<p>Roger Light <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#x72;&#x6f;&#103;&#101;&#x72;&#64;&#x61;&#116;&#99;&#x68;&#111;&#111;&#x2e;&#111;&#114;&#103;">&#x72;&#111;&#x67;&#101;&#114;&#x40;&#x61;&#x74;&#99;&#104;&#111;&#111;&#x2e;&#111;&#114;&#103;</a></p>
 
   
 </article>
