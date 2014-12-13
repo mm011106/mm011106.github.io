@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-10T20:50:41+09:00</updated>
+  <updated>2014-12-13T20:31:13+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,309 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[やっと復活。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/13/restarted/"/>
+    <updated>2014-12-13T16:23:35+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/13/restarted</id>
+    <content type="html"><![CDATA[<p>前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。<br/>
+今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。メニューも一応見えていますが、クリックすると茶色いプルダウンらしきものが広がるだけで何も見えません。</p>
+
+<!-- more -->
+
+
+<p>ブログに書いた手順を試してみるも、ターミナルが見えないのでいかんともし難く。。。。<br/>
+ブラインド状態でコマンド入力してみても、うまく入力できているようですが、効果なし。</p>
+
+<hr />
+
+<h2>新しいubuntuを立ち上げ</h2>
+
+<p>webでいろいろ調べましたが、結局解決には至らず。新しいubuntuをインストールするのが早いのじゃないか、ということで再インストールに。</p>
+
+<p>幸い、MacOSのParallelsの上の仮想PCだったので、トラブった環境はそのままにしてすすめました。こういうとき仮想環境は楽ですね。</p>
+
+<p>まずは、大事なブログのソースファイルをまるごと救出。<br/>
+Ctrl-Alt-F1でCUIベースのターミナルを開いて、</p>
+
+<pre><code>tar czf octopress.tar.gz octopress
+</code></pre>
+
+<p>のような感じで。</p>
+
+<p>さて、これをscpでコピーしようとしたら、どうもうまくいかず。。。</p>
+
+<p>きちんとsshの設定をしていなかったからか。。。反省。</p>
+
+<p>ですが、これまたラッキーなことにParallelsにはホストOSとのファイル共有が標準で用意されていて、これがubuntuでも有効です。</p>
+
+<pre><code>cp ./octopress.tar.gz ~/Desktop/Parallels\ Shared\ Folders/
+</code></pre>
+
+<p>とするだけです。
+これで大事な原稿と環境はホストOSにコピーされました。</p>
+
+<p>肝心のインストールは、ubuntu のインストール用ディスクイメージを持ってきて、Parallelsに教えてあげるだけであとは勝手にインストールして完了。</p>
+
+<hr />
+
+<h2>git インストール</h2>
+
+<p>さてここから環境の構築です。</p>
+
+<p>まず、SSH関係をしっかりと構築したあと、</p>
+
+<p><a href="http://octopress.org/docs/setup/">octopressのセットアップ手順</a>にしたがって、</p>
+
+<pre><code>sudo apt-get install git
+</code></pre>
+
+<p>としてインストール。簡単。問題無し。</p>
+
+<p>一応、動作を確認。gitで使うディレクトリに移動して</p>
+
+<pre><code>git init
+</code></pre>
+
+<p>エラーなし。okです。</p>
+
+<h2>ruby インストール</h2>
+
+<p>これまた、手順にしたがって、rbenvでRubyを<a href="http://octopress.org/docs/setup/rbenv/">インストール</a>することにします。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span>
+</span><span class='line'>git clone git://github.com/sstephenson/rbenv.git .rbenv
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.bash_profile
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;eval &quot;$(rbenv init -)&quot;&#39;</span> &gt;&gt; ~/.bash_profile
+</span><span class='line'>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</span><span class='line'><span class="nb">source</span> ~/.bash_profile
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ubuntuでは、<code>.bash_profile</code>をログイン時に実行するために</p>
+
+<pre><code>echo 'source ~/.bash_profile' &gt;&gt; .bashrc
+</code></pre>
+
+<p>としました。</p>
+
+<p>インストールの結果を確認します。
+新しいターミナルを開いて、</p>
+
+<pre><code>echo $PATH
+</code></pre>
+
+<p>の結果に<code>~/.rbenv/bin</code>などが入って入ればいいかと思います。</p>
+
+<p>これでrbenvツールが設定できたので、ここからRubyのインストールです。</p>
+
+<p>私の環境では<code>zlib1g-dev</code>と<code>libssl-dev</code>が入っていなかったので、あとあとエラーしました。</p>
+
+<p>念のため前もって</p>
+
+<pre><code>sudo apt-get install zlib1g-dev libssl-dev
+</code></pre>
+
+<p>などとして、インストールするか確認しておいたほうがいいかもしれません。
+そうでないと何回もRubyをインストールすることになります。</p>
+
+<ul>
+<li>octopressのセットアップではRubyのモジュールをダウンロードしますが、このときサーバにSSLで接続します。そのためにSSLのライブラリが必要なようです。</li>
+</ul>
+
+
+<p>では、インストール。解説にしたがい</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-p0
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-p0
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>と、しました。</p>
+
+<p>実は、<code>rbenv install 1.9.3-p0</code>で<code>installなんてコマンドないよ！</code>と起こられましたが、<code>ruby-build</code>が正しい位置に持ってこれていなかったのが原因でした。</p>
+
+<pre><code>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</code></pre>
+
+<p>を正しく実行し直して事なきを得ます。</p>
+
+<ul>
+<li>webの解説によれば、<code>rbenv local ruby 1.9.3-p0</code>は、その他のディレクトリにあるRuby環境を変更することなく、octopressをインストールするために使われるそうです。もし、どこでもこのバージョンを使いたいなら、local を grobal に変更するといい、と書かれています。</li>
+</ul>
+
+
+<p>インストールができたら、<code>Ruby --version</code>でバージョンを確認。OK。</p>
+
+<hr />
+
+<h2>Octopress</h2>
+
+<p><a href="">こちらの手順</a>にしたがってインストール。</p>
+
+<p>まず</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone git://github.com/imathis/octopress.git octopress
+</span><span class='line'><span class="nb">cd </span>octopress
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>としてoctopress自身を持ってきます。</p>
+
+<p>さらに、gemで必要なRubyモジュールをインストール</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>gem install bundler
+</span><span class='line'>rbenv rehash <span class="c"># If you use rbenv, rehash to be able to run the bundle command</span>
+</span><span class='line'>bundle install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここで、ちゃんと動くかどうか</p>
+
+<pre><code>rake generate
+</code></pre>
+
+<p>でためしてみたところ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rake generate
+</span><span class='line'><span class="c">## Generating Site with Jekyll</span>
+</span><span class='line'>identical <span class="nb">source</span>/stylesheets/screen.css
+</span><span class='line'>/home/masa/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/
+</span><span class='line'>execjs-2.2.2/lib/execjs/runtimes.rb:51:in <span class="sb">`</span>autodetect<span class="err">&#39;</span>: Could not find
+</span><span class='line'>a JavaScript runtime. See https://github.com/sstephenson/execjs <span class="k">for</span> a
+</span><span class='line'>list of available runtimes. <span class="o">(</span>ExecJS::RuntimeUnavailable<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>と言われてしまいました。
+&ldquo;octopress Could not find a JavaScript runtime&#8221;をキーワードに
+googleさんに尋ねてみると、解決策が</p>
+
+<pre><code>sudo apt-get install nodejs
+</code></pre>
+
+<p>を実行しろ、ということだったので、さっそくインストールし、無事<code>rake generate</code>できることを確認。</p>
+
+<p>さらに<code>rake preview</code>で出来栄えも確認し、インストール完了。</p>
+
+<p>やっと環境が整いました。</p>
+
+<hr />
+
+<h2>昔の機械から原稿を持ってくる</h2>
+
+<p>さて、昔の機械からデータを持ってこなきゃいけませんが、オリジナルのoctopress からテーマを更新(oct2を使用)しているので、もしかしたらコピーだけではだめかもしれないという危惧もあり、厄介かなあとおもいつつも、ダメモトということで、octopressディレクトリをまるごとコピー。</p>
+
+<p>オリジナルをキープしておいて、持ってきたものをコピーしましたが、<code>rake generate</code>では<code>「バージョンが違いますけど！」</code>と注意されてしまいます。しかたがないので、オリジナルに戻して、今度はsourceフォルダだけを昔のものに入れ替えて試してみました。</p>
+
+<p>すると、何事もなくgenerateが可能に。さらにpreviewして元のBlogページが戻ることを確認！！ああ、素晴らしい。</p>
+
+<p>ということで、記事を書き始めるとまたまたトラブル。。。。</p>
+
+<p>どうも文字が大きい。さらに、バックグラウンドの絵がページの頭の部分で黒くなる。。。。</p>
+
+<p>「うむ、やはりコピーだけではダメかああああ。」
+しかたなく、もう一度octopressの環境から作り直し。さらにoct2も素直にインストールし直し。</p>
+
+<p>まず、octopressのディレクトリをまるごと削除。もう一度インストールし直します。</p>
+
+<p>さらにoct2を以下のようにしてインストール</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone https://github.com/bijumon/oct2.git .themes/oct2
+</span><span class='line'>rake install<span class="o">[</span><span class="s2">&quot;oct2&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://github.com/bijumon/oct2">oct2のページ</a>によるインストール方法ではcloneの保存先が<code>.themes/</code>ですが、これではエラーしてしまうので、<code>.themes/oct2</code>としてみました。</p>
+
+<p>これで一応環境は整っているはずなので、このまま何もせず</p>
+
+<pre><code>rake preview
+</code></pre>
+
+<p>としてfirefoxなどで<a href="http://localhost:4000">localhost:4000</a>をアクセス。oct2が有効になっていることを確認します。</p>
+
+<p>いよいよblogのソースをコピーします。といっても、.mdの原稿を<code>_post</code>ディレクトリにコピーするだけです。</p>
+
+<p>さらに、以下のファイルをコピーしました。</p>
+
+<pre><code>./_config.yml
+./public/image/background.png  (自分で作ったバックグラウンドカラー）
+./public/image/logo.png
+./public/image/(その他必要な画像）
+./source/includes/post/date.html（日付表示がうまくいくように変更したもの）
+./source/(その他、自分で作ったディレクトリ）
+</code></pre>
+
+<p>これで、再び<code>rake preview</code>を実行。</p>
+
+<p>！！！やっとこれで元通り！！！とおもったところが、まだ文字が異常に大きい。。。</p>
+
+<p>これまた、googleにたずねると、「<a href="http://blog.nambo.jp/2013/07/26/change-octopress-font-size/">ここをご覧なさい</a>」といわれたので、そのまま追加して、納得できる出来栄えに。。。。</p>
+
+<figure class='code'><figcaption><span>./sass/custom/_stypes.scss　に追加</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">h1</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">h2</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.1em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">h3</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">#content</span> <span class="nc">.blog-index</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">article</span> <span class="n">h1</span> <span class="err">{</span>
+</span><span class='line'>    <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これもちょっと腑に落ちない妙な動作をするのですが、まあ、とりあえず吉としておきます。とおもいましたが、やはり気になるので<a href="http://yuyunko.github.io/blog/2013/03/04/octopress-%E3%83%86%E3%83%BC%E3%83%9E%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%B9%E3%82%99/">他の方法</a>も試してみるとこちらの方がいい感じなので、こうしました。</p>
+
+<figure class='code'><figcaption><span>./sass/custom/_styles.scss　を変更</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">0.8em</span><span class="p">;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>お疲れさまでした。
+ほぼ1日消費です。</p>
+
+<p>そうそう、Parallelsでスナップショットをとっておこう。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ubuntuのランチャとかが消えてしまう件]]></title>

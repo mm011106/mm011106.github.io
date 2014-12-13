@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: octopress | MQTT and ...]]></title>
-  <link href="http://mm011106.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <title><![CDATA[Category: ubuntu | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/ubuntu/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
   <updated>2014-12-13T20:31:13+09:00</updated>
   <id>http://mm011106.github.io/</id>
