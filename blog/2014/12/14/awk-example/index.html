@@ -5,11 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>mosquitto_subのオプション - MQTT and &#8230;</title>
+  <title>awkを使う - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="今日も何気なく検索しながら、webを眺めていたら、mosquitto_subのこんなオプションを発見。 -c, --disable-clean-session Disable the 'clean session' flag. This means that all of the &hellip;">
+  <meta name="description" content="いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。 まずは、最初のフィールドを切り出す必要があります。これは簡単で awk -F &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/14/awk-example/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -53,7 +54,7 @@
   
   <header>
     
-      <h1 class="entry-title">mosquitto_subのオプション</h1>
+      <h1 class="entry-title">awkを使う</h1>
     
     
       <p class="meta">
@@ -70,34 +71,97 @@
 
 
 
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
+<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
-
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
+<div class="entry-content"><p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。</p>
 
 <!-- more -->
 
 
-<p></p>
+<p>まずは、最初のフィールドを切り出す必要があります。これは簡単で</p>
 
-<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
-<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
+<pre><code>awk -F, '{print $1}'
+</code></pre>
 
-<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
+<p>です。セパレータがコンマなので、-Fオプションで変更します。セパレータで区切られた最初のフィールドがプリントされます。</p>
 
-<p>週末に試してみよう。</p>
+<p>これだけだと</p>
 
-<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
-もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
-<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
+<pre><code>1418394962
+1418395021
+1418395081
+1418395142
+1418395202
+</code></pre>
 
-<p>これも試す必要があります。</p>
+<p>なかんじなのでこれをdate コマンドで時刻表示に変換してあげます。
+strftime()なる関数があるawk処理系もあるようですが、ここではシェルコマンドを使ってやってみました。</p>
+
+<p>単純には</p>
+
+<pre><code>date -d @`cat data.txt|awk -F, '{print $1}'`
+</code></pre>
+
+<p>とやるとよさそうですが、複数行だとエラーします。</p>
+
+<p>なので、各行ごとにdateコマンドが発行される必要があります。
+ということはawk中で処理する必要があるということで。。。。</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd)}'
+</code></pre>
+
+<p>これで、</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:02:01 JST
+2014年 12月 13日 土曜日 00:03:02 JST
+2014年 12月 13日 土曜日 00:04:01 JST
+2014年 12月 13日 土曜日 00:05:01 JST
+</code></pre>
+
+<p>こんな感じになります。ひとまずok。</p>
+
+<p>で、さらに、この日付の後、データを表示しようとおもって、</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd); print $2"  "$3}'
+</code></pre>
+
+<p>とすると。。。。</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:05:01 JST
+ 1710   2004
+2014年 12月 13日 土曜日 00:06:02 JST
+ 1709   2002
+2014年 12月 13日 土曜日 00:07:01 JST
+ 1710   2003
+</code></pre>
+
+<p>コマンド実行結果に改行コードが入っているので、こんなになってしまいます。
+これではいけないということで、色々調べてみると</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; cmd | getline result; close(cmd); print result "  " $2"  "$3}'
+</code></pre>
+
+<p>としてやるといいことが分かりました。変数にコマンドを書いて、それを実行して結果を得るために　cmd | getline 変数（結果が入る） というのが想像できませんでした。</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:09:01 JST   1710   2003
+2014年 12月 13日 土曜日 00:10:02 JST   1710   2002
+2014年 12月 13日 土曜日 00:11:02 JST   1709   2003
+</code></pre>
+
+<p>これで、望むフォーマットになりました。</p>
+
+<p>日付と時間だけをプリントするのはdateコマンドにフォーマット指示を追加して</p>
+
+<pre><code>cmd= "date +\"%F %T\" -d @"
+</code></pre>
+
+<p>フォーマット内部にスペースを指定するためにはダブルクオートでフォーマットをくくる必要があります。awkにはバックスラッシュでダブルクオートをエスケープしておきます。</p>
 </div>
 
 
@@ -121,12 +185,12 @@
 
 
 
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
+<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/mosquitto-sub/'>mosquitto_sub</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>
+    <a class='category' href='/blog/categories/awk/'>awk</a>
   
 </span>
 
@@ -135,7 +199,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/03/mqtt-option/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/03/mqtt-option/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/14/awk-example/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/14/awk-example/" >Tweet</a>
   
   
   
@@ -144,10 +208,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/12/02/minor-adjustment/" title="Previous Post: Octopress+OCT2のちょっとした修正">&laquo; Octopress+OCT2のちょっとした修正</a>
+        <a class="basic-alignment left" href="/blog/2014/12/13/restarted/" title="Previous Post: やっと復活。。。">&laquo; やっと復活。。。</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/12/04/mosquitto-dot-conf/" title="Next Post: mosquitto.confを見てみた">mosquitto.confを見てみた &raquo;</a>
       
     </p>
   </footer>

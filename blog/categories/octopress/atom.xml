@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-13T20:31:13+09:00</updated>
+  <updated>2014-12-14T09:39:36+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -285,6 +285,12 @@ rake install["oct2"]
 ほぼ1日消費です。</p>
 
 <p>そうそう、Parallelsでスナップショットをとっておこう。</p>
+
+<h3>2014/12/14 update</h3>
+
+<p>_styles.scssをエディットしましたが、どうもこれが有効になったり無効になったり、おかしな感じになります。ちょっとしらべたところ、geditでは編集しているファイルのバックアップファイルを編集しているファイルと同じホルダに作ります。この時のファイル名が　&#8221;オリジナルのファイル名～&#8221;　となるのですが、どうもそれをoctopressが区別できていない、あるいは編集中のものにはアクセスロックがかかる？ようです。</p>
+
+<p>geditを使うときは、保存したファイルを一旦閉じるか、バックアップファイルを作るのをやめるように設定するか、編集後バックアップファイルを消して　generate　なり　preview　なりしたほうがいいようです。</p>
 ]]></content>
   </entry>
   
