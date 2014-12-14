@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-14T09:39:36+09:00</updated>
+  <updated>2014-12-14T20:23:59+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,34 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[日本語入力]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/14/ime/"/>
+    <updated>2014-12-14T20:07:28+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/14/ime</id>
+    <content type="html"><![CDATA[<p>日本語入力を変更しました。Mozcです。</p>
+
+<p>なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。</p>
+
+<!-- more -->
+
+
+<p>インストールメモ、といってもapt-getだけですが。。。</p>
+
+<pre><code>sudo apt-get install ibus-mozc
+</code></pre>
+
+<p>だけです。
+あとは、一旦ログアウトしてログインするとibusの「インプットメソッドの選択」の日本語入力メニューにmozcが見えてえいるはず。それを選択して、「設定」を押して適当な設定変更をして、おしまい。</p>
+
+<p>日本語入力はキーボードに次いで重要な部分なので、思ったとおりに動いてくれるのは大変ありがたいです。</p>
+
+<p>1つ気になるのが、変換中でのキャレット表示がわかりづらい。これはシステムの問題かと思いますが、たとえば、「ひとつきになるのが」と打って変換した時に、「ひと月になるのが」と表示されてるのですが、変換がどこで区切られて変換されているのかがわかりにくいです。普通のIMEだと変換しているところまでが太いアンダーラインがついたりしますが、ubuntu12.04では全部同じ太さのアンダーラインになってしまいます。14以降だと改善されているのですけど。。。。</p>
+
+<p>ちなみに、今、キーボードはFILCOのMajestouch 黒軸　です。いいキーボードなのですが、キーのタッチが私の癖に合わないみたいで、ミスタイプがちょっと多いです。もう少しクリックのある感じで、奥まで押した時に打鍵が確定するのがいいような感じです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[awkを使う]]></title>
