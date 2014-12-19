@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mqtt | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/mqtt/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-14T20:23:59+09:00</updated>
+  <updated>2014-12-19T21:24:06+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,62 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
+    <updated>2014-12-19T20:45:30+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
+    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+<!-- more -->
+
+
+<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+
+<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
+
+<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
+
+<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
+
+<p>結果、見事に新しいサブスクライブだけを入手することが出来ました。</p>
+
+<p>具体的には、</p>
+
+<pre><code class="sh Why Two topics comes up??">$ mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
+(古いRaspiからのデータ）
+^c
+　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（古いRaspiからのデータ）
+（新しいRaspiからのデータ）
+^C
+
+　　？？なぜ2つから？？
+    --disable-clean-sessionがあると一度サブスクライブしたセッションは、IDに張り付いているのでは？？？
+    だから、同じIDで違うトピックをサブスクライブしようとしても、前のセッションも復活する？
+    ならば、昔のセッションをクリアにしてあげればいいはず。
+
+$ mosquitto_sub --id abcd -t data/OLD_pi -q 1
+（clean sessionで接続してすぐに切断）
+^c
+　　これで、古いサブスクライブのセッションが切れたはず。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+
+　　思ったとおり
+</code></pre>
+
+<p>という感じです。</p>
+
+<p>ということで、スクリプトでサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、CleanSessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
@@ -277,36 +333,6 @@ listenerごとにipアドレスやホストネームをバインドできるの�
 <p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
 
 <p>奥深し。。。。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
-    <updated>2014-12-03T20:43:00+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
-    <content type="html"><![CDATA[<p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
-
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
-
-<!-- more -->
-
-
-<p>
-</p>
-
-<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
-<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
-
-<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
-
-<p>週末に試してみよう。</p>
-
-<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
-もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
-<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
-
-<p>これも試す必要があります。</p>
 ]]></content>
   </entry>
   
