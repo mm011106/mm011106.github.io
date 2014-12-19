@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-19T21:24:06+09:00</updated>
+  <updated>2014-12-19T22:54:15+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -31,7 +31,7 @@
 
 <p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
 
-<p>結果、見事に新しいサブスクライブだけを入手することが出来ました。</p>
+<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
 
 <p>具体的には、</p>
 
@@ -61,6 +61,8 @@
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
 </span><span class='line'><span class="o">(</span>古いRaspiからのデータ）
 </span><span class='line'>^c
@@ -72,14 +74,16 @@
 </span><span class='line'>^C
 </span><span class='line'>
 </span><span class='line'>　　？？なぜ2つから？？
-</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、IDに張り付いているのでは？？？
-</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、前のセッションも復活する？
+</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、
+</span><span class='line'>  IDに張り付いているのでは？？？
+</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、
+</span><span class='line'>  前のセッションも復活する？
 </span><span class='line'>  ならば、昔のセッションをクリアにしてあげればいいはず。
 </span><span class='line'>
 </span><span class='line'><span class="nv">$ </span>mosquitto_sub --id abcd -t data/OLD_pi -q 1
-</span><span class='line'>（clean sessionで接続してすぐに切断）
 </span><span class='line'>^c
-</span><span class='line'>　　これで、古いサブスクライブのセッションが切れたはず。
+</span><span class='line'>  clean sessionで接続してすぐに切断。
+</span><span class='line'>  これで、古いサブスクライブのセッションが切れたはず。
 </span><span class='line'>
 </span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
 </span><span class='line'>（新しいRaspiからのデータ）
@@ -92,7 +96,7 @@
 
 <p>という感じです。</p>
 
-<p>ということで、スクリプトでサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、CleanSessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
 ]]></content>
   </entry>
   
