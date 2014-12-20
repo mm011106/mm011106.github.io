@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MQTTのパケットを覗いてみた(1) - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">MQTTのパケットを覗いてみた(1)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+<!-- more -->
+
+
+<h2>mosquitto_sub でサブスクライブ要求した場合</h2>
+
+<p>まずは、パケットをキャプチャするものを用意しなければいけません。
+定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。
+<a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
+
+<p>まとめておくと、</p>
+
+<figure class='code'><figcaption><span>Install wireshark and configure&#8230;</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> <span class="c"># apt-get install wireshark</span>
+</span><span class='line'> <span class="c"># setcap &#39;CAP_NET_RAW+eip CAP_NET_ADMIN+eip&#39; /usr/bin/dumpcap</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
+
+<p>サブスクライブを要求します。</p>
+
+<pre><code>$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+</code></pre>
+
+<p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
+
+<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
+
+<hr />
+
+<h3>STEP 1: 接続要求　Client -> Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">10</span> <span class="m">22</span> <span class="m">00</span> <span class="m">06</span> 4d <span class="m">51</span> <span class="m">49</span> <span class="m">73</span> <span class="m">64</span> <span class="m">70</span> <span class="m">03</span> <span class="m">02</span> <span class="m">00</span> 3c <span class="m">00</span> <span class="m">14</span>  .<span class="err">&quot;</span>..MQIsdp...&lt;..
+</span><span class='line'><span class="m">0010</span>   6d 6f <span class="m">73</span> <span class="m">71</span> 5f <span class="m">73</span> <span class="m">75</span> <span class="m">62</span> 5f <span class="m">33</span> <span class="m">35</span> <span class="m">38</span> <span class="m">35</span> 5f <span class="m">75</span> <span class="m">62</span>  mosq_sub_3585_ub
+</span><span class='line'><span class="m">0020</span>   <span class="m">75</span> 6e <span class="m">74</span> <span class="m">75</span>                                      untu
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br/>
+0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)</p></li>
+<li><p>可変ヘッダー<br/>
+0002 : 次のメッセージの長さ　MSB<br/>
+0003 : LSB　（ここでは6byte）<br/>
+0004 : &ldquo;MQIsdp&rdquo; （ここは定型句のようです）<br/>
+000A : プロトコルバージョン &ldquo;03&rdquo;<br/>
+000B : FLAGs (CleanSession=&lsquo;1&rsquo;)<br/>
+000C : Keep Alive timer[s] MSB<br/>
+000D : Keep Alive timer[s] LSB  （ここでは60秒）<br/>
+000E : 次のメッセージの長さ　MSB<br/>
+000F :  　　LSB　（ここでは20byte) <br/>
+0010 : クライアント識別子 (オプション&ndash;idで指定したものが入ります。この例ではデフォルト値）</p></li>
+</ul>
+
+
+<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
+
+<hr />
+
+<h3>STEP 2 : 要求の返事　Client &lt;- Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">20</span> <span class="m">02</span> <span class="m">00</span> <span class="m">00</span>                                       ...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br/>
+0001 : 長さ 2byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 : トピック名圧縮要求(予約：未使用）<br/>
+0003 : 接続要求戻りコード（ここでは&#8217;00&#8217;で接続許可。&#8217;00&#8217;以外は接続拒否）</p></li>
+</ul>
+
+
+<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
+
+<hr />
+
+<h3>STEP 3: サブスクライブ要求　Client -> Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">82</span> 1b <span class="m">00</span> <span class="m">01</span> <span class="m">00</span> <span class="m">16</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span>  ......<span class="nv">$SYS</span>/broke
+</span><span class='line'><span class="m">0010</span>   <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">23</span> <span class="m">00</span>           r/messages/#.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br/>
+0001 長さ　27byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 メッセージID　16bit (MSB,LSB)<br/>
+0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br/>
+0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br/>
+001C QoS指定　要求するサブスクライブのQoS指定　QoS=&lsquo;0&rsquo;</p></li>
+</ul>
+
+
+<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
+
+<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
+
+<hr />
+
+<h3>STEP 4: データの送付　Client &lt;- Broker</h3>
+
+<p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">31</span> 1f <span class="m">00</span> 1b <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f  1...<span class="nv">$SYS</span>/broker/
+</span><span class='line'><span class="m">0010</span>   6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">73</span> <span class="m">74</span> 6f <span class="m">72</span> <span class="m">65</span> <span class="m">64</span> <span class="m">37</span>  messages/stored7
+</span><span class='line'><span class="m">0020</span>   <span class="m">32</span> <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  21<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
+</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
+</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> <span class="m">30</span> <span class="m">31</span> <span class="m">20</span> <span class="m">00</span> <span class="m">19</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f  ed738301 ..<span class="nv">$SYS</span>/
+</span><span class='line'><span class="m">0050</span>   <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f  broker/messages/
+</span><span class='line'><span class="m">0060</span>   <span class="m">73</span> <span class="m">65</span> 6e <span class="m">74</span> <span class="m">35</span> <span class="m">39</span> <span class="m">34</span> <span class="m">34</span> <span class="m">31</span>                       sent59441
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br/>
+0001 : 長さ　31byte</p>
+
+<p>可変ヘッダ：
+0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br/>
+0004 : トピック名　&#8217;$SYS/broker/messages/stored&#8217;<br/>
+  (QoSによっては、ここにメッセージID（16bit）が入る）<br/>
+001F : ペイロード　上記トピックのデータが来る<br/>
+　（ここまでが固定ヘッダで指定された長さ）</p>
+
+<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
+
+<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0020</span>      <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  .1<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
+</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
+</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> 30
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
+
+<p>仕様をよく見ると下記のように書いてありました。</p>
+
+<blockquote><p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.</p>
+
+<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br/>
+Each byte encodes 128 values and a &ldquo;continuation bit&rdquo;.<br/>
+For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br/>
+The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p></blockquote>
+
+<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。
+つまりは、</p>
+
+<ul>
+<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
+<li>切った残りのbitに&#8217;1&#8217;がのこっているのなら、切り取った7bitの最上位に&#8217;1&#8217;をつけて、最初の「長さを示す値(1byte)」とする</li>
+<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
+</ul>
+
+
+<p>という事がわかりました。</p>
+
+<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので
+単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。</p>
+
+<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
+
+<hr />
+
+<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
+
+<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。
+しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
+
+<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br/>
+clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br/>
+最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
+
+<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
+デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mqtt/'>mqtt</a>, <a class='category' href='/blog/categories/wireshark/'>wireshark</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/19/disable-clean-session/" title="Previous Post: 2つのトピックが。。。">&laquo; 2つのトピックが。。。</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/19/disable-clean-session/">2つのトピックが。。。</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/14/ime/">日本語入力</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/14/awk-example/">awkを使う</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/13/restarted/">やっと復活。。。</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mqtt | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/mqtt/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-19T22:54:15+09:00</updated>
+  <updated>2014-12-20T16:34:29+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,193 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[MQTTのパケットを覗いてみた(1)]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/"/>
+    <updated>2014-12-20T12:24:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/20/mqtt-packets</id>
+    <content type="html"><![CDATA[<p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+<!-- more -->
+
+
+<h2>mosquitto_sub でサブスクライブ要求した場合</h2>
+
+<p>まずは、パケットをキャプチャするものを用意しなければいけません。
+定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。
+<a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
+
+<p>まとめておくと、
+<code>sh Install wireshark and configure...
+ # apt-get install wireshark
+ # setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+</code></p>
+
+<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
+
+<p>サブスクライブを要求します。</p>
+
+<pre><code>$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+</code></pre>
+
+<p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
+
+<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
+
+<hr />
+
+<h3>STEP 1: 接続要求　Client -> Broker</h3>
+
+<pre><code class="sh ">0000   10 22 00 06 4d 51 49 73 64 70 03 02 00 3c 00 14  ."..MQIsdp...&lt;..
+0010   6d 6f 73 71 5f 73 75 62 5f 33 35 38 35 5f 75 62  mosq_sub_3585_ub
+0020   75 6e 74 75                                      untu
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br/>
+0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)</p></li>
+<li><p>可変ヘッダー<br/>
+0002 : 次のメッセージの長さ　MSB<br/>
+0003 : LSB　（ここでは6byte）<br/>
+0004 : &ldquo;MQIsdp&rdquo; （ここは定型句のようです）<br/>
+000A : プロトコルバージョン &ldquo;03&rdquo;<br/>
+000B : FLAGs (CleanSession=&lsquo;1&rsquo;)<br/>
+000C : Keep Alive timer[s] MSB<br/>
+000D : Keep Alive timer[s] LSB  （ここでは60秒）<br/>
+000E : 次のメッセージの長さ　MSB<br/>
+000F :  　　LSB　（ここでは20byte) <br/>
+0010 : クライアント識別子 (オプション&ndash;idで指定したものが入ります。この例ではデフォルト値）</p></li>
+</ul>
+
+
+<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
+
+<hr />
+
+<h3>STEP 2 : 要求の返事　Client &lt;- Broker</h3>
+
+<pre><code>0000   20 02 00 00                                       ...
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br/>
+0001 : 長さ 2byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 : トピック名圧縮要求(予約：未使用）<br/>
+0003 : 接続要求戻りコード（ここでは&#8217;00&#8217;で接続許可。&#8217;00&#8217;以外は接続拒否）</p></li>
+</ul>
+
+
+<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
+
+<hr />
+
+<h3>STEP 3: サブスクライブ要求　Client -> Broker</h3>
+
+<pre><code>0000   82 1b 00 01 00 16 24 53 59 53 2f 62 72 6f 6b 65  ......$SYS/broke
+0010   72 2f 6d 65 73 73 61 67 65 73 2f 23 00           r/messages/#.
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br/>
+0001 長さ　27byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 メッセージID　16bit (MSB,LSB)<br/>
+0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br/>
+0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br/>
+001C QoS指定　要求するサブスクライブのQoS指定　QoS=&lsquo;0&rsquo;</p></li>
+</ul>
+
+
+<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
+
+<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
+
+<hr />
+
+<h3>STEP 4: データの送付　Client &lt;- Broker</h3>
+
+<p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
+
+<pre><code>0000   31 1f 00 1b 24 53 59 53 2f 62 72 6f 6b 65 72 2f  1...$SYS/broker/
+0010   6d 65 73 73 61 67 65 73 2f 73 74 6f 72 65 64 37  messages/stored7
+0020   32 31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  21$..$SYS/broker
+0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv
+0040   65 64 37 33 38 33 30 31 20 00 19 24 53 59 53 2f  ed738301 ..$SYS/
+0050   62 72 6f 6b 65 72 2f 6d 65 73 73 61 67 65 73 2f  broker/messages/
+0060   73 65 6e 74 35 39 34 34 31                       sent59441
+</code></pre>
+
+<p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br/>
+0001 : 長さ　31byte</p>
+
+<p>可変ヘッダ：
+0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br/>
+0004 : トピック名　&#8217;$SYS/broker/messages/stored&#8217;<br/>
+  (QoSによっては、ここにメッセージID（16bit）が入る）<br/>
+001F : ペイロード　上記トピックのデータが来る<br/>
+　（ここまでが固定ヘッダで指定された長さ）</p>
+
+<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
+
+<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
+
+<pre><code>0020      31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  .1$..$SYS/broker
+0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv
+0040   65 64 37 33 38 33 30
+</code></pre>
+
+<hr />
+
+<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
+
+<p>仕様をよく見ると下記のように書いてありました。</p>
+
+<blockquote><p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.</p>
+
+<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br/>
+Each byte encodes 128 values and a &ldquo;continuation bit&rdquo;.<br/>
+For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br/>
+The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p></blockquote>
+
+<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。
+つまりは、</p>
+
+<ul>
+<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
+<li>切った残りのbitに&#8217;1&#8217;がのこっているのなら、切り取った7bitの最上位に&#8217;1&#8217;をつけて、最初の「長さを示す値(1byte)」とする</li>
+<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
+</ul>
+
+
+<p>という事がわかりました。</p>
+
+<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので
+単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。</p>
+
+<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
+
+<hr />
+
+<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
+
+<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。
+しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
+
+<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br/>
+clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br/>
+最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
+
+<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
+デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[2つのトピックが。。。]]></title>
@@ -273,68 +460,6 @@ allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;
 all client ids are valid.</p></blockquote>
 
 <p>となるようです。セキュリティの一助になるかしら？</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mosquitto.confを見てみた]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf/"/>
-    <updated>2014-12-04T20:21:14+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf</id>
-    <content type="html"><![CDATA[<p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
-原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
-
-<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
-
-<!-- more -->
-
-
-<p><strong>mount_point</strong>  <em>topic prefix</em></p>
-
-<blockquote><p>This option is used with the listener option to isolate groups of clients.
-When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p></blockquote>
-
-<p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
-
-<pre><code># The listener can be restricted to operating within a topic hierarchy using
-# the mount_point option. This is achieved be prefixing the mount_point string
-# to all topics for any clients connected to this listener. This prefixing only
-# happens internally to the broker; the client will not see the prefix.
-#mount_point
-</code></pre>
-
-<p>となっています。</p>
-
-<p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
-
-<blockquote><p>The network ports that mosquitto listens on can be controlled using listeners.</p></blockquote>
-
-<p>とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
-「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
-
-<p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
-
-<pre><code class=""># Listen on a port/ip address combination. By using this variable 
-# multiple times, mosquitto can listen on more than one port. If 
-# this variable is used and neither bind_address nor port given, 
-# then the default listener will not be started.
-# The port number to listen on must be given. Optionally, an ip 
-# address or host name may be supplied as a second argument. In 
-# this case, mosquitto will attempt to bind the listener to that 
-# address and so restrict access to the associated network and 
-# interface. By default, mosquitto will listen on all interfaces.
-# listener port-number [ip address/host name]
-#listener
-</code></pre>
-
-<p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
-listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
-
-<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。</p>
-
-<p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
-
-<p>奥深し。。。。。</p>
 ]]></content>
   </entry>
   
