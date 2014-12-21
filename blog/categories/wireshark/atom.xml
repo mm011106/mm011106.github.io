@@ -4,7 +4,7 @@
   <title><![CDATA[Category: wireshark | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/wireshark/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-20T16:34:29+09:00</updated>
+  <updated>2014-12-21T12:39:37+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -32,15 +32,15 @@
 
 <p>まとめておくと、
 <code>sh Install wireshark and configure...
- # apt-get install wireshark
- # setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+:# apt-get install wireshark
+:# setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 </code></p>
 
 <p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
 
 <p>サブスクライブを要求します。</p>
 
-<pre><code>$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+<pre><code>:$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
 </code></pre>
 
 <p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>

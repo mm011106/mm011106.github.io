@@ -9,8 +9,9 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
-ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、 &hellip;">
+  <meta name="description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。
+手順は、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +52,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/21/paho-mqtt/">Paho MQTT のインストール</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/21/paho-mqtt/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -444,51 +489,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">2014 / 12 / 04</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
-原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
-
-<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/04/mosquitto-dot-conf/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -534,6 +534,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/12/21/paho-mqtt/">Paho MQTT のインストール</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a>
       </li>
     
@@ -547,10 +551,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/14/awk-example/">awkを使う</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/13/restarted/">やっと復活。。。</a>
       </li>
     
   </ul>
