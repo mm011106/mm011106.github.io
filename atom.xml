@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-31T11:45:45+09:00</updated>
+  <updated>2014-12-31T15:07:19+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[引用のフォントサイズ]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/31/font-size/"/>
+    <updated>2014-12-31T14:36:58+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/31/font-size</id>
+    <content type="html"><![CDATA[<p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
+
+<!-- more -->
+
+
+<p>まずは、引用ってなんていうタグ？というところから開始。</p>
+
+<p>firefoxにはWEB開発用にスタイルシートやhtmlのソースとwebページを対比させながら表示する開発モードがあるので、これを使いながらタグを調べました。  <br/>
+その結果、&lt;blockquote>ということがわかり、今度はoctopressのスタイルシートの元を検索。結果<code>_typography.scss</code>にその設定がありました。</p>
+
+<p>引用しておくと</p>
+
+<figure class='code'><figcaption><span>_typography.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
+</span><span class='line'>  <span class="err">$</span><span class="n">bq</span><span class="o">-</span><span class="k">margin</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">line-height</span><span class="o">:</span> <span class="m">1.5em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding-left</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border-left</span><span class="o">:</span> <span class="m">4px</span> <span class="k">solid</span> <span class="n">rgba</span><span class="p">(</span><span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span><span class="o">,</span> <span class="o">.</span><span class="m">5</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">cite</span> <span class="err">{</span>
+</span><span class='line'>    <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">a</span> <span class="err">{</span> <span class="k">color</span><span class="o">:</span> <span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span> <span class="cp">!important</span><span class="p">;</span> <span class="n">word</span><span class="o">-</span><span class="n">wrap</span><span class="o">:</span> <span class="n">break</span><span class="o">-</span><span class="n">word</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="o">&amp;</span><span class="nd">:before</span> <span class="p">{</span> <span class="k">content</span><span class="o">:</span> <span class="s1">&#39;\2014&#39;</span><span class="p">;</span> <span class="k">padding</span><span class="o">:</span><span class="err">{</span><span class="k">right</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;</span> <span class="k">left</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;}</span> <span class="nt">color</span><span class="o">:</span> <span class="o">$</span><span class="nt">text-color-light</span><span class="o">;</span> <span class="err">}</span>
+</span><span class='line'>  <span class="err">}</span>
+</span><span class='line'>  <span class="k">@media</span> <span class="nt">only</span> <span class="nt">screen</span> <span class="nt">and</span> <span class="o">(</span><span class="nt">min-width</span><span class="o">:</span> <span class="nt">992px</span><span class="o">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">padding-left</span><span class="o">:</span> <span class="nt">1</span><span class="nc">.5em</span><span class="o">;</span>
+</span><span class='line'>    <span class="nt">border-left-width</span><span class="o">:</span> <span class="nt">4px</span><span class="o">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここに<code>font-size: 1.2em;</code>と指定があるため、文字が他と比べて大きく表示されているように思えましたので、これを上書きすることにします。</p>
+
+<p>具体的には<code>sass/custom/_styles.scss</code>に下記内容を追記しています。</p>
+
+<figure class='code'><figcaption><span>added lines on _styles.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、本文と同じ程度の大きさのフォントになり、見やすくなりました。</p>
+
+<p>ちなみに、本文のフォントサイズは結局以下のようにして小さくしています。</p>
+
+<figure class='code'><figcaption><span>change the body font size</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span>
+</span><span class='line'>     <span class="k">font-size</span><span class="o">:</span> <span class="m">0.9em</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[paho-mqttで回線を切るとどうなるか]]></title>

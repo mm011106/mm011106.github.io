@@ -4,7 +4,7 @@
   <title><![CDATA[Category: octopress | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/octopress/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2014-12-31T11:45:45+09:00</updated>
+  <updated>2014-12-31T15:07:19+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[引用のフォントサイズ]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/31/font-size/"/>
+    <updated>2014-12-31T14:36:58+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/31/font-size</id>
+    <content type="html"><![CDATA[<p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
+
+<!-- more -->
+
+
+<p>まずは、引用ってなんていうタグ？というところから開始。</p>
+
+<p>firefoxにはWEB開発用にスタイルシートやhtmlのソースとwebページを対比させながら表示する開発モードがあるので、これを使いながらタグを調べました。  <br/>
+その結果、&lt;blockquote>ということがわかり、今度はoctopressのスタイルシートの元を検索。結果<code>_typography.scss</code>にその設定がありました。</p>
+
+<p>引用しておくと</p>
+
+<pre><code class="css _typography.scss">blockquote {
+  $bq-margin: 1.2em;
+  font-style: italic;
+  position: relative;
+  font-size: 1.2em;
+  line-height: 1.5em;
+  padding-left: 1em;
+  border-left: 4px solid rgba($text-color-light, .5);
+  cite {
+    font-style: italic;
+    a { color: $text-color-light !important; word-wrap: break-word; }
+    &amp;:before { content: '\2014'; padding:{right: .3em; left: .3em;} color: $text-color-light; }
+  }
+  @media only screen and (min-width: 992px) {
+    padding-left: 1.5em;
+    border-left-width: 4px;
+  }
+}
+</code></pre>
+
+<p>ここに<code>font-size: 1.2em;</code>と指定があるため、文字が他と比べて大きく表示されているように思えましたので、これを上書きすることにします。</p>
+
+<p>具体的には<code>sass/custom/_styles.scss</code>に下記内容を追記しています。</p>
+
+<pre><code class="css added lines on _styles.scss">blockquote {
+  font-size: 1.0em;
+}
+</code></pre>
+
+<p>これで、本文と同じ程度の大きさのフォントになり、見やすくなりました。</p>
+
+<p>ちなみに、本文のフォントサイズは結局以下のようにして小さくしています。</p>
+
+<pre><code class="css change the body font size">body {
+     font-size: 0.9em;
+} 
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[やっと復活。。。]]></title>
