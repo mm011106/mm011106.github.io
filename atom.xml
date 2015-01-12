@@ -1,27 +1,2492 @@
----
-layout: null
----
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[{{ site.title }}]]></title>
-  <link href="{{ site.url }}/atom.xml" rel="self"/>
-  <link href="{{ site.url }}/"/>
-  <updated>{{ site.time | date_to_xmlschema }}</updated>
-  <id>{{ site.url }}/</id>
+  <title><![CDATA[MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-12T11:12:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
   <author>
-    <name><![CDATA[{{ site.author | strip_html }}]]></name>
-    {% if site.email %}<email><![CDATA[{{ site.email }}]]></email>{% endif %}
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  {% for post in site.posts limit: 20 %}
+  
   <entry>
-    <title type="html"><![CDATA[{{ post.title | cdata_escape }}]]></title>
-    <link href="{{ site.url }}{{ post.url }}"/>
-    <updated>{{ post.date | date_to_xmlschema }}</updated>
-    <id>{{ site.url }}{{ post.id }}</id>
-    <content type="html"><![CDATA[{{ post.content | expand_urls: site.url | cdata_escape }}]]></content>
+    <title type="html"><![CDATA[autossh]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/12/autossh/"/>
+    <updated>2015-01-12T08:53:44+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/12/autossh</id>
+    <content type="html"><![CDATA[<p>sshのコネクションはどうしても切れてしまうことがあるので、それを阻止するためにautosshを使ってみました。<br/>
+まず、sshのコマンドラインを簡素にするため、MQTTブローカへの接続設定を書いたconfigファイルを用意します。</p>
+
+<!-- more -->
+
+
+<p>sshのコンフィギュレーション</p>
+
+<p>まずは、sshの接続のコマンドラインを簡略化するためにconfigファイルを設定します。<br/>
+設定を隠蔽できる（シェルスクリプトなどにパラメタを書かなくてもいい）というてんで良いかなと思います。</p>
+
+<figure class='code'><figcaption><span>~/.ssh/config</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>Host Broker
+</span><span class='line'>  HostName        MQTT_Broker
+</span><span class='line'>  IdentityFile    ~/.ssh/id_rsa_MQTTClient
+</span><span class='line'>  User            MQTT_connection
+</span><span class='line'>  LocalForward    <span class="m">22883</span> localhost:1883
+</span><span class='line'>  Port            22222
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ポート番号などは適宜設定してください。</p>
+
+<p>こうすることで、<code>ssh -f -N Broker</code>のコマンドでトンネリング設定ができます。
+ここで、公開鍵はパスフレーズ無しで作ったものを指定します。セキュリティのため、ブローカのssh設定にはポート制限やIP制限、コマンドを実行しないなどの処置を<strong>必ず</strong>とる必要があります。<a href="http://mm011106.github.io/blog/2015/01/11/secure-connection/">設定の具体例</a>（「パスフレーズなしでの接続方法とセキュリティ設定」）</p>
+
+<p>さらに、これが切れたとき自動的に再接続するため、autosshを導入します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> <span class="nv">$ </span>sudo apt-get install autossh
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>autosshを使ってトンネリングを設定するには</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> <span class="nv">$ </span>autossh -M0 -f -N Broker
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とします。</p>
+
+<p>-M0 : 接続が切れているかどうかを確認するためのポート指定です。0は切断確認をポートではしないようにする設定です。</p>
+
+<p>-f : 実行をバックグラウンドに移行します。</p>
+
+<p>-N : sshへのオプションです。</p>
+
+<p>autosshはsshを起動してそのプロセスを監視するプロセスを起動するコマンドです。</p>
+
+<p>-Mオプションについては以下のように<a href="http://linux.die.net/man/1/autossh">解説</a>があります。</p>
+
+<blockquote><p>specifies the base monitoring port to use. Without the echo port, this port and the port immediately above it ( port + 1) should be something nothing else is using. autossh will send test data on the base monitoring port, and receive it back on the port above. For example, if you specify &ldquo;-M 20000&rdquo;, autossh will set up forwards so that it can send data on port 20000 and receive it back on 20001.</p>
+
+<p>Alternatively, a port for a remote echo service may be specified. This should be port 7 if you wish to use the standard inetd echo service. When an echo port is specified, only the specified monitor port is used, and it carries the monitor message in both directions.</p>
+
+<p>Many people disable the echo service, or even disable inetd, so check that this service is available on the remote machine. Some operating systems allow one to specify that the service only listen on the localhost (loopback interface), which would suffice for this use.</p>
+
+<p>The echo service may also be something more complicated: perhaps a daemon that monitors a group of ssh tunnels.</p>
+
+<p>Setting the monitor port to 0 turns the monitoring function off, and autossh will only restart ssh upon ssh&rsquo;s exit. For example, if you are using a recent version of OpenSSH, you may wish to explore using the ServerAliveInterval and ServerAliveCountMax options to have the SSH client exit if it finds itself no longer connected to the server. In many ways this may be a better solution than the monitoring port.</p></blockquote>
+
+<p>ということなので、0を指定するとsshがexitした時に再起動します。接続はServerAliveIntervalとServerAliveCountMaxだけ待って応答が来なければexitするので、その場合sshが再起動されるという事でしょう。「この方法がポートモニタするより良い方法だ」といっているので、そうすることにします。</p>
+
+<p>sshのデフォルト<a href="http://www.unixuser.org/~euske/doc/openssh/jman/ssh_config.html">設定</a>では<code>ServerAliveInterval</code>は0になっている(確認のメッセージを送らない）ようなので、適宜設定する必要があります。<br/>
+これがまたちょっと厄介ですね。あまり頻繁にパケットを送ると電話回線などプレミアムな回線を使っているときにコストがかさみます。本来はきちんとTPOで設定する必要があると思いますが、とりあえず30秒ぐらいに設定しておきます。</p>
+
+<figure class='code'><figcaption><span>configに追記</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#  connection alive detecting. 30 x 3 [s]</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'>ServerAliveInterval   30
+</span><span class='line'>ServerAliveCountMax   3
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>ServerAliveCountMax</code>は3がデフォルトのようですので、応答がなくなったあと1分30秒で切断されるようになります。</p>
+
+<p>これで、ちゃんと接続できるか確認してみます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ps ax <span class="p">|</span> grep <span class="s1">&#39;ssh&#39;</span>
+</span><span class='line'> <span class="m">6543</span> ?        Ss     0:00 /usr/lib/autossh/autossh -M0 -N Broker
+</span><span class='line'> <span class="m">6544</span> ?        S      0:00 /usr/bin/ssh -N Broker
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub -v -p <span class="m">22883</span> -t <span class="s1">&#39;$SYS/#&#39;</span>
+</span><span class='line'><span class="nv">$SYS</span>/broker/version mosquitto version 1.3.5
+</span><span class='line'><span class="nv">$SYS</span>/broker/timestamp 2014-10-18 21:06:44+0100
+</span><span class='line'> :
+</span><span class='line'> :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Okですね。
+さらに、keepalive確認のパケットがどのように出ているか確認してみます。</p>
+
+<p>IPアドレスは下記のようになっています。<br/>
+192.168.0.XXX クライアント<br/>
+192.168.0.YYY サーバ</p>
+
+<figure class='code'><figcaption><span>Keep Alive packets example</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>No.     Time        Source                Destination           Protocol Length Info
+</span><span class='line'>      <span class="m">1</span> 0.000000    192.168.0.XXX         192.168.0.YYY           TCP      <span class="m">130</span>    <span class="m">41387</span> &gt; SSHPORT　 <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">2</span> 0.010903    192.168.0.YYY         192.168.0.XXX           TCP      <span class="m">98</span>     SSHPORT &gt; <span class="m">41387</span> <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">3</span> 0.010941    192.168.0.XXX         192.168.0.YYY           TCP      <span class="m">66</span>     <span class="m">41387</span> &gt; SSHPORT <span class="o">[</span>ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">4</span> 30.039772   192.168.0.XXX         192.168.0.YYY           TCP      <span class="m">130</span>    <span class="m">41387</span> &gt; SSHPORT <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">5</span> 30.043964   192.168.0.YYY         192.168.0.XXX           TCP      <span class="m">98</span>     SSHPORT &gt; <span class="m">41387</span> <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">6</span> 30.044004   192.168.0.XXX         192.168.0.YYY           TCP      <span class="m">66</span>     <span class="m">41387</span> &gt; SSHPORT <span class="o">[</span>ACK<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>30秒ごとに何かしらのパケットをやり取りしていることがわかりました。設定通りです。</p>
+
+<p>さらに、途中で回線を切断してみます。</p>
+
+<figure class='code'><figcaption><span>Packet example (in case of disconnection)</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>No.     Time        Source                Destination           Protocol Length Info
+</span><span class='line'><span class="c">#　正常なalive確認のパケットやり取り</span>
+</span><span class='line'>      <span class="m">1</span> 0.000000    192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">130</span>    <span class="m">41405</span> &gt; SSHPORT <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">2</span> 0.002137    192.168.0.YYY         192.168.0.XXX         TCP      <span class="m">66</span>     SSHPORT &gt; <span class="m">41405</span> <span class="o">[</span>ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">3</span> 0.002566    192.168.0.YYY         192.168.0.XXX         TCP      <span class="m">98</span>     SSHPORT &gt; <span class="m">41405</span> <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">4</span> 0.041204    192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">66</span>     <span class="m">41405</span> &gt; SSHPORT <span class="o">[</span>ACK<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#　ここで回線を切断　sshがシャットダウンするまで130秒ぐらい待ち、回線を復旧させる</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#  sshがautosshによって再起動されて通信を開始</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 切断前のコネクションをリセット</span>
+</span><span class='line'>      <span class="m">5</span> 138.686269  192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">258</span>    <span class="m">41405</span> &gt; SSHPORT <span class="o">[</span>FIN, PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">6</span> 138.687686  192.168.0.YYY         192.168.0.XXX         TCP      <span class="m">98</span>     SSHPORT &gt; <span class="m">41405</span> <span class="o">[</span>PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">7</span> 138.687721  192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">54</span>     <span class="m">41405</span> &gt; SSHPORT <span class="o">[</span>RST<span class="o">]</span>
+</span><span class='line'>      <span class="m">8</span> 138.689209  192.168.0.YYY         192.168.0.XXX         TCP      <span class="m">130</span>    SSHPORT &gt; <span class="m">41405</span> <span class="o">[</span>FIN, PSH, ACK<span class="o">]</span>
+</span><span class='line'>      <span class="m">9</span> 138.689233  192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">54</span>     <span class="m">41405</span> &gt; SSHPORT <span class="o">[</span>RST<span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#　新たなコネクションのスタート</span>
+</span><span class='line'>     <span class="m">10</span> 148.955582  192.168.0.XXX         192.168.0.YYY         TCP      <span class="m">74</span>     <span class="m">41407</span> &gt; SSHPORT <span class="o">[</span>SYN<span class="o">]</span>
+</span><span class='line'>     <span class="m">11</span> 148.958766  192.168.0.YYY         192.168.0.XXX         TCP      <span class="m">74</span>     SSHPORT &gt; <span class="m">41407</span> <span class="o">[</span>SYN, ACK<span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>という感じになりました。何回か試して見ましたが、切断前のコネクションをリセットするやり取りがない場合が多いかもしれません。さらに、alive確認のパケットは2往復でなく1往復半という事もありました。</p>
+
+<p>無事sshの再起動も確認出来ました。</p>
+
+<p>接続確認のためのパケットのサイズは、今回の実験では360byteぐらいでした。もしこの設定（30秒に1回）だとすると1日で1Mbyteぐらいの通信量です。
+最近の安いデータ通信用のSIMにとってみれば大したデータ量ではないかもしれませんね。</p>
+]]></content>
   </entry>
-  {% endfor %}
+  
+  <entry>
+    <title type="html"><![CDATA[接続の暗号化]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/11/secure-connection/"/>
+    <updated>2015-01-11T11:05:38+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/11/secure-connection</id>
+    <content type="html"><![CDATA[<p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
+
+<!-- more -->
+
+
+<p>mosquitto.confを眺めてみると、mosquittoでは2つのやり方が準備されているようです。</p>
+
+<ul>
+<li>公開鍵認証・暗号化</li>
+</ul>
+
+
+<p>公開鍵をお互いにやり取りして、お互いを認証・暗号化する普通のやり方ですね。</p>
+
+<ul>
+<li>証明書ベース認証・暗号化</li>
+</ul>
+
+
+<p>HTTPで一般的に使われている証明書による認証ですね。https で始まるwebサイトでは暗号化されるように、この仕組みを使えばMQTTでも通信が暗号化されます。<br/>
+サーバーがオープンで誰でもが接続できるような状況にするためには、必須です。</p>
+
+<p>mosquittoではユーザ（サブスクライバ、パブリッシャ）認証のためにユーザ名、パスワード方式が使えますが、認証時に平文でこれらがやり取りされるという事ですので、通信経路そのものの暗号化が欠かせません。</p>
+
+<p>MQTTブローカに頼らない暗号化という意味では ssh しかないでしょうか。
+ブローカがオープンでない場合であれば、ポートフォワードと合わせ技で安全性が高められるかもしれません。
+ただ、この場合、ネットワーク環境によってはsshのトンネリングができない（ポリシー的に）という場合もあるかと思うので、環境の調査が必要かと思います。</p>
+
+<p>最近は<a href="http://jpmens.net/2014/07/03/the-mosquitto-mqtt-broker-gets-websockets-support/">websocket</a>という接続方法もあるので、MQTTブローカをweb applicationでラップしてセキュアにするというやり方もあるかもしれません。</p>
+
+<p>今回はsshのポートフォワードで暗号化してみましたので報告です。</p>
+
+<p>まず、何はなくとも検索。ssh mosquittoあたりでgoogleさんに聞いてみたところ、<a href="http://diabolicalws.blogspot.jp/2012/02/tunneling-mqtt-over-ssh.html">この</a>のサイトがヒット。正しくやろうとしていたことです。</p>
+
+<hr />
+
+<p>このページの最終目標としては、簡易的なVPNとしてのsshによるトンネリングを使ってMQTTプロトコルをセキュアにしようという事のようです。
+手順としては、</p>
+
+<ol>
+<li><p>トンネリングの設定</p></li>
+<li><p>トンネルを使った通信の設定</p></li>
+<li><p>パスフレーズなしでの接続方法とセキュリティ設定</p></li>
+</ol>
+
+
+<p>順を追ってやってみます。</p>
+
+<h3>トンネリグの設定</h3>
+
+<p>まずクライアント側の設定です。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>ssh -f -L 22883:127.0.0.1:1883 SSHusername@MQTT -N
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とすることで、クライアント側のポート22883 に対する通信が暗号化された上でサーバ&#8221;MQTT&#8221;の1883に接続されます。ユーザ名は&#8221;SSHusername&#8221;です。
+各オプションの意味は以下のとおりです。</p>
+
+<p> -f : バックグラウンドで動作</p>
+
+<p> -L : ローカル側でのポートフォワード（クライアント側のポート変換が設定されます）</p>
+
+<p> -N : サーバ側でコマンドを実行しないように指定</p>
+
+<p>この例ではポートは標準の22となっています。必要に応じて-pオプションでssh通信そのもののポート番号を指定してください。 sshのポート番号も専用のものにしておくことで、更にセキュリティを確保できるかもしれません。<br/>
+ここらへんはsshのポートフォワード設定を参照してもらったほうが正しい理解が得られるかと。</p>
+
+<p>この接続をするためには、クライアント、サーバ共にsshが動く環境であることが必要です。適宜設定してください。</p>
+
+<p>このコマンドを実行するとパスフレーズを聞かれるはずです。実際の無人運用ではこれが問題になりますが、これは後ほど解決してもらえます。</p>
+
+<h3>トンネルを使った通信の設定</h3>
+
+<p>上記の操作でセキュアな通信経路が22883ポートに設定されましたので、これを使って実際にMQTTプロトコルのデータを流してみます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mosquitto_sub -h 127.0.0.1 -p <span class="m">22883</span> -u dan -P password -t <span class="s1">&#39;test/#&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>-P, -uでユーザ名とパスワードを指定してブローカにサブスクライバとしてログインしています。ホストはローカルホスト、ポートは先程トンネルを設定した22883に指定します。<br/>
+-P, -uは必須ではないです。私はこれらナシでつかってます。</p>
+
+<p>トピックを適切に設定してあれば、なにかメッセージを受け取れるはずです。</p>
+
+<h3>パスフレーズなしでの接続方法とセキュリティ設定</h3>
+
+<p>参考にしたページでは、&#8221;Key-Based authentification&#8221;と説明されていますが、公開キーを事前にやり取りしている間柄なら、十分信用できるだろうという事で、鍵を持っている相手はパスフレーズなしでログインさせましょう、という設定です。<br/>
+この設定では、ssh接続に際しパスフレーズなしで接続できるようになってしまうので、鍵を他の用途で使うとセキュリティに問題が出る可能性があります。そのため、「このトンネリングだけに使う専用の鍵を用意するように」と注意書きがあります。</p>
+
+<p>パスフレーズ無しでキーを作り、それをサーバに登録します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>ssh-keygen
+</span><span class='line'>ssh-copy-id SSHusername@MQTT
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>サーバ側のセキュリティ確保のため、クライアントのキー記述の最初の部分に以下のような設定を追記します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">from</span><span class="o">=</span><span class="s2">&quot;192.168.1.*&quot;</span>,no-pty,permitopen<span class="o">=</span><span class="s2">&quot;127.0.0.1:1883&quot;</span>,command<span class="o">=</span><span class="s2">&quot;/bin/false&quot;</span> ssh-rsa........
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>この例では</p>
+
+<ul>
+<li>接続先のIP制限 from=</li>
+<li>ターミナルのアサインをしない no-pty</li>
+<li>ローカルホストの指定ポートのみオープン可能にする permitopen=</li>
+<li>ログイン時に実行するコマンドを /bin/falseに設定</li>
+</ul>
+
+
+<p>ということを指定しています。
+具体的には、192.168.1.*のネットワークからの接続に限定、ターミナルをアサインしない、ローカルホストの1883への接続のみを許可する、リモートから接続するときに指定されたコマンドを実行しない。
+という事になりそうです。<br/>
+くわしくは、<a href="http://www.nxmnpg.com/ja/8/sshd#9">ここらへん</a>を参照してください。</p>
+
+<p>私の実験では、IPアドレスの制限をしない設定、で実行してうまく動いています。</p>
+
+<p>本来的には、証明書ベースの認証システムを組むのがいいのでしょうけれど、証明書の発行など、よくわかっていないと事故に繋がりそうなので、今回は初学者向けということでトンネリングを実験して見ました。<br/>
+小規模なシステムでネットワーク環境もある程度わかっているところにデバイスを配置するには十分な感じかと思います。</p>
+
+<p>また、MQTTプロトコル上からデバイスがつながっているシステムの操作をするときに、重要なパラメタの制御は1箇所でできないようにするとか、あるデバイスの許可とペアで設定して初めてアクチュエートするなど、システム上でのセキュリティ構築も必要かもしれません。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[引用のフォントサイズ]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/31/font-size/"/>
+    <updated>2014-12-31T14:36:58+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/31/font-size</id>
+    <content type="html"><![CDATA[<p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
+
+<!-- more -->
+
+
+<p>まずは、引用ってなんていうタグ？というところから開始。</p>
+
+<p>firefoxにはWEB開発用にスタイルシートやhtmlのソースとwebページを対比させながら表示する開発モードがあるので、これを使いながらタグを調べました。  <br/>
+その結果、&lt;blockquote>ということがわかり、今度はoctopressのスタイルシートの元を検索。結果<code>_typography.scss</code>にその設定がありました。</p>
+
+<p>引用しておくと</p>
+
+<figure class='code'><figcaption><span>_typography.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
+</span><span class='line'>  <span class="err">$</span><span class="n">bq</span><span class="o">-</span><span class="k">margin</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">line-height</span><span class="o">:</span> <span class="m">1.5em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">padding-left</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border-left</span><span class="o">:</span> <span class="m">4px</span> <span class="k">solid</span> <span class="n">rgba</span><span class="p">(</span><span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span><span class="o">,</span> <span class="o">.</span><span class="m">5</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">cite</span> <span class="err">{</span>
+</span><span class='line'>    <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">a</span> <span class="err">{</span> <span class="k">color</span><span class="o">:</span> <span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span> <span class="cp">!important</span><span class="p">;</span> <span class="n">word</span><span class="o">-</span><span class="n">wrap</span><span class="o">:</span> <span class="n">break</span><span class="o">-</span><span class="n">word</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="o">&amp;</span><span class="nd">:before</span> <span class="p">{</span> <span class="k">content</span><span class="o">:</span> <span class="s1">&#39;\2014&#39;</span><span class="p">;</span> <span class="k">padding</span><span class="o">:</span><span class="err">{</span><span class="k">right</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;</span> <span class="k">left</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;}</span> <span class="nt">color</span><span class="o">:</span> <span class="o">$</span><span class="nt">text-color-light</span><span class="o">;</span> <span class="err">}</span>
+</span><span class='line'>  <span class="err">}</span>
+</span><span class='line'>  <span class="k">@media</span> <span class="nt">only</span> <span class="nt">screen</span> <span class="nt">and</span> <span class="o">(</span><span class="nt">min-width</span><span class="o">:</span> <span class="nt">992px</span><span class="o">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">padding-left</span><span class="o">:</span> <span class="nt">1</span><span class="nc">.5em</span><span class="o">;</span>
+</span><span class='line'>    <span class="nt">border-left-width</span><span class="o">:</span> <span class="nt">4px</span><span class="o">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここに<code>font-size: 1.2em;</code>と指定があるため、文字が他と比べて大きく表示されているように思えましたので、これを上書きすることにします。</p>
+
+<p>具体的には<code>sass/custom/_styles.scss</code>に下記内容を追記しています。</p>
+
+<figure class='code'><figcaption><span>added lines on _styles.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、本文と同じ程度の大きさのフォントになり、見やすくなりました。</p>
+
+<p>ちなみに、本文のフォントサイズは結局以下のようにして小さくしています。</p>
+
+<figure class='code'><figcaption><span>change the body font size</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span>
+</span><span class='line'>     <span class="k">font-size</span><span class="o">:</span> <span class="m">0.9em</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[paho-mqttで回線を切るとどうなるか]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/29/vim/"/>
+    <updated>2014-12-29T10:28:40+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/29/vim</id>
+    <content type="html"><![CDATA[<p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
+
+<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
+
+<!-- more -->
+
+
+<p>サブスクライバは下記のようなものです。これはpaho-mqttのページにあったテスト用のスクリプトです。</p>
+
+<figure class='code'><figcaption><span>test_subscriber.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">topic</span> <span class="o">=</span> <span class="s">&quot;TOPIC/YOU/WANTS/SEE&quot;</span>
+</span><span class='line'><span class="n">broker</span> <span class="o">=</span> <span class="s">&quot;192.168.0.xxx&quot;</span>
+</span><span class='line'><span class="n">portNo</span> <span class="o">=</span> <span class="mi">1883</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'><span class="c">#    client.subscribe(&quot;$SYS/broker/messages/#&quot;)</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>  <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">portNo</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で、これを実行して、途中でネットワークを切って見ました。</p>
+
+<p>端末上ではこんな感じ。</p>
+
+<figure class='code'><figcaption><span>In case of transmission line failure..</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>1419926642, 1767, 1433, 2513, 0
+</span><span class='line'>Connected with result code 0
+</span><span class='line'>1419926762, 1767, 1434, 2514, 0
+</span><span class='line'>1419926821, 1767, 1432, 2513, 0
+</span><span class='line'>  :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最初のサブスクライブを確認してから、接続を60秒以上切断し、元に戻します。</p>
+
+<p>データの最初のフィールドはタイムスタンプなので、120秒のデータ欠損があることがわかります。
+その後経路が回復した時点で、再接続されていることがわかります。</p>
+
+<p>スクリプトでは<code>client.connect(broker, portNo, 60)</code>として60秒以上交信しないとpingでMQTT接続をキープするように設定しています。この実験では、60秒以上コネクションを切っていますのでpingが発行され、その答えは帰ってこない状況に有ります。さらにブローカはmosquittoをデフォルトで動かしているので、ブローカがMQTTのコネクションを切ることはありません。（persistent_client_expirationを設定していない）</p>
+
+<p>スクリプトを実行した時のパケットの様子を見てみると。。。。</p>
+
+<ul>
+<li><p>TCP でのネゴシエーションがあったあと、MQTTでの接続リクエストがなされます。</p></li>
+<li><p>続いてMQTTの接続許可がブローカから来ます。
+そしてサブスクライブ要求としてトピックの指定をブローカに送ります。</p></li>
+<li><p>この返事として、TCPのACKがあり、サブスクライブの準備が整います。指定したトピックにパブリッシュがあると、サブスクライブされるようになります。</p></li>
+</ul>
+
+
+<p>そして、スクリプト開始から66.9秒後に最初のデータがきました。その後、接続を切ります。</p>
+
+<p>183秒のときに接続を再開。</p>
+
+<p>このとき起こったことは。。。。</p>
+
+<ul>
+<li><p>まず、TCPでの接続のために、クライアントからブローカに向かってSYN,ACK、SYNが取り交わされます。</p></li>
+<li><p>その後、最初の接続と同じように、MQTTのコネクションが最初の接続と同じIDで開始され、次にサブスクライブ要求が発行されています。</p></li>
+<li><p>サブスクライブ要求後、サブスクライブ確認のメッセージがブローカから帰ってきます。</p></li>
+<li><p>その3秒後、ブローカからFINパケットとともにデータが送られてきて、クライアントがRSTパケットを返してTCP接続が切られます。</p>
+
+<ul>
+<li>このFIN-RST応答は、そのシーケンス番号から、回線を切る前のコネクションの異常終了のためのやり取りだという事がわかりました。ですので、このパケットに乗っていたデータは以前のコネクションのデータだということで破棄されているはずです。スクリプトの出力を見るとこのデータは出力されていませんので、これは正しい理解だという事にします。</li>
+</ul>
+</li>
+</ul>
+
+
+<!--
+このタイミングはパブリッシュのタイミングなので、サブスクライブデータが送られてくるタイミングでもあります。
+ブローカ側としては、TCPコネクションが再開したのでデータを送るけれど、すでに同じIDでコネクション要求が入っているので、これは最後のデータね。ということでFINパケットと共に送られたものと思います。
+一方のクライアント側は、再接続しているので、このパケットを受け取るソケットが無く、RSTパケットで強制終了のお願いをして終わりにしたのだと考えられます。
+-->
+
+
+<ul>
+<li>そのあと、最新のデータが配信されてきました。このデータのタイムスタンプは<code>1419926762</code>で、スクリプトの出力からこのタイムスタンプのデータの受信は確認出来ました。</li>
+</ul>
+
+
+<p>以上が、回線を切断された時のこのスクリプトの動作です。</p>
+
+<p>ここで疑問は、「なぜ、コネクション要求がクライアントから出されるのか」という点です。
+スクリプトでは、接続がロストした時の内容は記述していません。ということは、ライブラリ側の判断で再接続がなされているという事になります。</p>
+
+<p>で、よく<a href="https://pypi.python.org/pypi/paho-mqtt#network-loop">マニュアル</a>を読むと、loop_forever()ファンクションがこれを管理しているようです。</p>
+
+<h3>Network loop</h3>
+
+<blockquote><p>These functions are the driving force behind the client. If they are not called, incoming network data will not be processed and outgoing network data may not be sent in a timely fashion.</p>
+
+<p>これらのファンクションはクライアントの裏で駆動力となるものです。これらが呼ばれなければ入力されたデータは処理されず、出力されるべきデータは時間通りに送られないでしょう。</p></blockquote>
+
+<h3>loop_forever()</h3>
+
+<blockquote><p>This is a blocking form of the network loop and will not return until the client calls disconnect(). It automatically handles reconnecting.</p>
+
+<p>これはネットワークループのブロッキングフォームで（私には意味不明）、クライアントがdisconnect()関数を呼び出すまでは帰って来ません。自動的に再接続を管理します。</p></blockquote>
+
+<p>ということなので、（予想では）loop_forever()が再接続を発行して、その結果、スクリプトの処理で再度サブスクライブ要求が出される。ということなのでしょう。</p>
+
+<p>今回、断線後の再接続では切断前と同じIDを使っていましたので、MQTTプロトコル的には再度サブスクライブ要求を出さずとも、以前に指定したトピックをサブスクライブできたはずです。 <br/>
+ただ、一体何が起こっているのか判断がつかない状況では、再接続後に再度サブスクライブ要求を出すというのは妥当な処理なのかなとも思います。</p>
+
+<p> ここでのもうひとつの疑問は、「回線が切れた、と判断する基準は何？」ということです。</p>
+
+<p>これについて、<code>connect()</code>のkeepaliveだけ切断する状況と、充分短い時間（ほんの数秒）切断する状況で確認してみたところ、短い時間では再接続が起こらなかったことから、keepaliveの時間以上接続が切れていると(pingに応答がないと)切断されたと判断して「再接続」を行うようです。</p>
+
+<p>マニュアル上では</p>
+
+<h3>keepalive</h3>
+
+<blockquote><p>maximum period in seconds allowed between communications with the broker. If no other messages are being exchanged, this controls the rate at which the client will send ping messages to the broker</p>
+
+<p>ブローカとの最大許されるコミュニケーション間の時間（秒）。他のメッセージが交換されなければ、この数値に基づいてクライアントがpingメッセージをブローカに送るレートをコントロールします。</p></blockquote>
+
+<p>ということで、pingに応答がなければ再接続のトリガになるとは書かれていません。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Paho MQTT のインストール]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/"/>
+    <updated>2014-12-21T11:25:59+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/21/paho-mqtt</id>
+    <content type="html"><![CDATA[<p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+<!-- more -->
+
+
+<p>インストールする前に、簡単にお勉強。</p>
+
+<p>Phao Projectとは一体何者？
+<a href="http://www.eclipse.org/paho/">Paho project</a></p>
+
+<blockquote><p>The Paho project provides scalable open-source client implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine‑to‑Machine (M2M) and Internet of Things (IoT).</p>
+
+<p>M2M、IoTへのアプリケーションに向けた、オープンで標準なメッセージングプロトコルの、スケーラブルでオープンソースのクライアント実装を提供するプロジェクトです。</p></blockquote>
+
+<p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
+
+<ul>
+<li><h2>MQTT Clients</h2></li>
+<li><h3>C/C++</h3>
+
+<p>  Posix C / Windows C<br/>
+  embedded systems<br/>
+  Posix C++ / Windows C++<br/>
+  embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p></li>
+<li><h3>Java</h3>
+
+<p>  J2SE<br/>
+  Android Service</p></li>
+<li><h3>JavaScript</h3></li>
+<li><h3>Python</h3></li>
+<li><h3>Go Client</h3></li>
+<li><h3>C# .Net and WinRT</h3></li>
+<li><h3>Utilities</h3>
+
+<p>  MQTT Conformance/Interoperability Testing</p></li>
+</ul>
+
+
+<p>で、目的のPython向けのクライアントモジュールは、</p>
+
+<p><a href="http://www.eclipse.org/paho/clients/python/">Python support:</a></p>
+
+<blockquote><p>The Paho Python Client provides a client class with support for both MQTT v3.1 and v3.1.1 on Python 2.7 or 3.x.</p></blockquote>
+
+<p>ということで、2.7と3.xの両方をサポートしているようです。</p>
+
+<p>ここまで確認した所で、インストールを始めました。</p>
+
+<figure class='code'><figcaption><span>steps installing Paho-mqtt for Python</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python --version
+</span><span class='line'>Python 2.7.3
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install python-pip
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo pip install paho-mqtt
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>cat paho-mqtt-test.py
+</span><span class='line'>
+</span><span class='line'>import paho.mqtt.client as mqtt
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'>def on_connect<span class="o">(</span>client, userdata, rc<span class="o">)</span>:
+</span><span class='line'>    print<span class="o">(</span><span class="s2">&quot;Connected with result code &quot;</span>+str<span class="o">(</span>rc<span class="o">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    client.subscribe<span class="o">(</span><span class="s2">&quot;$SYS/#&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'>def on_message<span class="o">(</span>client, userdata, msg<span class="o">)</span>:
+</span><span class='line'>    print<span class="o">(</span>msg.topic+<span class="s2">&quot; &quot;</span>+str<span class="o">(</span>msg.payload<span class="o">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">client</span> <span class="o">=</span> mqtt.Client<span class="o">()</span>
+</span><span class='line'>client.on_connect <span class="o">=</span> on_connect
+</span><span class='line'>client.on_message <span class="o">=</span> on_message
+</span><span class='line'>
+</span><span class='line'>client.connect<span class="o">(</span><span class="s2">&quot;iot.eclipse.org&quot;</span>, 1883, 60<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'>client.loop_forever<span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>python ./paho-mqtt-test.py
+</span><span class='line'>
+</span><span class='line'>Connected with result code 0
+</span><span class='line'><span class="nv">$SYS</span>/broker/version mosquitto version 1.3.5
+</span><span class='line'>..
+</span><span class='line'>..
+</span><span class='line'><span class="nv">$SYS</span>/broker/uptime <span class="m">1258785</span> seconds
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/total 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/inactive 1
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/active 1
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/maximum 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/expired 0
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/stored 72
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/received 80212
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/sent 65057
+</span><span class='line'><span class="nv">$SYS</span>/broker/subscriptions/count 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/retained messages/count 50
+</span><span class='line'><span class="nv">$SYS</span>/broker/heap/current 12888
+</span><span class='line'><span class="nv">$SYS</span>/broker/heap/maximum 23872
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/dropped 5069
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/received 20949
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/sent 5802
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/received 598854
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/sent 382692
+</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/received 2003874
+</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/sent 1025439
+</span><span class='line'>.....
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となりました。
+ここまで、10分かからず完了。</p>
+
+<p>先人に感謝。引き続き、巨人の肩の上で仕事させてもらいます。</p>
+
+<hr />
+
+<p><a href="http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf">MQTT-SN</a></p>
+
+<p>MQTT For Sensor Networks</p>
+
+<p>だそうです。概略だけ、かいつまんでみると。</p>
+
+<blockquote><p>It is optimized for communications over networks where bandwidth is at a premium or where the network con-
+nection could be intermittent. However MQTT requires an underlying network, such as TCP/IP, that provides
+an ordered lossless connection capability and this is too complex for very simple, small footprint, and low-cost
+devices such as wireless SAs.
+The purpose of this document is to specify MQTT-SN, a pub/sub protocol for wireless sensor networks.
+MQTT-SN can be considered as a version of MQTT which is adapted to the peculiarities of a wireless commu-
+nication environment.</p>
+
+<p>センサーネットワークのような、回線の費用がかかるような場所、しばしば回線が落ちるようなところに最適化されたMQTTプロトコルではありますが、小さなローコストのシンプルデバイスにとっては、複雑すぎるTCP/IPのようなロスレスのコネクションを基礎にしています。
+このドキュメントはワイヤレスセンサネットワークのためのパブリッシュ・サブスクライブプロトコルであるMQTT-SNの仕様を規定します。MQTT-SNはワイヤレスコミュニケーション環境の特色に特化したMQTTのバージョンだと考えられます。</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MQTTのパケットを覗いてみた(1)]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/"/>
+    <updated>2014-12-20T12:24:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/20/mqtt-packets</id>
+    <content type="html"><![CDATA[<p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+<!-- more -->
+
+
+<h2>mosquitto_sub でサブスクライブ要求した場合</h2>
+
+<p>まずは、パケットをキャプチャするものを用意しなければいけません。
+定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。
+<a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
+
+<p>まとめておくと、</p>
+
+<figure class='code'><figcaption><span>Install wireshark and configure&#8230;</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>:# apt-get install wireshark
+</span><span class='line'>:# setcap <span class="s1">&#39;CAP_NET_RAW+eip CAP_NET_ADMIN+eip&#39;</span> /usr/bin/dumpcap
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
+
+<p>サブスクライブを要求します。</p>
+
+<pre><code>:$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+</code></pre>
+
+<p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
+
+<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
+
+<hr />
+
+<h3>STEP 1: 接続要求　Client -> Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">10</span> <span class="m">22</span> <span class="m">00</span> <span class="m">06</span> 4d <span class="m">51</span> <span class="m">49</span> <span class="m">73</span> <span class="m">64</span> <span class="m">70</span> <span class="m">03</span> <span class="m">02</span> <span class="m">00</span> 3c <span class="m">00</span> <span class="m">14</span>  .<span class="err">&quot;</span>..MQIsdp...&lt;..
+</span><span class='line'><span class="m">0010</span>   6d 6f <span class="m">73</span> <span class="m">71</span> 5f <span class="m">73</span> <span class="m">75</span> <span class="m">62</span> 5f <span class="m">33</span> <span class="m">35</span> <span class="m">38</span> <span class="m">35</span> 5f <span class="m">75</span> <span class="m">62</span>  mosq_sub_3585_ub
+</span><span class='line'><span class="m">0020</span>   <span class="m">75</span> 6e <span class="m">74</span> <span class="m">75</span>                                      untu
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br/>
+0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)</p></li>
+<li><p>可変ヘッダー<br/>
+0002 : 次のメッセージの長さ　MSB<br/>
+0003 : LSB　（ここでは6byte）<br/>
+0004 : &ldquo;MQIsdp&rdquo; （ここは定型句のようです）<br/>
+000A : プロトコルバージョン &ldquo;03&rdquo;<br/>
+000B : FLAGs (CleanSession=&lsquo;1&rsquo;)<br/>
+000C : Keep Alive timer[s] MSB<br/>
+000D : Keep Alive timer[s] LSB  （ここでは60秒）<br/>
+000E : 次のメッセージの長さ　MSB<br/>
+000F :  　　LSB　（ここでは20byte) <br/>
+0010 : クライアント識別子 (オプション&ndash;idで指定したものが入ります。この例ではデフォルト値）</p></li>
+</ul>
+
+
+<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
+
+<hr />
+
+<h3>STEP 2 : 要求の返事　Client &lt;- Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">20</span> <span class="m">02</span> <span class="m">00</span> <span class="m">00</span>                                       ...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br/>
+0001 : 長さ 2byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 : トピック名圧縮要求(予約：未使用）<br/>
+0003 : 接続要求戻りコード（ここでは&#8217;00&#8217;で接続許可。&#8217;00&#8217;以外は接続拒否）</p></li>
+</ul>
+
+
+<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
+
+<hr />
+
+<h3>STEP 3: サブスクライブ要求　Client -> Broker</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">82</span> 1b <span class="m">00</span> <span class="m">01</span> <span class="m">00</span> <span class="m">16</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span>  ......<span class="nv">$SYS</span>/broke
+</span><span class='line'><span class="m">0010</span>   <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">23</span> <span class="m">00</span>           r/messages/#.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br/>
+0001 長さ　27byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 メッセージID　16bit (MSB,LSB)<br/>
+0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br/>
+0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br/>
+001C QoS指定　要求するサブスクライブのQoS指定　QoS=&lsquo;0&rsquo;</p></li>
+</ul>
+
+
+<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
+
+<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
+
+<hr />
+
+<h3>STEP 4: データの送付　Client &lt;- Broker</h3>
+
+<p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">31</span> 1f <span class="m">00</span> 1b <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f  1...<span class="nv">$SYS</span>/broker/
+</span><span class='line'><span class="m">0010</span>   6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">73</span> <span class="m">74</span> 6f <span class="m">72</span> <span class="m">65</span> <span class="m">64</span> <span class="m">37</span>  messages/stored7
+</span><span class='line'><span class="m">0020</span>   <span class="m">32</span> <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  21<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
+</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
+</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> <span class="m">30</span> <span class="m">31</span> <span class="m">20</span> <span class="m">00</span> <span class="m">19</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f  ed738301 ..<span class="nv">$SYS</span>/
+</span><span class='line'><span class="m">0050</span>   <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f  broker/messages/
+</span><span class='line'><span class="m">0060</span>   <span class="m">73</span> <span class="m">65</span> 6e <span class="m">74</span> <span class="m">35</span> <span class="m">39</span> <span class="m">34</span> <span class="m">34</span> <span class="m">31</span>                       sent59441
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br/>
+0001 : 長さ　31byte</p>
+
+<p>可変ヘッダ：
+0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br/>
+0004 : トピック名　&#8217;$SYS/broker/messages/stored&#8217;<br/>
+  (QoSによっては、ここにメッセージID（16bit）が入る）<br/>
+001F : ペイロード　上記トピックのデータが来る<br/>
+　（ここまでが固定ヘッダで指定された長さ）</p>
+
+<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
+
+<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0020</span>      <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  .1<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
+</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
+</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> 30
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
+
+<p>仕様をよく見ると下記のように書いてありました。</p>
+
+<blockquote><p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.</p>
+
+<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br/>
+Each byte encodes 128 values and a &ldquo;continuation bit&rdquo;.<br/>
+For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br/>
+The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p></blockquote>
+
+<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。
+つまりは、</p>
+
+<ul>
+<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
+<li>切った残りのbitに&#8217;1&#8217;がのこっているのなら、切り取った7bitの最上位に&#8217;1&#8217;をつけて、最初の「長さを示す値(1byte)」とする</li>
+<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
+</ul>
+
+
+<p>という事がわかりました。</p>
+
+<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので
+単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。</p>
+
+<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
+
+<hr />
+
+<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
+
+<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。
+しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
+
+<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br/>
+clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br/>
+最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
+
+<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
+デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
+    <updated>2014-12-19T20:45:30+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
+    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+<!-- more -->
+
+
+<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+
+<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
+
+<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
+
+<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
+
+<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
+
+<p>具体的には、</p>
+
+<figure class='code'><figcaption><span>Why Two topics comes up??</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
+</span><span class='line'><span class="o">(</span>古いRaspiからのデータ）
+</span><span class='line'>^c
+</span><span class='line'>　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+</span><span class='line'>（古いRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>^C
+</span><span class='line'>
+</span><span class='line'>　　？？なぜ2つから？？
+</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、
+</span><span class='line'>  IDに張り付いているのでは？？？
+</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、
+</span><span class='line'>  前のセッションも復活する？
+</span><span class='line'>  ならば、昔のセッションをクリアにしてあげればいいはず。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --id abcd -t data/OLD_pi -q 1
+</span><span class='line'>^c
+</span><span class='line'>  clean sessionで接続してすぐに切断。
+</span><span class='line'>  これで、古いサブスクライブのセッションが切れたはず。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>
+</span><span class='line'>　　思ったとおり
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>という感じです。</p>
+
+<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[日本語入力]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/14/ime/"/>
+    <updated>2014-12-14T20:07:28+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/14/ime</id>
+    <content type="html"><![CDATA[<p>日本語入力を変更しました。Mozcです。</p>
+
+<p>なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。</p>
+
+<!-- more -->
+
+
+<p>インストールメモ、といってもapt-getだけですが。。。</p>
+
+<pre><code>sudo apt-get install ibus-mozc
+</code></pre>
+
+<p>だけです。
+あとは、一旦ログアウトしてログインするとibusの「インプットメソッドの選択」の日本語入力メニューにmozcが見えてえいるはず。それを選択して、「設定」を押して適当な設定変更をして、おしまい。</p>
+
+<p>日本語入力はキーボードに次いで重要な部分なので、思ったとおりに動いてくれるのは大変ありがたいです。</p>
+
+<p>1つ気になるのが、変換中でのキャレット表示がわかりづらい。これはシステムの問題かと思いますが、たとえば、「ひとつきになるのが」と打って変換した時に、「ひと月になるのが」と表示されてるのですが、変換がどこで区切られて変換されているのかがわかりにくいです。普通のIMEだと変換しているところまでが太いアンダーラインがついたりしますが、ubuntu12.04では全部同じ太さのアンダーラインになってしまいます。14以降だと改善されているのですけど。。。。</p>
+
+<p>ちなみに、今、キーボードはFILCOのMajestouch 黒軸　です。いいキーボードなのですが、キーのタッチが私の癖に合わないみたいで、ミスタイプがちょっと多いです。もう少しクリックのある感じで、奥まで押した時に打鍵が確定するのがいいような感じです。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[awkを使う]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/14/awk-example/"/>
+    <updated>2014-12-14T09:04:24+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/14/awk-example</id>
+    <content type="html"><![CDATA[<p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。</p>
+
+<!-- more -->
+
+
+<p>まずは、最初のフィールドを切り出す必要があります。これは簡単で</p>
+
+<pre><code>awk -F, '{print $1}'
+</code></pre>
+
+<p>です。セパレータがコンマなので、-Fオプションで変更します。セパレータで区切られた最初のフィールドがプリントされます。</p>
+
+<p>これだけだと</p>
+
+<pre><code>1418394962
+1418395021
+1418395081
+1418395142
+1418395202
+</code></pre>
+
+<p>なかんじなのでこれをdate コマンドで時刻表示に変換してあげます。
+strftime()なる関数があるawk処理系もあるようですが、ここではシェルコマンドを使ってやってみました。</p>
+
+<p>単純には</p>
+
+<pre><code>date -d @`cat data.txt|awk -F, '{print $1}'`
+</code></pre>
+
+<p>とやるとよさそうですが、複数行だとエラーします。</p>
+
+<p>なので、各行ごとにdateコマンドが発行される必要があります。
+ということはawk中で処理する必要があるということで。。。。</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd)}'
+</code></pre>
+
+<p>これで、</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:02:01 JST
+2014年 12月 13日 土曜日 00:03:02 JST
+2014年 12月 13日 土曜日 00:04:01 JST
+2014年 12月 13日 土曜日 00:05:01 JST
+</code></pre>
+
+<p>こんな感じになります。ひとまずok。</p>
+
+<p>で、さらに、この日付の後、データを表示しようとおもって、</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd); print $2"  "$3}'
+</code></pre>
+
+<p>とすると。。。。</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:05:01 JST
+ 1710   2004
+2014年 12月 13日 土曜日 00:06:02 JST
+ 1709   2002
+2014年 12月 13日 土曜日 00:07:01 JST
+ 1710   2003
+</code></pre>
+
+<p>コマンド実行結果に改行コードが入っているので、こんなになってしまいます。
+これではいけないということで、色々調べてみると</p>
+
+<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; cmd | getline result; close(cmd); print result "  " $2"  "$3}'
+</code></pre>
+
+<p>としてやるといいことが分かりました。変数にコマンドを書いて、それを実行して結果を得るために　cmd | getline 変数（結果が入る） というのが想像できませんでした。</p>
+
+<pre><code>2014年 12月 13日 土曜日 00:09:01 JST   1710   2003
+2014年 12月 13日 土曜日 00:10:02 JST   1710   2002
+2014年 12月 13日 土曜日 00:11:02 JST   1709   2003
+</code></pre>
+
+<p>これで、望むフォーマットになりました。</p>
+
+<p>日付と時間だけをプリントするのはdateコマンドにフォーマット指示を追加して</p>
+
+<pre><code>cmd= "date +\"%F %T\" -d @"
+</code></pre>
+
+<p>フォーマット内部にスペースを指定するためにはダブルクオートでフォーマットをくくる必要があります。awkにはバックスラッシュでダブルクオートをエスケープしておきます。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[やっと復活。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/13/restarted/"/>
+    <updated>2014-12-13T16:23:35+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/13/restarted</id>
+    <content type="html"><![CDATA[<p>前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。<br/>
+今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。メニューも一応見えていますが、クリックすると茶色いプルダウンらしきものが広がるだけで何も見えません。</p>
+
+<!-- more -->
+
+
+<p>ブログに書いた手順を試してみるも、ターミナルが見えないのでいかんともし難く。。。。<br/>
+ブラインド状態でコマンド入力してみても、うまく入力できているようですが、効果なし。</p>
+
+<hr />
+
+<h2>新しいubuntuを立ち上げ</h2>
+
+<p>webでいろいろ調べましたが、結局解決には至らず。新しいubuntuをインストールするのが早いのじゃないか、ということで再インストールに。</p>
+
+<p>幸い、MacOSのParallelsの上の仮想PCだったので、トラブった環境はそのままにしてすすめました。こういうとき仮想環境は楽ですね。</p>
+
+<p>まずは、大事なブログのソースファイルをまるごと救出。<br/>
+Ctrl-Alt-F1でCUIベースのターミナルを開いて、</p>
+
+<pre><code>tar czf octopress.tar.gz octopress
+</code></pre>
+
+<p>のような感じで。</p>
+
+<p>さて、これをscpでコピーしようとしたら、どうもうまくいかず。。。</p>
+
+<p>きちんとsshの設定をしていなかったからか。。。反省。</p>
+
+<p>ですが、これまたラッキーなことにParallelsにはホストOSとのファイル共有が標準で用意されていて、これがubuntuでも有効です。</p>
+
+<pre><code>cp ./octopress.tar.gz ~/Desktop/Parallels\ Shared\ Folders/
+</code></pre>
+
+<p>とするだけです。
+これで大事な原稿と環境はホストOSにコピーされました。</p>
+
+<p>肝心のインストールは、ubuntu のインストール用ディスクイメージを持ってきて、Parallelsに教えてあげるだけであとは勝手にインストールして完了。</p>
+
+<hr />
+
+<h2>git インストール</h2>
+
+<p>さてここから環境の構築です。</p>
+
+<p>まず、SSH関係をしっかりと構築したあと、</p>
+
+<p><a href="http://octopress.org/docs/setup/">octopressのセットアップ手順</a>にしたがって、</p>
+
+<pre><code>sudo apt-get install git
+</code></pre>
+
+<p>としてインストール。簡単。問題無し。</p>
+
+<p>一応、動作を確認。gitで使うディレクトリに移動して</p>
+
+<pre><code>git init
+</code></pre>
+
+<p>エラーなし。okです。</p>
+
+<h2>ruby インストール</h2>
+
+<p>これまた、手順にしたがって、rbenvでRubyを<a href="http://octopress.org/docs/setup/rbenv/">インストール</a>することにします。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span>
+</span><span class='line'>git clone git://github.com/sstephenson/rbenv.git .rbenv
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.bash_profile
+</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;eval &quot;$(rbenv init -)&quot;&#39;</span> &gt;&gt; ~/.bash_profile
+</span><span class='line'>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</span><span class='line'><span class="nb">source</span> ~/.bash_profile
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ubuntuでは、<code>.bash_profile</code>をログイン時に実行するために</p>
+
+<pre><code>echo 'source ~/.bash_profile' &gt;&gt; .bashrc
+</code></pre>
+
+<p>としました。</p>
+
+<p>インストールの結果を確認します。
+新しいターミナルを開いて、</p>
+
+<pre><code>echo $PATH
+</code></pre>
+
+<p>の結果に<code>~/.rbenv/bin</code>などが入って入ればいいかと思います。</p>
+
+<p>これでrbenvツールが設定できたので、ここからRubyのインストールです。</p>
+
+<p>私の環境では<code>zlib1g-dev</code>と<code>libssl-dev</code>が入っていなかったので、あとあとエラーしました。</p>
+
+<p>念のため前もって</p>
+
+<pre><code>sudo apt-get install zlib1g-dev libssl-dev
+</code></pre>
+
+<p>などとして、インストールするか確認しておいたほうがいいかもしれません。
+そうでないと何回もRubyをインストールすることになります。</p>
+
+<ul>
+<li>octopressのセットアップではRubyのモジュールをダウンロードしますが、このときサーバにSSLで接続します。そのためにSSLのライブラリが必要なようです。</li>
+</ul>
+
+
+<p>では、インストール。解説にしたがい</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-p0
+</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-p0
+</span><span class='line'><span class="nv">$ </span>rbenv rehash
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>と、しました。</p>
+
+<p>実は、<code>rbenv install 1.9.3-p0</code>で<code>installなんてコマンドないよ！</code>と起こられましたが、<code>ruby-build</code>が正しい位置に持ってこれていなかったのが原因でした。</p>
+
+<pre><code>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+</code></pre>
+
+<p>を正しく実行し直して事なきを得ます。</p>
+
+<ul>
+<li>webの解説によれば、<code>rbenv local ruby 1.9.3-p0</code>は、その他のディレクトリにあるRuby環境を変更することなく、octopressをインストールするために使われるそうです。もし、どこでもこのバージョンを使いたいなら、local を grobal に変更するといい、と書かれています。</li>
+</ul>
+
+
+<p>インストールができたら、<code>Ruby --version</code>でバージョンを確認。OK。</p>
+
+<hr />
+
+<h2>Octopress</h2>
+
+<p><a href="">こちらの手順</a>にしたがってインストール。</p>
+
+<p>まず</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone git://github.com/imathis/octopress.git octopress
+</span><span class='line'><span class="nb">cd </span>octopress
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>としてoctopress自身を持ってきます。</p>
+
+<p>さらに、gemで必要なRubyモジュールをインストール</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>gem install bundler
+</span><span class='line'>rbenv rehash <span class="c"># If you use rbenv, rehash to be able to run the bundle command</span>
+</span><span class='line'>bundle install
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここで、ちゃんと動くかどうか</p>
+
+<pre><code>rake generate
+</code></pre>
+
+<p>でためしてみたところ。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rake generate
+</span><span class='line'><span class="c">## Generating Site with Jekyll</span>
+</span><span class='line'>identical <span class="nb">source</span>/stylesheets/screen.css
+</span><span class='line'>/home/masa/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/
+</span><span class='line'>execjs-2.2.2/lib/execjs/runtimes.rb:51:in <span class="sb">`</span>autodetect<span class="err">&#39;</span>: Could not find
+</span><span class='line'>a JavaScript runtime. See https://github.com/sstephenson/execjs <span class="k">for</span> a
+</span><span class='line'>list of available runtimes. <span class="o">(</span>ExecJS::RuntimeUnavailable<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>と言われてしまいました。
+&ldquo;octopress Could not find a JavaScript runtime&#8221;をキーワードに
+googleさんに尋ねてみると、解決策が</p>
+
+<pre><code>sudo apt-get install nodejs
+</code></pre>
+
+<p>を実行しろ、ということだったので、さっそくインストールし、無事<code>rake generate</code>できることを確認。</p>
+
+<p>さらに<code>rake preview</code>で出来栄えも確認し、インストール完了。</p>
+
+<p>やっと環境が整いました。</p>
+
+<hr />
+
+<h2>昔の機械から原稿を持ってくる</h2>
+
+<p>さて、昔の機械からデータを持ってこなきゃいけませんが、オリジナルのoctopress からテーマを更新(oct2を使用)しているので、もしかしたらコピーだけではだめかもしれないという危惧もあり、厄介かなあとおもいつつも、ダメモトということで、octopressディレクトリをまるごとコピー。</p>
+
+<p>オリジナルをキープしておいて、持ってきたものをコピーしましたが、<code>rake generate</code>では<code>「バージョンが違いますけど！」</code>と注意されてしまいます。しかたがないので、オリジナルに戻して、今度はsourceフォルダだけを昔のものに入れ替えて試してみました。</p>
+
+<p>すると、何事もなくgenerateが可能に。さらにpreviewして元のBlogページが戻ることを確認！！ああ、素晴らしい。</p>
+
+<p>ということで、記事を書き始めるとまたまたトラブル。。。。</p>
+
+<p>どうも文字が大きい。さらに、バックグラウンドの絵がページの頭の部分で黒くなる。。。。</p>
+
+<p>「うむ、やはりコピーだけではダメかああああ。」
+しかたなく、もう一度octopressの環境から作り直し。さらにoct2も素直にインストールし直し。</p>
+
+<p>まず、octopressのディレクトリをまるごと削除。もう一度インストールし直します。</p>
+
+<p>さらにoct2を以下のようにしてインストール</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone https://github.com/bijumon/oct2.git .themes/oct2
+</span><span class='line'>rake install<span class="o">[</span><span class="s2">&quot;oct2&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://github.com/bijumon/oct2">oct2のページ</a>によるインストール方法ではcloneの保存先が<code>.themes/</code>ですが、これではエラーしてしまうので、<code>.themes/oct2</code>としてみました。</p>
+
+<p>これで一応環境は整っているはずなので、このまま何もせず</p>
+
+<pre><code>rake preview
+</code></pre>
+
+<p>としてfirefoxなどで<a href="http://localhost:4000">localhost:4000</a>をアクセス。oct2が有効になっていることを確認します。</p>
+
+<p>いよいよblogのソースをコピーします。といっても、.mdの原稿を<code>_post</code>ディレクトリにコピーするだけです。</p>
+
+<p>さらに、以下のファイルをコピーしました。</p>
+
+<pre><code>./_config.yml
+./public/image/background.png  (自分で作ったバックグラウンドカラー）
+./public/image/logo.png
+./public/image/(その他必要な画像）
+./source/includes/post/date.html（日付表示がうまくいくように変更したもの）
+./source/(その他、自分で作ったディレクトリ）
+</code></pre>
+
+<p>これで、再び<code>rake preview</code>を実行。</p>
+
+<p>！！！やっとこれで元通り！！！とおもったところが、まだ文字が異常に大きい。。。</p>
+
+<p>これまた、googleにたずねると、「<a href="http://blog.nambo.jp/2013/07/26/change-octopress-font-size/">ここをご覧なさい</a>」といわれたので、そのまま追加して、納得できる出来栄えに。。。。</p>
+
+<figure class='code'><figcaption><span>./sass/custom/_stypes.scss　に追加</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">h1</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">h2</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.1em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">h3</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">#content</span> <span class="nc">.blog-index</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">article</span> <span class="n">h1</span> <span class="err">{</span>
+</span><span class='line'>    <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="err">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これもちょっと腑に落ちない妙な動作をするのですが、まあ、とりあえず吉としておきます。とおもいましたが、やはり気になるので<a href="http://yuyunko.github.io/blog/2013/03/04/octopress-%E3%83%86%E3%83%BC%E3%83%9E%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%B9%E3%82%99/">他の方法</a>も試してみるとこちらの方がいい感じなので、こうしました。</p>
+
+<figure class='code'><figcaption><span>./sass/custom/_styles.scss　を変更</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">0.8em</span><span class="p">;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>お疲れさまでした。
+ほぼ1日消費です。</p>
+
+<p>そうそう、Parallelsでスナップショットをとっておこう。</p>
+
+<h3>2014/12/14 update</h3>
+
+<p>_styles.scssをエディットしましたが、どうもこれが有効になったり無効になったり、おかしな感じになります。ちょっとしらべたところ、geditでは編集しているファイルのバックアップファイルを編集しているファイルと同じホルダに作ります。この時のファイル名が　&#8221;オリジナルのファイル名～&#8221;　となるのですが、どうもそれをoctopressが区別できていない、あるいは編集中のものにはアクセスロックがかかる？ようです。</p>
+
+<p>geditを使うときは、保存したファイルを一旦閉じるか、バックアップファイルを作るのをやめるように設定するか、編集後バックアップファイルを消して　generate　なり　preview　なりしたほうがいいようです。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ubuntuのランチャとかが消えてしまう件]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/ubuntu-problem/"/>
+    <updated>2014-12-07T13:19:44+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/ubuntu-problem</id>
+    <content type="html"><![CDATA[<p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
+
+<!-- more -->
+
+
+<p>検索してみたところ、<a href="http://m12i.hatenablog.com/entry/2014/05/24/100539">この</a>ページにあるような症状にぴったりだったので、書かれている復活手順を踏んでみました。以下はその引用です。　<strong>　<em>mizukyfさん、ありがとうございます。</em> </strong></p>
+
+<ul>
+<li><p>ログイン後 Ctrl＋Alt＋F1キー入力 でコンソール画面に遷移。</p></li>
+<li><p>「（マシン名） login:_」という表示されるのでログイン。</p></li>
+<li><p>「DISPLAY=:0.0 gnome-terminal」と入力しEnter。gnomeの上のターミナルを起動</p></li>
+<li><p>Alt＋F7キーを押下するとデスクトップ画面に復帰するが端末ウィンドウが新たに表示されている。</p></li>
+<li><p>このターミナル上で「dconf reset -f /org/compiz/」と入力してEnter。</p></li>
+<li><p>「sudo shutdown -r now」と入力してEnter。OSが再起動する。</p></li>
+</ul>
+
+
+<p>多分、<code>dconf reset -f /org/compiz/</code>が重要なので、コンソールでログインしたあとにこれを実行すればいい、という気もします。
+今度不具合になったら試してみましょう。</p>
+
+<p>PS:<br/>
+<a href="http://ja.wikipedia.org/wiki/Compiz">compiz</a>を調べてみたところ、ウインドーマネージャなのですねえ。<br/>
+<a href="http://en.wikipedia.org/wiki/Dconf">dconf</a>はいろいろな設定を一気に引き受けるユーティリティ。あるwebの解説によれば「Windowsのレジストリシステムのようなもの」とのこと。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
+    <updated>2014-12-07T10:14:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
+    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+<!-- more -->
+
+
+<p>確認手順：</p>
+
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
+
+
+<p>で、送られたデータを確認してみると。。。。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat reconnect.txt <span class="p">|</span> awk -F , <span class="s1">&#39;{ command = &quot;date -d @&quot; $1 ; printf NR&quot;   &quot; ; system(command) }&#39;</span>
+</span><span class='line'><span class="m">1</span>   Sat Dec  <span class="m">6</span> 21:33:01 JST 2014
+</span><span class='line'><span class="m">2</span>   Sat Dec  <span class="m">6</span> 21:34:02 JST 2014
+</span><span class='line'><span class="m">3</span>   Sat Dec  <span class="m">6</span> 21:35:01 JST 2014
+</span><span class='line'>  <span class="o">(</span>...snip..<span class="o">)</span>
+</span><span class='line'><span class="m">27</span>   Sat Dec  <span class="m">6</span> 21:59:01 JST 2014
+</span><span class='line'><span class="m">28</span>   Sat Dec  <span class="m">6</span> 22:00:01 JST 2014
+</span><span class='line'><span class="m">29</span>   Sat Dec  <span class="m">6</span> 22:01:01 JST 2014
+</span><span class='line'><span class="m">30</span>   Sat Dec  <span class="m">6</span> 22:02:02 JST <span class="m">2014</span> &lt;指定した数だけ古いデータがあって
+</span><span class='line'><span class="m">31</span>   Sun Dec  <span class="m">7</span> 09:57:01 JST <span class="m">2014</span> &lt;そのあと最新の配信データが届く
+</span><span class='line'><span class="m">32</span>   Sun Dec  <span class="m">7</span> 09:58:02 JST 2014
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
+    <updated>2014-12-06T19:58:41+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/06/again</id>
+    <content type="html"><![CDATA[<p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># The maximum number of QoS 1 and 2 messages to hold in a queue </span>
+</span><span class='line'><span class="c"># above those that are currently in-flight.  Defaults to 100. Set </span>
+</span><span class='line'><span class="c"># to 0 for no maximum (not recommended).</span>
+</span><span class='line'><span class="c"># See also queue_qos0_messages.</span>
+</span><span class='line'><span class="c">#max_queued_messages 100</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
+
+<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
+
+<p>client IDの件に関連するオプションでこんなものもありました。</p>
+
+<ul>
+<li><strong> allow_zero_length_clientid </strong></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option controls whether a client is allowed to connect with a zero</span>
+</span><span class='line'><span class="c"># length client id or not. This option only affects clients using MQTT v3.1.1</span>
+</span><span class='line'><span class="c"># and later. If set to false, clients connecting with a zero length client id</span>
+</span><span class='line'><span class="c"># are disconnected. If set to true, clients will be allocated a client id by</span>
+</span><span class='line'><span class="c"># the broker. This means it is only useful for clients with clean session set</span>
+</span><span class='line'><span class="c"># to true.</span>
+</span><span class='line'><span class="c">#allow_zero_length_clientid true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
+
+<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
+
+<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
+
+<p>などと話していたら、こんなオプションがありました。</p>
+
+<ul>
+<li><strong>persistent_client_expiration</strong></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option allows persistent clients (those with clean session set to false)</span>
+</span><span class='line'><span class="c"># to be removed if they do not reconnect within a certain time frame.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># Badly designed clients may set clean session to false whilst using a randomly</span>
+</span><span class='line'><span class="c"># generated client id. This leads to persistent clients that will never</span>
+</span><span class='line'><span class="c"># reconnect. This option allows these clients to be removed.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># The expiration period should be an integer followed by one of d w m y for</span>
+</span><span class='line'><span class="c"># day, week, month and year respectively. For example</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 2m</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 14d</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 1y</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># The default if not set is to never expire persistent clients.</span>
+</span><span class='line'><span class="c">#persistent_client_expiration</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
+「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[disable-clean-sessionオプション]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/"/>
+    <updated>2014-12-05T21:14:40+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option</id>
+    <content type="html"><![CDATA[<p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
+
+<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub -h HOSTNAME -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id CONNECTION-ID
+</span><span class='line'>
+</span><span class='line'>1417781342, 1691, 0, 0, 0
+</span><span class='line'>1417781402, 1691, 0, 0, 0
+</span><span class='line'>1417781461, 1691, 0, 0, 0
+</span><span class='line'>1417781522, 1691, 0, 0, 0　　&lt;&lt;時刻 21:12:02　で中断
+</span><span class='line'>^C
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>--id</code>オプションはサブスクライバが同一であることを主張するためのもののようですので、これが一致することで「再接続だから配信していないデータを送らなきゃ」と認識してくれます。<code>--id</code>を指定しないとデフォルトのプロセス番号を元にしたものになるので、プロセスを止めて再度起動した場合「再接続」と認識してもらえません。
+また、&ndash;qosが1もしくは2でないとダメみたいです。QoS　0は配信保証がなされないクオリティ指定ですので、当然といえば当然。</p>
+
+<p>データが来たところで、適当に中断します。このトピックではパブリッシャが1分毎に1データを送ってきます。データの最初のフィールドがエポックタイムです。よく見ると60づつ増えていっているのがわかります。</p>
+
+<p>そしてCtrl-Cでプロセスを止めます。</p>
+
+<p>では、ここでしばらく待って。。。。。</p>
+
+<p>わかりやすいように、タイムスタンプを印刷してからサブスクライブを再開します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>date <span class="p">;</span> mosquitto_sub -h __host-name__ -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id  testclient
+</span><span class='line'>
+</span><span class='line'>Fri Dec  <span class="m">5</span> 21:24:54 JST 2014
+</span><span class='line'>1417781581, 1692, 0, 0, 0　　&lt;&lt;　再開したのは21:24:54だけど、21:13:01のデータから配信されている。
+</span><span class='line'>1417781642, 1691, 0, 0, 0
+</span><span class='line'>1417781701, 1691, 0, 0, 0
+</span><span class='line'>1417781761, 1692, 0, 0, 0
+</span><span class='line'>1417781822, 1691, 0, 0, 0
+</span><span class='line'>1417781881, 1691, 0, 0, 0
+</span><span class='line'>1417781942, 1692, 0, 0, 0
+</span><span class='line'>1417782002, 1692, 0, 0, 0
+</span><span class='line'>1417782061, 1692, 0, 0, 0
+</span><span class='line'>1417782121, 1692, 0, 0, 0
+</span><span class='line'>1417782182, 1692, 0, 0, 0
+</span><span class='line'>1417782241, 1692, 0, 0, 0
+</span><span class='line'>1417782302, 1692, 0, 0, 0
+</span><span class='line'>1417782361, 1692, 0, 0, 0
+</span><span class='line'>   ：
+</span><span class='line'>   :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>おお、きちんと中断している間のデータも配信されました。</p>
+
+<p><code>--id</code>オプションには次のように書かれています。</p>
+
+<p><strong> -i, - -id </strong></p>
+
+<blockquote><p>The id to use for this client. If not given, defaults to mosquitto_sub_ appended with
+the process id of the client. Cannot be used at the same time as the <strong> <em>&ndash;id-prefix</em> </strong> argument.</p></blockquote>
+
+<p>通常、IDは<code>mosquitto_sub_${PID}</code>になるようです。でもpidは起動するたびに変わってしまうので、同じクライアントとは認識されませんね。物理経路のトラブル等で通信が途絶えた場合は大丈夫でしょうけれど。</p>
+
+<p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
+
+<p>関連するところで<br/>
+ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
+
+<p><strong>clientid_prefixes</strong> <em>prefix</em></p>
+
+<blockquote><p>If defined, only clients that have a clientid with a prefix that matches clientid_prefixes will be
+allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;</em> here would mean a client
+&ldquo;<em>secure-</em>client&rdquo; could connect but another with clientid &ldquo;mqtt&rdquo; couldn&rsquo;t. By default,
+all client ids are valid.</p></blockquote>
+
+<p>となるようです。セキュリティの一助になるかしら？</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.confを見てみた]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf/"/>
+    <updated>2014-12-04T20:21:14+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf</id>
+    <content type="html"><![CDATA[<p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
+原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
+
+<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
+
+<!-- more -->
+
+
+<p><strong>mount_point</strong>  <em>topic prefix</em></p>
+
+<blockquote><p>This option is used with the listener option to isolate groups of clients.
+When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p></blockquote>
+
+<p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># The listener can be restricted to operating within a topic hierarchy using
+</span><span class='line'># the mount_point option. This is achieved be prefixing the mount_point string
+</span><span class='line'># to all topics for any clients connected to this listener. This prefixing only
+</span><span class='line'># happens internally to the broker; the client will not see the prefix.
+</span><span class='line'>#mount_point</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっています。</p>
+
+<p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
+
+<blockquote><p>The network ports that mosquitto listens on can be controlled using listeners.</p></blockquote>
+
+<p>とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
+「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
+
+<p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Listen on a port/ip address combination. By using this variable 
+</span><span class='line'># multiple times, mosquitto can listen on more than one port. If 
+</span><span class='line'># this variable is used and neither bind_address nor port given, 
+</span><span class='line'># then the default listener will not be started.
+</span><span class='line'># The port number to listen on must be given. Optionally, an ip 
+</span><span class='line'># address or host name may be supplied as a second argument. In 
+</span><span class='line'># this case, mosquitto will attempt to bind the listener to that 
+</span><span class='line'># address and so restrict access to the associated network and 
+</span><span class='line'># interface. By default, mosquitto will listen on all interfaces.
+</span><span class='line'># listener port-number [ip address/host name]
+</span><span class='line'>#listener</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
+listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
+
+<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。</p>
+
+<p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
+
+<p>奥深し。。。。。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto_subのオプション]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/03/mqtt-option/"/>
+    <updated>2014-12-03T20:43:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/03/mqtt-option</id>
+    <content type="html"><![CDATA[<p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
+
+<p><strong><code>-c, --disable-clean-session</code></strong></p>
+
+<!-- more -->
+
+
+<p></p>
+
+<p><code>Disable the 'clean session' flag. This means that all of the subscriptions for the client will be maintained after it disconnects, along with subsequent QoS 1 and QoS 2 messages that arrive. When the client reconnects, it will receive all of the queued messages.</code>
+<code>If using this option, it is recommended that the client id is set manually with --id</code></p>
+
+<p>これがちゃんと動けば、結構いいですよねえ。でもまあ、ちゃんと<code>man</code>読めよ、って話ですな。</p>
+
+<p>週末に試してみよう。</p>
+
+<p>ところで全く話は違いますが、<code>mosquitto(8)</code>では1つのブローカのプロセスで1つのトピックツリーを持っているのですよね。
+もし、1つのブローカを多くのユーザが共有した場合、お互いのトピックツリーは自由に行き出来できてしまいますよねえ。多くのユーザで使いたいときはどうすればいいのかなあ、と思っていた次第。
+<code>-iオプション</code>でユーザ名を指定すればユーザ名ごとにトピックツリーを作ってくれるのかしら？</p>
+
+<p>これも試す必要があります。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress+OCT2のちょっとした修正]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/02/minor-adjustment/"/>
+    <updated>2014-12-02T20:28:23+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/02/minor-adjustment</id>
+    <content type="html"><![CDATA[<p>今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、ブログページに日付が入っていることを発見。なら、この部分だけ持ってきて入れなおしてみるかな、とやってみたところうまく行きました！</p>
+
+<!-- more -->
+
+
+<p>このページはOCT2というテーマを使っているのですが、そのソース<code>source/_include/date.html</code>では日付が代入されている（と思われる）変数が<code>post.date_formatted</code>となっているのですが、これではうまく表示できないようです。ポスト日時が表示できていた昔のソースではここが<code>post.date</code>になっていました。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{% capture date %}{{ page.date }}{{ post.date }}{% endcapture %}
+</span><span class='line'>{% capture date_text %}{{ page.date_text }}{{ post.date_text }}{% endcapture %}
+</span><span class='line'>{% capture has_date %}{{ date | size }}{% endcapture %}
+</span><span class='line'>
+</span><span class='line'>{% capture updated %}{{ page.updated }}{{ post.updated }}{% endcapture %}
+</span><span class='line'>{% capture updated_text %}{{ page.updated_text }}{{ post.updated_text }}{% endcapture %}
+</span><span class='line'>{% capture was_updated %}{{ updated | size }}{% endcapture %}
+</span><span class='line'>
+</span><span class='line'>{% if has_date != '0' %}
+</span><span class='line'>  {% capture time %}&lt;time datetime="{{ date | datetime | date_to_xmlschema }}" pubdate{% if updated %} data-updated="true"{% endif %}>{{ date_text }}&lt;/time>{% endcapture %}
+</span><span class='line'>{% endif %}
+</span><span class='line'>
+</span><span class='line'>{% if was_updated != '0' %}
+</span><span class='line'>  {% capture updated %}&lt;time datetime="{{ updated | datetime | date_to_xmlschema }}" class="updated">Updated {{ updated_text }}&lt;/time>{% endcapture %}
+</span><span class='line'>{% else %}{% assign updated = false %}{% endif %}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>中身がわからないまま使っているので、この変数がどこでどのように定義されているのかいまいちわかっていませんが、<code>post.date_formatted</code>にはうまく値が入っていないようです。あるいは、<code>formatted</code>にするために何か他のモジュールのようなものがいるのかもしれません。<br/>
+やったことは、もともとある<code>octopress/_include/date.html</code>のファイル名を変更してオリジナルを保存。次に、うまく時間表示ができていた以前のテーマの同じテンプレートをコピー。それだけ。</p>
+
+<p>あまり深く詮索せず、とりえあず表示できたので良しとします。日付のフォーマットも西洋風ですが、まああまり違和感ないのでこのまま。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[試作システムの概要]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/01/overview/"/>
+    <updated>2014-12-01T20:20:23+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/01/overview</id>
+    <content type="html"><![CDATA[<h3>概略の仕様</h3>
+
+<p>試作しようとしているシステムの概要は以下のような感じです。</p>
+
+<!-- more -->
+
+
+<p><strong>用意するもの</strong></p>
+
+<ul>
+<li>Edge device:　センシング用マイコン+ネットワーク接続</li>
+<li>MQTT ブローカ：　通信プロトコルはMQTTを使いますので、ブローカが必要です。</li>
+<li>Core device: linux 計算機</li>
+</ul>
+
+
+<p><strong>動作</strong></p>
+
+<ul>
+<li>センサで状態を数値化（現状、温度とアナログ計測装置のモニタ電圧（直流）を想定）</li>
+<li>規定の時間毎（1分〜1時間ぐらい）に送信</li>
+<li>Core Deviceでデータを保持</li>
+<li>規定の時間毎（数時間）に経時変化をグラフ化し指定されたユーザにメールで返信</li>
+</ul>
+
+
+<p><strong>その他</strong></p>
+
+<ul>
+<li>現状ではEdge deviceのコントロールは考えていません。</li>
+<li>接続はSSHを使ったポートフォワーディング</li>
+<li>Edge device、　MQTTブローカにはRaspberry Piを使用</li>
+</ul>
+
+
+<p><strong>Edgeデバイスのこと</strong></p>
+
+<p>Raspberry Piはアナログ入力ポート（ADコンバータ）が少ないので増設します。<br/>
+OSがSDカードに乗っているのでSDカードの寿命がどれぐらいか気になるところですが、今回の試作で実際のSDカードへのアクセス量の実績が出れば、それで寿命が想定できると思います。工業用のSDカードはめちゃくちゃ高いので、きちんと設計してから必要な容量を購入したいです。一応目標としては、最低でも5年ぐらいは連続動作するようなものがほしいですね。<br/>
+将来的には、mbedに移行したいと思っています。RaspberryPiは値段は十分に安いですが、ちょっとオーバースペック的なところがあり、ミニマムにした時にどこまで削ぎ落とせるかという点では、mbedぐらいの規模がコストやメンテナンス、応用範囲を考えるとベストなサイズじゃないかという感じがします。特に、OSがリリースされれば開発しやすさも変わるかな、とちょっと期待しています。</p>
+
+<p><strong>プロトコルのこと</strong></p>
+
+<p>2年ほど前、このシステムのフィジビリティテストみたいなことで最初のシステムをプロトタイピングしたのですが、その時には<a href="http://mqtt.org/">MQTT</a>のことを知らずに、メールでデータを送るシステムをつくりました。httpでも良かったのかもしれませんが、プッシュでデータを送るとなるとちょっと面倒かなあ、と思ったのとApachサーバを立てることになり、ちょっと面倒だ（というかこれでくじけるかも）と感じたので、gmailのアカウントを作ってEdge deviceはそこに対してメールすればそれでおしまい、というような構成にしました。<br/>
+Edge device のプログラミングで使ったpythonは、幸いなことにモジュールがすごく良く完備されていて、データを読み込んでメールするまでの処理がほんの60行程度のコードで収まってしまいました。初めてのpythonでしたが、1日程度でざっくり動くものができ、2〜3日でだいたい完成しました。<br/>
+ただ、リアルタイム性を求めないような用途、たとえば1時間に1回程度のサンプリングならこれでも十分ですが、たとえば1分に1回とか、10秒に1回となるとメールでいちいち送ってはいられません。まとめて1000個分のデータを送るとか言うような、バッチ処理的アプローチも考えましたが、あまり面白くないなあとおもいつつ、フィジビリティテストのプロトタイピングは終わりました。<br/>
+そしてつい最近、MQTTというプロトコルの存在を知り、「ああ、これだ！」という直感で飛びつきました。</p>
+
+<p><strong>Coreデバイスのこと</strong></p>
+
+<p>コアデバイスという呼び方でいいのかどうかわかりませんが、データを集計する側のセットアップです。<br/>
+こちらは定番でubuntuを使うことにします。昔々はFreeBSDを使っていたのですが、しばらくunix系OSから離れているうちにlinuxがすごく使いやすくなっていたのでそちらに転向しました。<br/>
+この上で使うのはシェルとgnuplot程度です。（それと、ps2pdf）</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ET2014コンファレンス　レポート]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/30/et2014-report/"/>
+    <updated>2014-11-30T10:18:25+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/30/et2014-report</id>
+    <content type="html"><![CDATA[<p>２週間ほど前に開かれたEmbedded Technology の展示会（パシフィコ横浜）に行って来ました。「流行り」のIoTの情報とその流行り具合を体感しにいってきました。  やはりこればかりはnet上ではなかなか難しいです。</p>
+
+<p>カンファレンス主体で参加しましたので、その内容をメモしておきます。</p>
+
+<!-- more -->
+
+
+<h2>2014/11/19</h2>
+
+<ol>
+<li><p>　10:00〜11:00　　<strong>【IoT基調講演】IoTによる新ビジネスの可能性</strong>　　武居 輝好 氏　株式会社野村総合研究所</p>
+
+<p> <strong>1.　IOTとは?</strong><br/>
+ 物がネットに繋がることで価値あるサービスを生み出す。 M2Mとは違い、人がコントロール、人が情報を使う。<br/>
+ なぜ今なのか？　->  環境の進化　デバイス、回線、価格、ファンダメンタルの全て</p>
+
+<p> 　　<strong>実例：</strong><br/>
+ 　　Microsoft　Azureによる対応<br/>
+ 　　ARMの対応　OSの準備、クラウドの準備</p>
+
+<p> 　　<strong>標準化</strong><br/>
+ 　団体による　IETF, 3GPP, ITU, ETSI,oneM2M</p>
+
+<p> 　業界による　open interconnect, allseen alliance, industrial internet consortiam, ThreadGroup</p>
+
+<p> <strong>2.　先行ユーザ例</strong><br/>
+ M2MからIOTへ<br/>
+ M2Mは機器の制御、安全、保守のものだっが、機器から得られるデータを社会に還元すると言う形でIOTへ</p>
+
+<p> 　　<strong>何が出来るか？</strong></p>
+
+<ul>
+<li>付加価値の向上</li>
+<li>機能の向上、使い方のアドバイス、状況の可視化</li>
+<li>アフターサービスの充実</li>
+<li>リモートコントロール、故障の予兆を発見</li>
+<li>オペレーションの改善</li>
+<li>動作状況の記録を元にオペレーションの最適化、自動コントロール</li>
+</ul>
+
+
+<p> 　<strong>事例：</strong></p>
+
+<p> 　<strong>計測機器</strong>
+  データを直接サーバに送り、専門家に分析させ、即現場にフィードバック<br/>
+ 今までは：作業者の中に（現場に）計測のプロフェッショナルが必要だった<br/>
+ これから：現場は作業に集中することが出来る、リアルタイムでの分析結果のフィードバック、同様の事例とのマッチングなど付加価値</p>
+
+<p> 　<strong>ロストバゲッジの改善</strong>
+ 　単なるRFIDではなく、搭乗航空機、最終目的地、持ち主、日程、などの複合的な要素との関連づけによりロストバゲッジを改善する</p>
+
+<p> 　<strong>テスラ自動車</strong>
+ 　ソフトウエアアップデートの改善</p>
+
+<p> 　<strong>ブリジストン</strong>
+ 　タイヤのセンシングにより、鉱山用車両の最適管理　ドライバへのフィードバック、工場管理へのデータフィードバック、故障率寿命の予測によるメンテナンスの効率化など。</p>
+
+<p> 　<strong>スターバックス</strong>
+ 　コーヒーメーカのインテリジェント化　各店での利用の傾向、機器管理、豆のパラメタのフィードバックおよびレシピの最適化</p>
+
+<p> 　<strong>事例まとめ：</strong><br/>
+ 　　実用的面での問題点を解決する手段。リアルタイムの状況把握を現場からリモートで。</p>
+
+<p> <strong>3.　課題</strong></p>
+
+<ul>
+<li>リアルタイムのデータ取得・処理の方法</li>
+<li>端末のセキュリティ</li>
+</ul>
+
+
+<p> &ndash; セキュリティ：　回線・データのセキュリティ　と　得られるデータのセキュリティ<br/>
+ 　　クラッキングへの対応、ウイルスへの対応<br/>
+ 　　PCのようにリソースリッチ出ない状況の中でどのように対処するか？課題</p>
+
+<p> &ndash; リアルタイムデータ：　多量の端末による帯域の問題<br/>
+ 　　数万ノードがいっぺんに通信したらどうなるか。<br/>
+ 　　　　　　　↓<br/>
+ 処理の遅延、処理のコスト、トラフィック、プロセスパワー<br/>
+ これを解決するために、端末、ゲートウエイへの処理の移譲</p>
+
+<p> 端末の状態管理、データの一次処理などをデバイス側で行う
+ Big Dataの活用に支障が出ないように（つまり処理しすぎない）</p>
+
+<p> <strong>4.　IOTビジネス拡大に向けて</strong></p>
+
+<p> 　ベクトル１：　自社製品のデータを活用する<br/>
+ 　　　データの高密度かによる蓄積データの活用</p>
+
+<p> 　ベクトル2:　自社製品と他社製品のネットワーク<br/>
+ 　　　リアルタイムで他社とのネットワークに繋がる、社会と繋がることによる新しいサービスの提供</p>
+
+<p> これら両方を合わせて新しいビジネスモデルの構築<br/>
+ 　　　　　　↓<br/>
+ リアルタイムな多機器との連携</p>
+
+<ul>
+<li>既存サービスとの連携でそのサービスの品質を向上する、今まで無理と思われていたサービスが可能になる。</li>
+<li>「デバイスメーカから見たときの異業種」であると、より有効なサービスが生まれる可能性がある。</li>
+<li>メーカがAPIを公開することにより、まったく知らない人たちがデータを活用、あるいは全く違う分野のデータと結合させあたらなサービスが生まれる可能性。　->　<strong>新しいエコシステムへ</strong></li>
+</ul>
+
+
+<p> <strong>感想</strong>
+ IoTの目的や目指すところの全体像が見えた、重要なプレゼンだったように思います。特に、坂村さんの提唱するように「すべてをAPIでオープンにする」というところと重なっているように思います。APIはデバイス側の受け口ですが、IoTというとどちらかといえば情報の取り出し口のようなニュアンスがあります。実際にはその両方がIoTには込められていると思い直しています。
+ 問題点として、処理負荷とセキュリティを挙げています。私はエッジ側での処理はできるだけしないほうがいい、とおもっているので、処理負荷については興味があるところです。しかしGPGPUの発展などを見ていくと、そんなに大コストでなく、十分な処理ができるようにも思います。リアルなもののサンプリングは色付けなしで細かくしておいたほうが後々役立ちます。
+ 一方セキュリティは大きな問題ですが、センシング側のノードが増えると同じものを違う角度でサンプリングしているという状況が多く出てくるはずです。そのコヒーレンシ的な情報をうまく活用すれば、クラッキングなどに強いシステムができるような気がしています（素人目線ですが）。　お互いのコネクションが有機的になりニューラルネットワークのようになれば自律的になり得るかなあ。そうすれば1個や2個クラックされても大勢に影響が無いようにできるはず。</p></li>
+<li><p>　11:15〜12:00　　<strong>IoT時代を牽引するセンサ・ソリューション</strong>　　野口 洋 氏　STマイクロエレクトロニクス株式会社</p>
+
+<p> センサ、プロセッサ、通信と、IoTで必要なものは全てありますよ、的な内容。あまりSTの半導体は使ったことないのだけれど、MEMS関係はこれからお世話になるかもしれません。</p></li>
+<li><p>　13:30〜14:30　　<strong>【IoT基調講演】ウェアラブルコンピューティングのための組込み技術とソリューション</strong>　　塚本 昌彦 氏　神戸大学大学院</p>
+
+<p> 特に記載することはないです。タイトルとはだいぶかけ離れた内容で、話題もnet上の話題を超えてはいません。</p></li>
+<li><p>　14:45〜15:30　　<strong>組込みシステムをクラウドに接続する際の課題</strong>  ダグラス・アンダーソン 氏　Microchip Technology Incorporated</p>
+
+<ul>
+<li>IoTでは、デバイスからITまでの広い範囲をインテグレートする必要がある。それは一人の技術者で出来る話では無い。</li>
+<li>IOTを束ねるゲートウエイを導入するのが効率が良い。</li>
+<li>IOTが必要とされるところはインフラが少ない場合がある、無線でゲートウエイまでデータを飛ばしてそこから優先や3Gを使ってネットに。</li>
+<li>ITの側ではパートナーと仕事を進めるべき。組み込み技術者が思っているほどITは簡単では無い。</li>
+<li>Amazon web serviceと提携したWCM開発キット　基板上のスイッチのモニタ、LEDのドライブをwebからできる。</li>
+</ul>
+
+
+<p> <strong>感想：</strong><br/>
+ まずは全部自分で組み立ててみる、というのがアマチュア精神。規模が小さければ全部自前でもokとおもう。ITのプロが逆にIoTのことがわかるかというと、そうでもないはず。ならばそこに新しいビジネスがあるかも。</p></li>
+</ol>
+
+
+<h2>2014/11/20</h2>
+
+<ol>
+<li><p>　10:00〜11:00　　<strong>【IoT基調講演】ClouT: IoTとクラウドの融合によるスマートシティの構築</strong>　　徳田 英幸 氏　慶應義塾大学</p>
+
+<p> 街レベルのIoTが生活をサポートする<br/>
+ clouT：IoTのためのクラウドの融合</p>
+
+<p> ICTの進化によるSocial Open Big Dateの活用。それをサポートするIoTによる情報収集。<br/>
+ IoTのドライブフォース：　繋がるメリット、コスト、ネットワークの利便性</p>
+
+<p> メリットとリスクが発展のキーを握っている</p>
+
+<p> インターネットの進化：　そのなかで目指した物は&hellip;</p>
+
+<ul>
+<li>時間空間からの自由</li>
+<li>メディアからの自由</li>
+<li>リスクからの自由</li>
+<li>現実の物からの自由</li>
+<li>物理的容量からの自由</li>
+</ul>
+
+
+<p> これを街の単位で考えると<br/>
+ 「街」の抽象化：</p>
+
+<ul>
+<li>IOTによりセンシングした情報で街の状態をサイバー空間内で抽象化し処理を施し実空間に反映（アクチュエーティング）する</li>
+</ul>
+
+
+<p> インターネットで目指したことを「街」を対象にやってみる。</p>
+
+<ul>
+<li>コンテキストキャプチャー: 現状をいかにサンプリングするか</li>
+<li>Visualizing context: コンテキストをビジュアルか（見える化）</li>
+<li>optimal control: contextをもとに最適制御</li>
+<li>prediction: 状態の予測</li>
+</ul>
+
+
+<p> <strong>ClouT = cloud of things:</strong></p>
+
+<p> ClouTプロジェクトのコンセプトは，クラウドコンピューティングを活用することにより，「モノのインターネット」と「人のインターネット」を「サービスのインターネット」を通してつなぐこと。</p>
+
+<p> 　　->  街の仮想化のベースとなる場所</p>
+
+<p> <strong>言葉：</strong></p>
+
+<ul>
+<li><p>core heavy , Edge heavy :<br/>
+  処理をコア（クラウド側）でやるのか、エッジ（デバイス側）でやるのかということ</p></li>
+<li><p>センシングクラウド :<br/>
+処理して必要な物だけをCloudにしまう（でも、それが要らない物、と言う判断はどうやってするのか）</p></li>
+<li><p>IOTカーネル :<br/>
+カーネルという考え方　　物理情報のオブジェクト化、抽象化</p></li>
+<li><p>ソフトセンサ :<br/>
+実際のIOTから得られた情報で二次的な情報を作り出す、あるいはwebなどの情報から状態をセンスする。
+ソーシャルセンシングに近い？</p></li>
+</ul>
+
+
+<p> <strong>感想：</strong><br/>
+ 街というハードウエアをプログラミング対象として考えるとこうなる、のだろうが、すごいこと考えるなあ、というのが感想。ただ、線形のシステムではないので、一朝一夕に制御できるとは思えないけれど、今のソフトウエア技術を持ってすればいずれ最適制御は可能なんだろうなあ。<br/>
+ インターネットの目的を聞いた時には、かなりセンセーショナルでした。そうなのかあ。と。　たしかにそうですよね。ここまで一般化できると、IoTへの視点も変わってきます。<br/>
+ 人とIoTを街という視点から見ると、街とインタラクションしながら動いているという意味では、同じものとみなせますね。人はアクチュエートできない、という点で違うけれど、手法を変えればある程度「制御」はできる。逆にものは完全に制御可能だけれど、「街」という複雑系の中に入った場合、果たして制御可能と言えるように振る舞えるのか？<br/>
+ なんてことが頭をよぎりました。</p></li>
+<li><p>　11:15〜12:00　　<strong>総解説・IoTを支える技術</strong>　　竹之下 航洋 氏　株式会社アットマークテクノ</p>
+
+<p> IoTのリファレンスモデルの提唱：システムを考えやすくするためのリファレンスモデル</p>
+
+<p> Layer 1．　<strong>フィジカルデバイス</strong>:<br/>
+ 　デバイスとコントローラ、センサ、アクチュエータなど　データを送り、コマンドを受け付ける</p>
+
+<p> Layer 2．　<strong>コネクティビティ</strong>:<br/>
+ 　デバイスをネットワークに繋ぐ</p>
+
+<p> Layer 3.　<strong>Edgeコンピューティング（fogコンピューティング）</strong>:<br/>
+ 　エッジ側での計算　　評価、フォーマット変換、必要なデータの抽出、判断<br/>
+ 　トラフィック、クラウドストレージデータの削減　コスト削減</p>
+
+<p> Layer 4.　<strong>データアキュムレーション、ストレージ　（ここからはIT系の仕事）</strong>:<br/>
+ 　databaseの最適化　例えば google big query, Hadoop<br/>
+ 　大型ストレージ　例えば　amazonS3　GoogleDrive<br/>
+ 　IoTからのデータはイベントドリブンなので、とりあえず保管、という工程が必要になる。</p>
+
+<p> Layer 5.　<strong>Data Aggregation、アブストラクション</strong>:<br/>
+ 　データベース同士の接続のためのレイヤ<br/>
+ 　データベースの抽象化、相互接続によるアプリケーションインターフェイスの容易化</p>
+
+<p> Layer 6.　<strong>アプリケーション</strong>:<br/>
+ 　IoTのデータに基づく</p>
+
+<ul>
+<li>レポーティング</li>
+<li>解析</li>
+<li>コントロール</li>
+</ul>
+
+
+<p> 　ビッグデータで出来ることは</p>
+
+<ul>
+<li>過去の解析</li>
+<li>異常検出</li>
+</ul>
+
+
+<p> 　多くのデータを処理できることで、見えていなかった何かが見える、あるいはデータ更新頻度を上げることで何か見落としていた物がみえるかも。<br/>
+ 　予測には　Google Prediction APIなど　モデリングよりも多くのデータから類推する方が速い。<br/>
+ 　最適化　データトレンドから予測し、最適なリソース配置を。</p>
+
+<p> Layer 7.　<strong>コラボレーティング　プロセス</strong>:<br/>
+ 　他の系とのリレーション
+ 　問題は、「ビッグデータを元に何を動かすのか、何にフィードバックするのか」</p>
+
+<p> <strong>まとめ</strong>：<br/>
+ 物作り企業にできることはレイヤの１〜３ぐらいだが、その他のレイヤのことも考えておく必要がある。<br/>
+ セキュリティは重要課題。</p>
+
+<p> <strong>キーテクノロジ</strong><br/>
+ &ndash; edge側でのネットワーク</p>
+
+<ul>
+<li>SmartMESH　タイマー同期によるスリープ解除、ローパワー高信頼性</li>
+<li>Wi-SUN     920MHzスター型　長距離転送</li>
+<li>EnOcean     928MHz　省エネルギー、自分で発電など</li>
+</ul>
+
+
+<p> &ndash; プロトコル</p>
+
+<ul>
+<li>HTTP</li>
+<li>MQTT</li>
+<li>Fluentd     ソフトウエア実装　OSのログを取る仕組みと似ている</li>
+</ul>
+
+
+<p> &ndash; セキュリティの問題:<br/>
+ 　根本的解決には結局はVPNしかない（どうかなあ？？　プロモーション的にはそうだろうけど）</p>
+
+<p> <strong>感想：</strong><br/>
+ fluentdはフォーマットとしてJSON（JavaScript Object Notation）を使っている。データベースでフォーマットの解析が容易。そのままデータを入れればDBで解析できる。<br/>
+ MQTTなどはプロトコルだけの規定なので、データそのものについてフォーマットの指定は無い。</p>
+
+<p> リファレンスモデルはいいですね。素人の私でもわかりやすいです。<br/>
+ プレゼンタはセキュリティの問題をポイントにして、自社製品への誘導を試みていますが、私のようなソロテクニシャンからするとそういうコストのかかることはできない。ベストエフォートというか、現状のコスト配分を最適にしてセキュリティリスクをできるだけ回避するようにしかできないのですよ。現状での手段はIPsecとSSH、暗号化してデータを送るとか。<br/>
+ クラッキングがソーシャルを利用するように、セキュリティ強化のためにソーシャルなものを利用できないでしょうかね？それが一番強力なような気がする。<br/>
+ データのプレディクションにはモデルを使わない、というのはけっこうショック。古い人間なので「モデリング」は重要とおもっていたけど。変なモデルを作るよりは、今までの1万倍のデータを持って来たほうが正確にプレディクションができる、というのは理にかなっているとおもったり、素人ながら。さらに、それをgoogleがすでに提供しているというのは初めて知った。</p></li>
+<li><p>　13:30〜14:30　　<strong>【IoT基調講演】IoTの活用でビジネスイノベーションを加速しよう</strong>　　　稲田 修一 氏　東京大学</p>
+
+<p> <strong>ビジネスの付加価値をどうやってIoTで高めるか</strong></p>
+
+<p> 例：　アグリカルチャ　オランダの例<br/>
+ 単なる生産性の向上では無く、マーケットオリエントな生産をIoTで可能にする</p>
+
+<p> &ndash; コンピュータを単なるデータ解析だけでなく、判断、理解に応用する流れ<br/>
+ &ndash; そのためのinputとしてIoT　物理世界の情報をサイバー世界に持ち込むためのインターフェイスという位置づけ<br/>
+ &ndash; それによって　認識・判断　が可能に</p>
+
+<p> 例：　消費者の理解、生産工程の理解<br/>
+ 今まで部分的だった情報を統合できる可能性　これによって総合的な理解</p>
+
+<ul>
+<li>industrie 4.0　と　CPS (Cyber-Phisical system)</li>
+</ul>
+
+
+<p> <strong>スマート化の本質：</strong></p>
+
+<ul>
+<li>データ活用をどこに適用するか　「バリューチェーン」の明確化と最適な情報フィードバック</li>
+<li><p>生産性・生産品質は当たり前の物になるだろう。</p></li>
+<li><p><strong>品質が当たり前になればその他のところで製品の評価が決まる。（デザイン？）</strong></p>
+
+<p> -> これにより「プロダクト」のパラダイムシフトが起こるであろう</p></li>
+</ul>
+</li>
+<li><p>　14:45〜15:30　　<strong>IoTを夢で終わらせないために必要な事は何か</strong>　　　桑原 一悦 氏　日本電気株式会社</p>
+
+<ul>
+<li>IoTに必要なことは　アーキテクチャの理解</li>
+<li><p>IoTを活用しようとしている場所の「アーキテクチャ」を理解することでデータ活用の仕組みを効率的に作ることが出来る<br/>
+(これは、ソフトウエアの構造化のところでやったデータ構造＋アルゴリズム＝プログラムというのの逆の話？)</p></li>
+<li><p>ステークホルダの相関関係を明確に</p></li>
+<li>情報の入出力、解析、コスト、処理、使いやすさのバランスを考えた「機能配置」</li>
+</ul>
+
+
+<p> <strong>感想</strong><br/>
+ IoTを使ったシステムのアーキテクチャを理解せよ、という話。全体を見ないと最適制御、最適配置、最適利益配分はできないということですね。時に組み込み技術者は全体を見ることを忘れてしまいますので、このことばに自戒をこめて。</p></li>
+</ol>
+
+
+<h2>2014/11/21</h2>
+
+<ol>
+<li><p>　10:00〜11:00　　<strong>【IoT基調講演】IoTにより変わる世界</strong>　　　内海 弦 氏　アーム株式会社</p>
+
+<p> IoTは物作りを変える可能性がある。<br/>
+ 今までの流れ：　電子化からソフト化へ　　　例：そろばん−＞計算機械−＞電卓−＞アプリ <br/>
+ 全てはソフト化へむかっている。 実世界が抽象化によってソフトで表現できる。</p>
+
+<p> IoTのポイント：</p>
+
+<ul>
+<li>情報のオープン化</li>
+<li>他のビジネスのネタになるような情報の生成</li>
+<li>抽象化</li>
+<li>標準化</li>
+<li>水平分業・協業</li>
+</ul>
+
+
+<p> mbedの話</p>
+
+<p> mbedも抽象化、標準化を推し進めてより使いやすい物にしていく。そのためにデバイスをプラットフォーム化、オープンソース化する。<br/>
+ 共通OSの提供により、パワーコントロール、セキュリティ、デバイスドライブの隠蔽、抽象化。<br/>
+ OSはイベントドリブンなもので、RTOSではない。　ライトウエイトでよりIoT向けの物に。来年リリース<br/>
+ さらにIoTが繋がる先のクラウドも提供。</p>
+
+<p> 感想：<br/>
+ さすがにARMのプレゼンだけあって満席に近かった。現状mbedはOSが無い状況なので、「公式OS」が発表されればより一層アプリケーションが広がる可能性がある感じがする。私も乗り遅れないように今から勉強を始めようと思います。<br/>
+ 「抽象化」で、フィジカルなすべてがサイバーに投射される、という感覚は、internetが一般化した時にいろんな情報がnet上で再公開され利便性が増したことを想起させます。今度は、フィジカルな「もの」がそれにつながるわけで、これで本当のサイバーが出来上がるという感じがします。セキュリティなど考慮するべきことは多々あると思いますが。</p></li>
+<li><p>　11:15〜12:00　　<strong>IoT市場動向と活用事例</strong>　　　江川 将峰 氏　ディジインターナショナル株式会社</p>
+
+<p> zigbeeを中心としたワイヤレスデバイスの紹介。恥ずかしながらこの会社のことを知りませんでした。業界では有名なのでしょうね。<br/>
+ ワイヤレスを使う予定はあまりなかったのですが、このプレゼンで指摘されたように「リソースリッチでない環境」ではバッテリ動作の小型・省電力無線デバイスとハブとなるプロセッサは必要かなあ、とも思い直しています。調べてみると、意外と簡単に使えそうなので試してみるものリストに入れておきます。</p></li>
+<li><p>　12:30〜13:30　　<strong>組込み機器から始まるInternet of Your Things</strong>　　　澤 円 氏　日本マイクロソフト株式会社</p>
+
+<p> 招待講演ですが、まあ、Microsoftですからね。内容はまあしれています。デモンストレートを中心とした現実離れしたIoTデバイスの開発事例でした。こちらはプロなので、「小学生でもできますよ」的なプレゼンテーションは全く意味がない。<br/>
+ ただ、MSがIoTに対して（というかクラウド用サービス）に結構本気だというのはわかった。サブミリオンとかミリオンオーダーのデバイスをさばくような大メーカさん向けのサービスかな、という感じです。
+ 私は、IoTは大手メーカだけのものではなく、小さなメーカ(makers?)が製品付加価値を大きくするための強力なツールだと思うので、年産数台のものを何十種類も作っているような中小メーカのためにこそ活用されるべきで、そこがメインターゲットだと思っています。</p></li>
+<li><p>　13:30〜14:30　　<strong>古くて新しいシステム開発のアプローチ システム エンジニアリングが導く、日本のものづくりの新ステージ</strong>　　　（パネルディスカッション）</p>
+
+<p> システムズエンジニアリングは直接IoTとは関係無いですが、IoTを活用するシステム全体を考慮するとこういう視点まで引いて考える必要があるかなと思います。ここはまとまってメモできなかったので、キーワード的に箇条書きでまとめておきます。</p>
+
+<ul>
+<li>団塊世代の技術者の「おれってすごい」的発言で場がしらける。</li>
+<li>NASDAの技術者の話がなかなか説得力があり、おもしろい。</li>
+<li>ポイントは：行き着く先に何があるのか、意識することが大切</li>
+<li>人間も「システムの一部」として、その要因を出来るだけ排除するのか、それとも最大限に考慮するのか</li>
+<li>現実世界の抽象化</li>
+<li>人材のマネージメント、技術・スキル・マインド・性格</li>
+<li>ステークホルダとバリュー</li>
+<li>システムを取り巻く環境もシステムの一部（インフラ、政策など）</li>
+</ul>
+</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[このwebでは...]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/29/motivation/"/>
+    <updated>2014-11-29T14:52:11+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/29/motivation</id>
+    <content type="html"><![CDATA[<p>このwebは、IoTデバイスを開発する経過をメモするために設けました。</p>
+
+<p>最初のアイディアは2012年の春頃のことです。データロガーのデータをユーザに向けて一定時間ごとに報告するようなシステムを作る必要に駆られて設計することになり、<!-- more -->まずはメールベースでデータを送信するようなハードウエアを、ArduinoとMac（！）でプロトタイピングしました。<br/>
+このシステムは一応うまく動いて、半年の間、データを１時間ごとにクラウド（といっても事務所の中のlinuxサーバ）に向け「メール」し、その中でデータをまとめ、６時間毎にgnuplotで作成したPDFファイルのグラフをユーザ送ることが出来ました。</p>
+
+<p>その後、2013年にRaspberryPIにエッジデバイス機能を実装して試していましたが、なんかちょっと腑に落ちない感じでした。<br/>
+というのも、メールプロトコルというのがどうも気になっていたのです。ある程度セキュアでいいのですが、双方向にしようと思うと結構エッジ側の負担が重くなる。RaspberryPIぐらいの高機能デバイスならいいですが、mbedぐらいの軽いデバイスに載せ替えようとおもうと、ちょっと大変。将来的にバッテリ駆動+3G回線みたいな環境に適応させることを考えると、軽いデバイスで実装できるシステムを作っておいたほうがいい、そんな気持ちでした。<br/>
+そんなところに、MQTTというプロトコルがあるということをつい最近（2014年夏頃）知って、それに飛びついたわけです。試したところ、RaspberryPIなら十分軽くてブローカ（MQTTのサーバのこと）にもできそうだし、最初のアイディアのシステムはMQTTに移行してRaspberryPI上で同様の機能が２つぐらいのスクリプトファイルだけで動作しています。さらにmbedにもプロトコルの実装例があるので、素人でも行けそうかなあと思いました。</p>
+
+<p>このへんはこれからの作業になりますが、まずは、このデバイスのプロトタイピングでやった内容をブログにまとめておきたいと思います。<br/>
+また、同様にこれからやることもまとめていきたいと思います。<br/>
+将来自分が見て「ああ、こんなことやってたのね」と思えると同時に、同じようなことをやろうとしている人の助けになればと思います。</p>
+]]></content>
+  </entry>
+  
 </feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: paho | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/paho/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-11T14:01:54+09:00</updated>
+  <updated>2015-01-12T11:12:55+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -37,10 +37,10 @@
 <p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
 
 <ul>
-<li><h3>MQTT Clients</h3>
+<li><h2>MQTT Clients</h2></li>
+<li><h3>C/C++</h3>
 
-<p>  C/C++<br/>
-  Posix C / Windows C<br/>
+<p>  Posix C / Windows C<br/>
   embedded systems<br/>
   Posix C++ / Windows C++<br/>
   embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p></li>
