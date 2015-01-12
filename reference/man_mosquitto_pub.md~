@@ -1,0 +1,14 @@
+---
+layout: page
+title: "man mosquitto_pub"
+date: 2014-12-06 0:00
+
+comments: true
+sharing: true
+footer: false
+---
+
+[`mosquitto_sub(1)`](http://mosquitto.org/man/mosquitto_sub-1.html)
+
+日本語：
+mosquitto_sub シンプルなメッセージ配信のための
