@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ipconfig | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/ipconfig/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-13T21:10:27+09:00</updated>
+  <updated>2015-01-14T21:14:01+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -62,6 +62,13 @@ eth0      Link encap:Ethernet  HWaddr b8:27:eb:29:61:2d
 <p>今回の目的には十分かとおもいます。</p>
 
 <p>しかし、なんかもっといい方法（どっかのファイルを見るとか）がありそうなきもします。。。。</p>
+
+<p>さて、このコマンドラインをデバイスのスクリプト（cronで動く）にいれてみたところ、うまく動かない。具体的には、結果がNULLになってしまうのです。試しに、手元でコマンドラインから実行するとうまく動く。うう〜ん。<br/>
+さっぱり理由が分からず、いろいろ調べてみたところ「<a href="http://higelog.brassworks.jp/?p=1775">動かないときはエラーログを取れ！</a>」という啓示をいただき、試してみたところ、<code>command not found</code>とのこと。ifconfigコマンドへのパスが通ってない、という情けないという状況。言われてみれば確かにそんなことをどこかで見たような気がするなあ。。。。</p>
+
+<p>ということで、ifconfigコマンドを絶対パスで指定して事なきを得ました。</p>
+
+<p><strong>「CRONのコマンドは絶対パス指定」</strong>　勉強しました。。。</p>
 ]]></content>
   </entry>
   
