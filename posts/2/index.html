@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。
-今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。 &hellip;">
+  <meta name="description" content="いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/14/awk-example/">awkを使う</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/14/awk-example/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -447,50 +490,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/11/30/et2014-report/">ET2014コンファレンス　レポート</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-11-30T10:18:25+09:00" pubdate data-updated="true">2014 / 11 / 30</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>２週間ほど前に開かれたEmbedded Technology の展示会（パシフィコ横浜）に行って来ました。「流行り」のIoTの情報とその流行り具合を体感しにいってきました。  やはりこればかりはnet上ではなかなか難しいです。</p>
-
-<p>カンファレンス主体で参加しましたので、その内容をメモしておきます。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/11/30/et2014-report/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -538,6 +537,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
       </li>
     
@@ -551,10 +554,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/29/vim/">paho-mqttで回線を切るとどうなるか</a>
       </li>
     
   </ul>
@@ -597,6 +596,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
       </li>
     
@@ -610,10 +613,6 @@
     
       <li class="post">
         <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/29/vim/">paho-mqttで回線を切るとどうなるか</a>
       </li>
     
   </ul>
