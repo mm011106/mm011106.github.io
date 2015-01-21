@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>日本語入力 - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="日本語入力を変更しました。Mozcです。 なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。 インストールメモ、といってもapt-getだけですが。。。 sudo apt-get install ibus-mozc だけです。
+あとは、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/14/ime/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">日本語入力</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-14T20:07:28+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>日本語入力を変更しました。Mozcです。</p>
+
+<p>なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。</p>
+
+<!-- more -->
+
+
+<p>インストールメモ、といってもapt-getだけですが。。。</p>
+
+<pre><code>sudo apt-get install ibus-mozc
+</code></pre>
+
+<p>だけです。
+あとは、一旦ログアウトしてログインするとibusの「インプットメソッドの選択」の日本語入力メニューにmozcが見えてえいるはず。それを選択して、「設定」を押して適当な設定変更をして、おしまい。</p>
+
+<p>日本語入力はキーボードに次いで重要な部分なので、思ったとおりに動いてくれるのは大変ありがたいです。</p>
+
+<p>1つ気になるのが、変換中でのキャレット表示がわかりづらい。これはシステムの問題かと思いますが、たとえば、「ひとつきになるのが」と打って変換した時に、「ひと月になるのが」と表示されてるのですが、変換がどこで区切られて変換されているのかがわかりにくいです。普通のIMEだと変換しているところまでが太いアンダーラインがついたりしますが、ubuntu12.04では全部同じ太さのアンダーラインになってしまいます。14以降だと改善されているのですけど。。。。</p>
+
+<p>ちなみに、今、キーボードはFILCOのMajestouch 黒軸　です。いいキーボードなのですが、キーのタッチが私の癖に合わないみたいで、ミスタイプがちょっと多いです。もう少しクリックのある感じで、奥まで押した時に打鍵が確定するのがいいような感じです。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-14T20:07:28+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ubuntu/'>ubuntu</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/14/ime/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/14/ime/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/14/awk-example/" title="Previous Post: awkを使う">&laquo; awkを使う</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/12/19/disable-clean-session/" title="Next Post: 2つのトピックが。。。">2つのトピックが。。。 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

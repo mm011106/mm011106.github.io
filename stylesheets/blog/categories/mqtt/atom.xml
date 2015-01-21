@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mqtt | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/mqtt/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-18T17:08:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Paho MQTT のインストール]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/"/>
+    <updated>2014-12-21T11:25:59+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/21/paho-mqtt</id>
+    <content type="html"><![CDATA[<p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+<!-- more -->
+
+
+<p>インストールする前に、簡単にお勉強。</p>
+
+<p>Phao Projectとは一体何者？
+<a href="http://www.eclipse.org/paho/">Paho project</a></p>
+
+<blockquote><p>The Paho project provides scalable open-source client implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine‑to‑Machine (M2M) and Internet of Things (IoT).</p>
+
+<p>M2M、IoTへのアプリケーションに向けた、オープンで標準なメッセージングプロトコルの、スケーラブルでオープンソースのクライアント実装を提供するプロジェクトです。</p></blockquote>
+
+<p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
+
+<ul>
+<li><h2>MQTT Clients</h2></li>
+<li><h3>C/C++</h3>
+
+<p>  Posix C / Windows C<br/>
+  embedded systems<br/>
+  Posix C++ / Windows C++<br/>
+  embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p></li>
+<li><h3>Java</h3>
+
+<p>  J2SE<br/>
+  Android Service</p></li>
+<li><h3>JavaScript</h3></li>
+<li><h3>Python</h3></li>
+<li><h3>Go Client</h3></li>
+<li><h3>C# .Net and WinRT</h3></li>
+<li><h3>Utilities</h3>
+
+<p>  MQTT Conformance/Interoperability Testing</p></li>
+</ul>
+
+
+<p>で、目的のPython向けのクライアントモジュールは、</p>
+
+<p><a href="http://www.eclipse.org/paho/clients/python/">Python support:</a></p>
+
+<blockquote><p>The Paho Python Client provides a client class with support for both MQTT v3.1 and v3.1.1 on Python 2.7 or 3.x.</p></blockquote>
+
+<p>ということで、2.7と3.xの両方をサポートしているようです。</p>
+
+<p>ここまで確認した所で、インストールを始めました。</p>
+
+<pre><code class="sh steps installing Paho-mqtt for Python">$ python --version
+Python 2.7.3
+
+$ sudo apt-get install python-pip
+
+$ sudo pip install paho-mqtt
+
+$ cat paho-mqtt-test.py
+
+import paho.mqtt.client as mqtt
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("$SYS/#")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.payload))
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("iot.eclipse.org", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
+
+
+$ python ./paho-mqtt-test.py
+
+Connected with result code 0
+$SYS/broker/version mosquitto version 1.3.5
+..
+..
+$SYS/broker/uptime 1258785 seconds
+$SYS/broker/clients/total 2
+$SYS/broker/clients/inactive 1
+$SYS/broker/clients/active 1
+$SYS/broker/clients/maximum 2
+$SYS/broker/clients/expired 0
+$SYS/broker/messages/stored 72
+$SYS/broker/messages/received 80212
+$SYS/broker/messages/sent 65057
+$SYS/broker/subscriptions/count 2
+$SYS/broker/retained messages/count 50
+$SYS/broker/heap/current 12888
+$SYS/broker/heap/maximum 23872
+$SYS/broker/publish/messages/dropped 5069
+$SYS/broker/publish/messages/received 20949
+$SYS/broker/publish/messages/sent 5802
+$SYS/broker/publish/bytes/received 598854
+$SYS/broker/publish/bytes/sent 382692
+$SYS/broker/bytes/received 2003874
+$SYS/broker/bytes/sent 1025439
+.....
+</code></pre>
+
+<p>となりました。
+ここまで、10分かからず完了。</p>
+
+<p>先人に感謝。引き続き、巨人の肩の上で仕事させてもらいます。</p>
+
+<hr />
+
+<p><a href="http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf">MQTT-SN</a></p>
+
+<p>MQTT For Sensor Networks</p>
+
+<p>だそうです。概略だけ、かいつまんでみると。</p>
+
+<blockquote><p>It is optimized for communications over networks where bandwidth is at a premium or where the network con-
+nection could be intermittent. However MQTT requires an underlying network, such as TCP/IP, that provides
+an ordered lossless connection capability and this is too complex for very simple, small footprint, and low-cost
+devices such as wireless SAs.
+The purpose of this document is to specify MQTT-SN, a pub/sub protocol for wireless sensor networks.
+MQTT-SN can be considered as a version of MQTT which is adapted to the peculiarities of a wireless commu-
+nication environment.</p>
+
+<p>センサーネットワークのような、回線の費用がかかるような場所、しばしば回線が落ちるようなところに最適化されたMQTTプロトコルではありますが、小さなローコストのシンプルデバイスにとっては、複雑すぎるTCP/IPのようなロスレスのコネクションを基礎にしています。
+このドキュメントはワイヤレスセンサネットワークのためのパブリッシュ・サブスクライブプロトコルであるMQTT-SNの仕様を規定します。MQTT-SNはワイヤレスコミュニケーション環境の特色に特化したMQTTのバージョンだと考えられます。</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MQTTのパケットを覗いてみた(1)]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/"/>
+    <updated>2014-12-20T12:24:00+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/20/mqtt-packets</id>
+    <content type="html"><![CDATA[<p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+<!-- more -->
+
+
+<h2>mosquitto_sub でサブスクライブ要求した場合</h2>
+
+<p>まずは、パケットをキャプチャするものを用意しなければいけません。
+定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。
+<a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
+
+<p>まとめておくと、
+<code>sh Install wireshark and configure...
+:# apt-get install wireshark
+:# setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+</code></p>
+
+<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
+
+<p>サブスクライブを要求します。</p>
+
+<pre><code>:$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+</code></pre>
+
+<p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
+
+<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
+
+<hr />
+
+<h3>STEP 1: 接続要求　Client -> Broker</h3>
+
+<pre><code class="sh ">0000   10 22 00 06 4d 51 49 73 64 70 03 02 00 3c 00 14  ."..MQIsdp...&lt;..
+0010   6d 6f 73 71 5f 73 75 62 5f 33 35 38 35 5f 75 62  mosq_sub_3585_ub
+0020   75 6e 74 75                                      untu
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br/>
+0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)</p></li>
+<li><p>可変ヘッダー<br/>
+0002 : 次のメッセージの長さ　MSB<br/>
+0003 : LSB　（ここでは6byte）<br/>
+0004 : &ldquo;MQIsdp&rdquo; （ここは定型句のようです）<br/>
+000A : プロトコルバージョン &ldquo;03&rdquo;<br/>
+000B : FLAGs (CleanSession=&lsquo;1&rsquo;)<br/>
+000C : Keep Alive timer[s] MSB<br/>
+000D : Keep Alive timer[s] LSB  （ここでは60秒）<br/>
+000E : 次のメッセージの長さ　MSB<br/>
+000F :  　　LSB　（ここでは20byte) <br/>
+0010 : クライアント識別子 (オプション&ndash;idで指定したものが入ります。この例ではデフォルト値）</p></li>
+</ul>
+
+
+<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
+
+<hr />
+
+<h3>STEP 2 : 要求の返事　Client &lt;- Broker</h3>
+
+<pre><code>0000   20 02 00 00                                       ...
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br/>
+0001 : 長さ 2byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 : トピック名圧縮要求(予約：未使用）<br/>
+0003 : 接続要求戻りコード（ここでは&#8217;00&#8217;で接続許可。&#8217;00&#8217;以外は接続拒否）</p></li>
+</ul>
+
+
+<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
+
+<hr />
+
+<h3>STEP 3: サブスクライブ要求　Client -> Broker</h3>
+
+<pre><code>0000   82 1b 00 01 00 16 24 53 59 53 2f 62 72 6f 6b 65  ......$SYS/broke
+0010   72 2f 6d 65 73 73 61 67 65 73 2f 23 00           r/messages/#.
+</code></pre>
+
+<ul>
+<li><p>固定ヘッダ：<br/>
+0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br/>
+0001 長さ　27byte</p></li>
+<li><p>可変ヘッダ：<br/>
+0002 メッセージID　16bit (MSB,LSB)<br/>
+0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br/>
+0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br/>
+001C QoS指定　要求するサブスクライブのQoS指定　QoS=&lsquo;0&rsquo;</p></li>
+</ul>
+
+
+<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
+
+<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
+
+<hr />
+
+<h3>STEP 4: データの送付　Client &lt;- Broker</h3>
+
+<p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
+
+<pre><code>0000   31 1f 00 1b 24 53 59 53 2f 62 72 6f 6b 65 72 2f  1...$SYS/broker/
+0010   6d 65 73 73 61 67 65 73 2f 73 74 6f 72 65 64 37  messages/stored7
+0020   32 31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  21$..$SYS/broker
+0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv
+0040   65 64 37 33 38 33 30 31 20 00 19 24 53 59 53 2f  ed738301 ..$SYS/
+0050   62 72 6f 6b 65 72 2f 6d 65 73 73 61 67 65 73 2f  broker/messages/
+0060   73 65 6e 74 35 39 34 34 31                       sent59441
+</code></pre>
+
+<p>固定ヘッダ：<br/>
+0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br/>
+0001 : 長さ　31byte</p>
+
+<p>可変ヘッダ：
+0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br/>
+0004 : トピック名　&#8217;$SYS/broker/messages/stored&#8217;<br/>
+  (QoSによっては、ここにメッセージID（16bit）が入る）<br/>
+001F : ペイロード　上記トピックのデータが来る<br/>
+　（ここまでが固定ヘッダで指定された長さ）</p>
+
+<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
+
+<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
+
+<pre><code>0020      31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  .1$..$SYS/broker
+0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv
+0040   65 64 37 33 38 33 30
+</code></pre>
+
+<hr />
+
+<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
+
+<p>仕様をよく見ると下記のように書いてありました。</p>
+
+<blockquote><p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.</p>
+
+<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br/>
+Each byte encodes 128 values and a &ldquo;continuation bit&rdquo;.<br/>
+For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br/>
+The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p></blockquote>
+
+<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。
+つまりは、</p>
+
+<ul>
+<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
+<li>切った残りのbitに&#8217;1&#8217;がのこっているのなら、切り取った7bitの最上位に&#8217;1&#8217;をつけて、最初の「長さを示す値(1byte)」とする</li>
+<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
+</ul>
+
+
+<p>という事がわかりました。</p>
+
+<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので
+単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。</p>
+
+<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
+
+<hr />
+
+<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
+
+<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。
+しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
+
+<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br/>
+clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br/>
+最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
+
+<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
+デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
+    <updated>2014-12-19T20:45:30+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
+    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+<!-- more -->
+
+
+<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+
+<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
+
+<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
+
+<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
+
+<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
+
+<p>具体的には、</p>
+
+<pre><code class="sh Why Two topics comes up??">$ mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
+(古いRaspiからのデータ）
+^c
+　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（古いRaspiからのデータ）
+（新しいRaspiからのデータ）
+^C
+
+　　？？なぜ2つから？？
+    --disable-clean-sessionがあると一度サブスクライブしたセッションは、
+    IDに張り付いているのでは？？？
+    だから、同じIDで違うトピックをサブスクライブしようとしても、
+    前のセッションも復活する？
+    ならば、昔のセッションをクリアにしてあげればいいはず。
+
+$ mosquitto_sub --id abcd -t data/OLD_pi -q 1
+^c
+    clean sessionで接続してすぐに切断。
+    これで、古いサブスクライブのセッションが切れたはず。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+
+　　思ったとおり
+</code></pre>
+
+<p>という感じです。</p>
+
+<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
+    <updated>2014-12-07T10:14:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
+    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+<!-- more -->
+
+
+<p>確認手順：</p>
+
+<ul>
+<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
+これで、30個のデータが保持されるはず。</p></li>
+<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
+<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
+<li><p>適当に中断</p></li>
+<li><p>適当に再開<br/>
+今回は寝る前に止めて朝起きて再接続してみました。<br/>
+あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
+</ul>
+
+
+<p>で、送られたデータを確認してみると。。。。</p>
+
+<pre><code class="sh">$ cat reconnect.txt | awk -F , '{ command = "date -d @" $1 ; printf NR"   " ; system(command) }'
+1   Sat Dec  6 21:33:01 JST 2014
+2   Sat Dec  6 21:34:02 JST 2014
+3   Sat Dec  6 21:35:01 JST 2014
+  (...snip..)
+27   Sat Dec  6 21:59:01 JST 2014
+28   Sat Dec  6 22:00:01 JST 2014
+29   Sat Dec  6 22:01:01 JST 2014
+30   Sat Dec  6 22:02:02 JST 2014 &lt;指定した数だけ古いデータがあって
+31   Sun Dec  7 09:57:01 JST 2014 &lt;そのあと最新の配信データが届く
+32   Sun Dec  7 09:58:02 JST 2014
+</code></pre>
+
+<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
+    <updated>2014-12-06T19:58:41+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/06/again</id>
+    <content type="html"><![CDATA[<p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+
+
+<!-- more -->
+
+
+<pre><code class="sh"># The maximum number of QoS 1 and 2 messages to hold in a queue 
+# above those that are currently in-flight.  Defaults to 100. Set 
+# to 0 for no maximum (not recommended).
+# See also queue_qos0_messages.
+#max_queued_messages 100
+</code></pre>
+
+<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
+
+<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
+
+<p>client IDの件に関連するオプションでこんなものもありました。</p>
+
+<ul>
+<li><strong> allow_zero_length_clientid </strong></li>
+</ul>
+
+
+<pre><code class="sh"># This option controls whether a client is allowed to connect with a zero
+# length client id or not. This option only affects clients using MQTT v3.1.1
+# and later. If set to false, clients connecting with a zero length client id
+# are disconnected. If set to true, clients will be allocated a client id by
+# the broker. This means it is only useful for clients with clean session set
+# to true.
+#allow_zero_length_clientid true
+</code></pre>
+
+<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
+
+<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
+
+<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
+
+<p>などと話していたら、こんなオプションがありました。</p>
+
+<ul>
+<li><strong>persistent_client_expiration</strong></li>
+</ul>
+
+
+<pre><code class="sh"># This option allows persistent clients (those with clean session set to false)
+# to be removed if they do not reconnect within a certain time frame.
+#
+# This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.
+#
+# Badly designed clients may set clean session to false whilst using a randomly
+# generated client id. This leads to persistent clients that will never
+# reconnect. This option allows these clients to be removed.
+#
+# The expiration period should be an integer followed by one of d w m y for
+# day, week, month and year respectively. For example
+#
+# persistent_client_expiration 2m
+# persistent_client_expiration 14d
+# persistent_client_expiration 1y
+#
+# The default if not set is to never expire persistent clients.
+#persistent_client_expiration
+</code></pre>
+
+<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
+「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
+]]></content>
+  </entry>
+  
+</feed>

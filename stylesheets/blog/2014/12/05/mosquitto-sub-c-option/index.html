@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>disable-clean-sessionオプション - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="一昨日から気になっていたmosquitto_sub --disable-clean-sessionオプションですが、試してみました。 ブローカに向かって--desiable-clean-sessionと--idの2つのオプションをつけてサブスクライブを要求します。 1
+2
+3
+4
+5
+6
+7
+$ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">disable-clean-sessionオプション</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
+
+<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub -h HOSTNAME -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id CONNECTION-ID
+</span><span class='line'>
+</span><span class='line'>1417781342, 1691, 0, 0, 0
+</span><span class='line'>1417781402, 1691, 0, 0, 0
+</span><span class='line'>1417781461, 1691, 0, 0, 0
+</span><span class='line'>1417781522, 1691, 0, 0, 0　　&lt;&lt;時刻 21:12:02　で中断
+</span><span class='line'>^C
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>--id</code>オプションはサブスクライバが同一であることを主張するためのもののようですので、これが一致することで「再接続だから配信していないデータを送らなきゃ」と認識してくれます。<code>--id</code>を指定しないとデフォルトのプロセス番号を元にしたものになるので、プロセスを止めて再度起動した場合「再接続」と認識してもらえません。
+また、&ndash;qosが1もしくは2でないとダメみたいです。QoS　0は配信保証がなされないクオリティ指定ですので、当然といえば当然。</p>
+
+<p>データが来たところで、適当に中断します。このトピックではパブリッシャが1分毎に1データを送ってきます。データの最初のフィールドがエポックタイムです。よく見ると60づつ増えていっているのがわかります。</p>
+
+<p>そしてCtrl-Cでプロセスを止めます。</p>
+
+<p>では、ここでしばらく待って。。。。。</p>
+
+<p>わかりやすいように、タイムスタンプを印刷してからサブスクライブを再開します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>date <span class="p">;</span> mosquitto_sub -h __host-name__ -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id  testclient
+</span><span class='line'>
+</span><span class='line'>Fri Dec  <span class="m">5</span> 21:24:54 JST 2014
+</span><span class='line'>1417781581, 1692, 0, 0, 0　　&lt;&lt;　再開したのは21:24:54だけど、21:13:01のデータから配信されている。
+</span><span class='line'>1417781642, 1691, 0, 0, 0
+</span><span class='line'>1417781701, 1691, 0, 0, 0
+</span><span class='line'>1417781761, 1692, 0, 0, 0
+</span><span class='line'>1417781822, 1691, 0, 0, 0
+</span><span class='line'>1417781881, 1691, 0, 0, 0
+</span><span class='line'>1417781942, 1692, 0, 0, 0
+</span><span class='line'>1417782002, 1692, 0, 0, 0
+</span><span class='line'>1417782061, 1692, 0, 0, 0
+</span><span class='line'>1417782121, 1692, 0, 0, 0
+</span><span class='line'>1417782182, 1692, 0, 0, 0
+</span><span class='line'>1417782241, 1692, 0, 0, 0
+</span><span class='line'>1417782302, 1692, 0, 0, 0
+</span><span class='line'>1417782361, 1692, 0, 0, 0
+</span><span class='line'>   ：
+</span><span class='line'>   :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>おお、きちんと中断している間のデータも配信されました。</p>
+
+<p><code>--id</code>オプションには次のように書かれています。</p>
+
+<p><strong> -i, - -id </strong></p>
+
+<blockquote><p>The id to use for this client. If not given, defaults to mosquitto_sub_ appended with
+the process id of the client. Cannot be used at the same time as the <strong> <em>&ndash;id-prefix</em> </strong> argument.</p></blockquote>
+
+<p>通常、IDは<code>mosquitto_sub_${PID}</code>になるようです。でもpidは起動するたびに変わってしまうので、同じクライアントとは認識されませんね。物理経路のトラブル等で通信が途絶えた場合は大丈夫でしょうけれど。</p>
+
+<p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
+
+<p>関連するところで<br/>
+ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
+
+<p><strong>clientid_prefixes</strong> <em>prefix</em></p>
+
+<blockquote><p>If defined, only clients that have a clientid with a prefix that matches clientid_prefixes will be
+allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;</em> here would mean a client
+&ldquo;<em>secure-</em>client&rdquo; could connect but another with clientid &ldquo;mqtt&rdquo; couldn&rsquo;t. By default,
+all client ids are valid.</p></blockquote>
+
+<p>となるようです。セキュリティの一助になるかしら？</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mosquitto-sub/'>mosquitto_sub</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/04/mosquitto-dot-conf/" title="Previous Post: mosquitto.confを見てみた">&laquo; mosquitto.confを見てみた</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/12/06/again/" title="Next Post: mosquitto.conf 再び">mosquitto.conf 再び &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

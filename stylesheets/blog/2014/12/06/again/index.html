@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>mosquitto.conf 再び - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。 max_queued_messages 1
+2
+3
+4
+5
+# The maximum number of QoS 1 and 2 messages to hold in &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/06/again/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">mosquitto.conf 再び</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">2014 / 12 / 06</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># The maximum number of QoS 1 and 2 messages to hold in a queue </span>
+</span><span class='line'><span class="c"># above those that are currently in-flight.  Defaults to 100. Set </span>
+</span><span class='line'><span class="c"># to 0 for no maximum (not recommended).</span>
+</span><span class='line'><span class="c"># See also queue_qos0_messages.</span>
+</span><span class='line'><span class="c">#max_queued_messages 100</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
+
+<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
+
+<p>client IDの件に関連するオプションでこんなものもありました。</p>
+
+<ul>
+<li><strong> allow_zero_length_clientid </strong></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option controls whether a client is allowed to connect with a zero</span>
+</span><span class='line'><span class="c"># length client id or not. This option only affects clients using MQTT v3.1.1</span>
+</span><span class='line'><span class="c"># and later. If set to false, clients connecting with a zero length client id</span>
+</span><span class='line'><span class="c"># are disconnected. If set to true, clients will be allocated a client id by</span>
+</span><span class='line'><span class="c"># the broker. This means it is only useful for clients with clean session set</span>
+</span><span class='line'><span class="c"># to true.</span>
+</span><span class='line'><span class="c">#allow_zero_length_clientid true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
+
+<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
+
+<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
+
+<p>などと話していたら、こんなオプションがありました。</p>
+
+<ul>
+<li><strong>persistent_client_expiration</strong></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option allows persistent clients (those with clean session set to false)</span>
+</span><span class='line'><span class="c"># to be removed if they do not reconnect within a certain time frame.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># Badly designed clients may set clean session to false whilst using a randomly</span>
+</span><span class='line'><span class="c"># generated client id. This leads to persistent clients that will never</span>
+</span><span class='line'><span class="c"># reconnect. This option allows these clients to be removed.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># The expiration period should be an integer followed by one of d w m y for</span>
+</span><span class='line'><span class="c"># day, week, month and year respectively. For example</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 2m</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 14d</span>
+</span><span class='line'><span class="c"># persistent_client_expiration 1y</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># The default if not set is to never expire persistent clients.</span>
+</span><span class='line'><span class="c">#persistent_client_expiration</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
+「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">2014 / 12 / 06</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mosquitto-dot-conf/'>mosquitto.conf</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/06/again/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/06/again/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/05/mosquitto-sub-c-option/" title="Previous Post: disable-clean-sessionオプション">&laquo; disable-clean-sessionオプション</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/12/07/max-quieued-messages/" title="Next Post: max_queued_messagesオプションの動作">max_queued_messagesオプションの動作 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>man mosquitto_sub - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="man mosquitto_sub 2014 / 12 / 06 mosquitto_sub(1) 日本語： 名前 mosquitto_sub トピックを購読するためのMQTTバージョン3.1クライアント コマンド mosquitto_sub [-A bind_address] [-c] [-d &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/reference/man_mosquitto_sub.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">man mosquitto_sub</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T00:00:00+09:00" pubdate data-updated="true">2014 / 12 / 06</time></p>
+  </header>
+  
+  <p><a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub(1)</code></a></p>
+
+<p>日本語：</p>
+
+<hr />
+
+<h3>名前</h3>
+
+<p><strong> mosquitto_sub </strong>    トピックを購読するためのMQTTバージョン3.1クライアント</p>
+
+<hr />
+
+<h3>コマンド</h3>
+
+<p>mosquitto_sub [-A bind_address] [-c] [-d] [-h hostname] [-i client_id] [-I client id prefix] [-k keepalive time] [-p port number] [-q message QoS] [-R] [-S] [-N] [&ndash;quiet] [-v] [ [-u username] [-P password] ] [ &ndash;will-topic topic [&ndash;will-payload payload] [&ndash;will-qos qos] [&ndash;will-retain] ] [[ { &ndash;cafile file | &ndash;capath dir } [&ndash;cert file] [&ndash;key file] [&ndash;tls-version version] [&ndash;insecure] ] | [ &ndash;psk hex-key &ndash;psk-identity identity [&ndash;tls-version version] ]] [-T filter-out&hellip;] -t message-topic&hellip;</p>
+
+<p>mosquitto_sub [&ndash;help]</p>
+
+<hr />
+
+<h3>概要</h3>
+
+<p><strong> mosquitto_sub </strong>は、トピックを購読し受信したメッセージを印刷する、シンプルなMQTT3.1のクライアントです。</p>
+
+<hr />
+
+<h3>オプション</h3>
+
+<ul>
+<li><p>-A<br/>
+出て行く接続先をローカルのIP/ホスト名に固定します。
+特定のインターフェイスとのネットワークコミュニケーションに制限する必要がある場合にこのオプションを使用してください。</p></li>
+<li><p>-c, - - disable-clean-session<br/>
+celan-sessionフラグを無効にします。これは、クライアントへのすべての購読をQoS1,2のメッセージの受信については維持するものです。クライアントが再接続をした時点で、溜まっていたメッセージが受信されます。<br/>
+このオプションを使う場合、<code>--id</code>オプションを使ってメッセージIDを手動でセットすることをおすすめします。</p></li>
+<li><p>- - cafile<br/>
+信頼できるPEMエンコードされたCA認証<strong>ファイルへのパス</strong>を指定します。SSL通信を有効にするために使用されます。  <code>--capath</code>も参照のこと。</p></li>
+<li><p>- - capath<br/>
+信頼できるPEMエンコードされたCA認証が入っている<strong>ディレクトリへのパス</strong>を指定します。SSL通信を有効にするために使用されます。<br/>
+<code>--capath</code>を正しく動作させるために、認証フィアル名の終わりは&#8221;.crt&#8221;にしてください。さらに、<code>c_refresh &lt;path to capath&gt;</code>を認証ファイルの追加・削除ごとに実行してください。</p></li>
+<li><p>- - cert<br/>
+サーバが必要とする場合、このクライアントのPEMエンコードされた認証があるファイルへのパスを指定します。　<code>--key</code>も参照のこと。</p></li>
+<li><p>- - ciphers<br/>
+クライアントをサポートするためのopenSSLにコンパチブルなTLS　ciphersリストです。詳しくは<code>ciphers(1)</code>を見てください。</p></li>
+<li><p>-d, - - debug<br/>
+デバグメッセージを有効にします。</p></li>
+<li><p>- - help<br/>
+使い方を表示します。</p></li>
+<li><p>-h, - - host<br/>
+接続するホストを指定します。デフォルトは<code>localhost</code>です。</p></li>
+<li><p>-i, - - id<br/>
+このクライアントのためのidで、デフォルトでは<code>mosquitto_sub</code>にクライアントのプロセスidがついたものです。<code>--id-prefix</code>オプションと同時には使えません。</p></li>
+<li><p>-I, - - id-prefix<br/>
+クライアントプロセスのプロセスｉｄを元にクライアントidを作るために使われるプリフィックスを指定します。<code>--id</code>オプションとは同時に使えません。</p></li>
+<li><p>- - insecure<br/>
+証明書ベースの暗号化を行う場合、このオプションはサーバ証明にあるホスト名の確認を無効にします。これは、初期のサーバ設定をテストするのに便利ですが、たとえば、悪意のあるサードパーティよってDNSスプーリングが偽装されることを可能にします。このオプションは <strong> テストのためだけに </strong> 使用してください。このオプションを製品環境で使うことに陥ってしまうのなら、その構成はダメなもので暗号化の意味は全くありません。</p></li>
+<li><p>-k, - - keepalive<br/>
+接続していて、機能しているということを知らせるための、ブローカへのPINGコマンドの発信間隔[s]を設定します。デフォルトでは60[s]です。</p></li>
+<li><p>- - key<br/>
+サーバが必要とする場合、このクライアントのPEMエンコードされたプライベートキーファイルが入っている<strong>ファイルへのパス</strong>を指定します。<code>--cert</code>も見てください。</p></li>
+<li><p>-N<br/>
+印刷の時にペイロードに対して改行コードを付加しません。これによってペイロードを直接ほかのいくつものアプリケーションに対してストリーミングすることが可能です。<code>-v</code>オプションを使っていない時だけ動作します。<br/>
+(訳注：手元のmosquitto_subではこのオプションを指定するとエラーになります）</p></li>
+<li><p>-p, - - poart<br/>
+ポート番号を指定して、デフォルトのポート番号1883以外のポートに接続します。</p></li>
+<li><p>-P, - - pw<br/>
+ブローカに認証してもらうためのパスワードを提供します。<code>username</code>を指定しないでこのオプションを使うことは出来ません。このオプションにはMQTT v3.1をサポートしたブローカが必要です。<code>--username</code>オプションを参照。</p></li>
+<li><p>- -psk<br/>
+TLS-PSK暗号化に使うため、ブローカに使われているものとマッチする16進のpre-shared-key（0xプリフィックスは不要）を提供します。<code>--psk-identity</code>も同時に提供される必要があります。</p></li>
+<li><p>- -psk-identity<br/>
+TLS-PSKで使われるcleient identitiyです。ブローカの設定によってはusernameの代わりに使われます。</p></li>
+<li><p>-q, - -qos<br/>
+0,1,2のいずれかで受信するメッセージに期待するQoSを指定します。QoSについては<code>mqtt(7)</code>を参照してください。</p></li>
+<li><p>- -quiet<br/>
+このオプションが与えられた場合、実行時のエラーは出力されません。無効なユーザ入力に対して出されるエラーメッセージはすべて抑止されます。(<code>--port</code> オプションをポート番号指定なしで使った場合など）</p></li>
+<li><p>-R<br/>
+このオプションが与えられた場合、リテインビットがセットされているメッセージを受信すると、そのメッセージは出力されません。リテインビットがセットされているメッセージは”古い”もので、いつ発行されたメッセージであるかわかりません。ワイルドカードでトピックを指定してパブリッシュを要求した場合、多くのリテインメッセージが含まれているはずです。このオプションはそのようなメッセージを抑止します。</p></li>
+<li><p>-S<br/>
+どのホストに接続するかを決めるためにSRVを参照します。-hオプションと同時に使われた場合、<code>_mqtt._tcp.&lt;host&gt;</code>を参照します。それ以外では<code>_mqtt._tcp.&lt;local dns domain&gt;</code>を参照します。</p></li>
+<li><p>-t, - -topic<br/>
+購読するMQTTトピックです。MQTTトピックについては<code>mqtt(7)</code>を参照してください。複数のトピックを一度に購読するために繰り返し使われても構いません。</p></li>
+<li><p>-T, - -filter-out<br/>
+フィルタにマッチするトピックの印刷を抑制します。ワイルドカードを使った購読でワイルドカードの一部分だけを印刷することを可能にします。<br/>
+例えば、&#8221;BBC&#8221;ツリーを購読していて&#8221;Radio 3&#8221;からの出力を見たくない時には<br/>
+<code>mosquitto_sub -t bbc/# -T bbc/radio3</code><br/>
+のように設定します。このオプションは複数のトピックやトピックツリーを除外するために繰り返し使うことが可能です。</p></li>
+<li><p>- -tls-version<br/>
+ブローカと接続するために使うTLSプロトコルのバージョンを選びます。選択肢は<code>tlsv1.2</code>　<code>tlsv1.1</code>　<code>tlsv1</code>です。<br/>
+デフォルトは<code>tlsv1.2</code>です。インストールされているopenSSLのバージョンが古いと<code>tlsv1</code>だけが有効かもしれません。これはブローカで使われているバージョンと一致する必要があります。</p></li>
+<li><p>-u, - -username<br/>
+ブローカに認証してもらうためのユーザ名を提供します。このオプションにはMQTT　v3.1をサポートするブローカが必要です。<code>--pw</code>オプションも参照してください。</p></li>
+<li><p>-v, - -verbose<br/>
+受信したメッセージを詳しく表示します。このオプションではメッセージを&#8221;topic payload&#8221;のように表示します。このオプションがない場合には&#8221;payload&#8221;のみの表示になります。</p></li>
+<li><p>- -will-payload<br/>
+ブローカに保存されるメッセージを指定します。これはこのクライアントが予期せずに切断された場合送信されます。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-qos<br/>
+WillのQoSを指定します。デフォルトでは0になります。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-retain<br/>
+これが与えられた場合、クライアントが予期せずに切断された場合のメッセージはリテインメッセージとして扱われます。このオプションは<code>--will-topic</code>とともに指定される必要があります。</p></li>
+<li><p>- -will-topic<br/>
+クライアントが予期せずに切断された場合のWillを送るトピックを指定します。</p></li>
+</ul>
+
+
+<hr />
+
+<h3>Will（遺言）</h3>
+
+<p><code>mosquitto_sub</code>はクライアントが予期せずに切断された場合のメッセージをブローカに登録することが出来ます。くわしくは<code>mqtt(7)</code>をご覧ください。</p>
+
+<p>最小限必要なことは<code>--will-topic</code>オプションを使ってWill（遺言）を送り出す先のトピックを指定することです。これにより、リテインしない、長さ0のメッセージをQoS0で送信することになります。</p>
+
+<p>その他のWill(遺言）パラメタを設定するために<code>--will-retain</code> <code>--will-payload</code> <code>--will-qos</code>オプションを調整してください。</p>
+
+<hr />
+
+<h3>例</h3>
+
+<p>以下は本当にただの例です。トピックの購読指示はうまく動くかもしれませんが、何かを受信するためには、当該のトピックにデータが送られないといけません。</p>
+
+<p>ローカルホストからQoS1で温度の情報を購読します。</p>
+
+<pre><code>mosquitto_sub -t sensors/temperature -q 1
+</code></pre>
+
+<p>ハードディスクからの温度情報を複数の計算機・ハードディスクから購読します。この例ではそれぞれの計算機のハードディスクの温度が&#8221;sensors/machines/HOSTNAME/temperature/HD_NAME&#8221;に発行されている必要があります。</p>
+
+<pre><code>mosquitto_sub -t sensors/machines/+/temperature/+
+</code></pre>
+
+<p>すべてのブローカのステータスメッセージを購読するには</p>
+
+<pre><code>mosquitto_sub -v -t \$SYS/#
+</code></pre>
+
+<hr />
+
+<h3>バグ</h3>
+
+<p><strong>mosquitto_sub</strong> のバグについての情報は[<a href="http://launchpad.net/mosquitto/">http://launchpad.net/mosquitto/</a>]で見つかるかもしれません。</p>
+
+<hr />
+
+<h3>こちらもご覧ください</h3>
+
+<p> mqtt(7) , mosquitto_pub(1) , mosquitto(8) , libmosquitto(3) , mosquitto-tls(7)</p>
+
+<hr />
+
+<h3>謝辞</h3>
+
+<p>This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. (<a href="http://www.openssl.org/">http://www.openssl.org/</a>)</p>
+
+<p>This product includes cryptographic software written by Eric Young (<a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#x6f;&#58;&#x65;&#x61;&#x79;&#x40;&#x63;&#x72;&#x79;&#112;&#116;&#x73;&#111;&#102;&#x74;&#46;&#99;&#111;&#x6d;">&#101;&#x61;&#x79;&#x40;&#99;&#x72;&#121;&#112;&#116;&#x73;&#x6f;&#x66;&#116;&#x2e;&#x63;&#x6f;&#x6d;</a>)</p>
+
+<p>This product includes software written by Tim Hudson (<a href="&#109;&#97;&#105;&#x6c;&#x74;&#111;&#58;&#x74;&#106;&#x68;&#x40;&#99;&#114;&#121;&#x70;&#x74;&#x73;&#111;&#x66;&#x74;&#x2e;&#x63;&#x6f;&#109;">&#116;&#106;&#104;&#64;&#x63;&#x72;&#x79;&#x70;&#x74;&#x73;&#111;&#102;&#116;&#x2e;&#x63;&#111;&#109;</a>)</p>
+
+<hr />
+
+<h3>著者</h3>
+
+<p>Roger Light <a href="&#109;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#114;&#x6f;&#x67;&#x65;&#114;&#64;&#x61;&#x74;&#99;&#x68;&#x6f;&#111;&#46;&#111;&#x72;&#103;">&#x72;&#111;&#103;&#x65;&#x72;&#64;&#97;&#x74;&#99;&#x68;&#111;&#x6f;&#x2e;&#x6f;&#x72;&#x67;</a></p>
+
+  
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

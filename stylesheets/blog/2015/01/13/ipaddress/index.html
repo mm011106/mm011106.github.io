@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>自分のIPアドレスを送信する - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。 Raspberry Pi で、まずは、どうやってIPアドレスを抽出するかです。 自分のIPアドレスはifconfigで出てきますが、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/01/13/ipaddress/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">自分のIPアドレスを送信する</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-13T20:43:51+09:00" pubdate data-updated="true">2015 / 01 / 13</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。</p>
+
+<!-- more -->
+
+
+<p>Raspberry Pi で、まずは、どうやってIPアドレスを抽出するかです。</p>
+
+<p>自分のIPアドレスは<code>ifconfig</code>で出てきますが、これは人間用なのでフォーマットがややこしい。</p>
+
+<figure class='code'><figcaption><span>example of result of &#8220;ifconfig&#8221; command</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ifconfig eth0
+</span><span class='line'>
+</span><span class='line'>eth0      Link encap:Ethernet  HWaddr b8:27:eb:29:61:2d
+</span><span class='line'>          inet addr:192.168.0.xyz  Bcast:192.168.0.255  Mask:255.255.255.0
+</span><span class='line'>          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+</span><span class='line'>          RX packets:95729 errors:0 dropped:67 overruns:0 frame:0
+</span><span class='line'>          TX packets:62090 errors:0 dropped:0 overruns:0 carrier:0
+</span><span class='line'>          collisions:0 txqueuelen:1000
+</span><span class='line'>          RX bytes:10362519 <span class="o">(</span>9.8 MiB<span class="o">)</span>  TX bytes:6910384 <span class="o">(</span>6.5 MiB<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>色々と悩んだ末、こんな感じのコマンドラインではどうかと。。。。</p>
+
+<figure class='code'><figcaption><span>a example of one-liner extracting IP adress from &#8220;ifconfig&#8221; command</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>ifconfig eth0 <span class="p">|</span> grep -o <span class="s1">&#39;^ *inet addr:.*B&#39;</span> <span class="p">|</span> grep -E -o <span class="s1">&#39;([0-9]{1,3}\.){3}[0-9]{1,3}&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最初のgrepでインターフェイスのIPアドレスを表示しているフレーズだけを抜き出します。<br/>
+具体的には行頭から任意の数のスペースがあって、&#8221;inet addr:&ldquo;とあって、任意の文字が続き&#8221;B&#8221;で終わる部分です。</p>
+
+<p><code>grep -o '^ *inet addr:.*B'</code></p>
+
+<p>次に、そのフレーズの中には1つしかIPアドレスは入っていないはずなので、それを抜き出します。</p>
+
+<p><code>grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'</code></p>
+
+<p>だいたいこれで、行けそうです。
+試しにやってみると。</p>
+
+<figure class='code'><figcaption><span>test for the one-liner </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ifconfig eth0 <span class="p">|</span> grep -o <span class="s1">&#39;^ *inet addr:.*B&#39;</span> <span class="p">|</span> grep -E -o <span class="s1">&#39;([0-9]{1,3}\.){3}[0-9]{1,3}&#39;</span>
+</span><span class='line'>192.168.0.xyz
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>今回の目的には十分かとおもいます。</p>
+
+<p>しかし、なんかもっといい方法（どっかのファイルを見るとか）がありそうなきもします。。。。</p>
+
+<p>さて、このコマンドラインをデバイスのスクリプト（cronで動く）にいれてみたところ、うまく動かない。具体的には、結果がNULLになってしまうのです。試しに、手元でコマンドラインから実行するとうまく動く。うう〜ん。<br/>
+さっぱり理由が分からず、いろいろ調べてみたところ「<a href="http://higelog.brassworks.jp/?p=1775">動かないときはエラーログを取れ！</a>」という啓示をいただき、試してみたところ、<code>command not found</code>とのこと。ifconfigコマンドへのパスが通ってない、という情けないという状況。言われてみれば確かにそんなことをどこかで見たような気がするなあ。。。。</p>
+
+<p>ということで、ifconfigコマンドを絶対パスで指定して事なきを得ました。</p>
+
+<p><strong>「CRONのコマンドは絶対パス指定」</strong>　勉強しました。。。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-13T20:43:51+09:00" pubdate data-updated="true">2015 / 01 / 13</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ipconfig/'>ipconfig</a>, <a class='category' href='/blog/categories/raspi/'>raspi</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/01/13/ipaddress/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/01/13/ipaddress/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/12/autossh/" title="Previous Post: autossh">&laquo; autossh</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/01/18/ore-ore-certificate/" title="Next Post: オレオレ証明書を作ってみようかと　準備">オレオレ証明書を作ってみようかと　準備 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

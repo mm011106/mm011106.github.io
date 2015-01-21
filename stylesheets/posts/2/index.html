@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。 ">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/posts/2/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/14/awk-example/">awkを使う</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
+そこで、awkを使って普通の表示にしてやります。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/14/awk-example/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/13/restarted/">やっと復活。。。</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-13T16:23:35+09:00" pubdate data-updated="true">2014 / 12 / 13</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。<br/>
+今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。メニューも一応見えていますが、クリックすると茶色いプルダウンらしきものが広がるだけで何も見えません。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/13/restarted/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/07/ubuntu-problem/">ubuntuのランチャとかが消えてしまう件</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-07T13:19:44+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/07/ubuntu-problem/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/07/max-quieued-messages/">max_queued_messagesオプションの動作</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-07T10:14:05+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
+
+<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/07/max-quieued-messages/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/06/again/">mosquitto.conf 再び</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">2014 / 12 / 06</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/06/again/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
+
+<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/05/mosquitto-sub-c-option/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">2014 / 12 / 04</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
+原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
+
+<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/04/mosquitto-dot-conf/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/03/mqtt-option/">mosquitto_subのオプション</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
+
+<p><strong><code>-c, --disable-clean-session</code></strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/03/mqtt-option/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/02/minor-adjustment/">Octopress+OCT2のちょっとした修正</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">2014 / 12 / 02</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、ブログページに日付が入っていることを発見。なら、この部分だけ持ってきて入れなおしてみるかな、とやってみたところうまく行きました！</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/02/minor-adjustment/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/01/overview/">試作システムの概要</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true">2014 / 12 / 01</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>概略の仕様</h3>
+
+<p>試作しようとしているシステムの概要は以下のような感じです。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/01/overview/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="3">&larr; Older</a>
+    
+    <a href="/blog/archives/"> Archives </a>
+    
+    <a class="next" href="1">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

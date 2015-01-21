@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ssh | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/ssh/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-18T17:08:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[autossh]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/12/autossh/"/>
+    <updated>2015-01-12T08:53:44+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/12/autossh</id>
+    <content type="html"><![CDATA[<p>sshのコネクションはどうしても切れてしまうことがあるので、それを阻止するためにautosshを使ってみました。<br/>
+まず、sshのコマンドラインを簡素にするため、MQTTブローカへの接続設定を書いたconfigファイルを用意します。</p>
+
+<!-- more -->
+
+
+<p>sshのコンフィギュレーション</p>
+
+<p>まずは、sshの接続のコマンドラインを簡略化するためにconfigファイルを設定します。<br/>
+設定を隠蔽できる（シェルスクリプトなどにパラメタを書かなくてもいい）というてんで良いかなと思います。</p>
+
+<p>&#8220;`sh ~/.ssh/config
+Host Broker
+    HostName        MQTT_Broker
+    IdentityFile    ~/.ssh/id_rsa_MQTTClient
+    User            MQTT_connection
+    LocalForward    22883 localhost:1883
+    Port            22222</p>
+
+<pre><code>
+ポート番号などは適宜設定してください。
+
+こうすることで、`ssh -f -N Broker`のコマンドでトンネリング設定ができます。
+ここで、公開鍵はパスフレーズ無しで作ったものを指定します。セキュリティのため、ブローカのssh設定にはポート制限やIP制限、コマンドを実行しないなどの処置を__必ず__とる必要があります。[設定の具体例](http://mm011106.github.io/blog/2015/01/11/secure-connection/)（「パスフレーズなしでの接続方法とセキュリティ設定」）
+
+さらに、これが切れたとき自動的に再接続するため、autosshを導入します。
+</code></pre>
+
+<p> $ sudo apt-get install autossh
+&#8220;`</p>
+
+<p>autosshを使ってトンネリングを設定するには
+<code>sh
+ $ autossh -M0 -f -N Broker
+</code></p>
+
+<p>とします。</p>
+
+<p>-M0 : 接続が切れているかどうかを確認するためのポート指定です。0は切断確認をポートではしないようにする設定です。</p>
+
+<p>-f : 実行をバックグラウンドに移行します。</p>
+
+<p>-N : sshへのオプションです。</p>
+
+<p>autosshはsshを起動してそのプロセスを監視するプロセスを起動するコマンドです。</p>
+
+<p>-Mオプションについては以下のように<a href="http://linux.die.net/man/1/autossh">解説</a>があります。</p>
+
+<blockquote><p>specifies the base monitoring port to use. Without the echo port, this port and the port immediately above it ( port + 1) should be something nothing else is using. autossh will send test data on the base monitoring port, and receive it back on the port above. For example, if you specify &ldquo;-M 20000&rdquo;, autossh will set up forwards so that it can send data on port 20000 and receive it back on 20001.</p>
+
+<p>Alternatively, a port for a remote echo service may be specified. This should be port 7 if you wish to use the standard inetd echo service. When an echo port is specified, only the specified monitor port is used, and it carries the monitor message in both directions.</p>
+
+<p>Many people disable the echo service, or even disable inetd, so check that this service is available on the remote machine. Some operating systems allow one to specify that the service only listen on the localhost (loopback interface), which would suffice for this use.</p>
+
+<p>The echo service may also be something more complicated: perhaps a daemon that monitors a group of ssh tunnels.</p>
+
+<p>Setting the monitor port to 0 turns the monitoring function off, and autossh will only restart ssh upon ssh&rsquo;s exit. For example, if you are using a recent version of OpenSSH, you may wish to explore using the ServerAliveInterval and ServerAliveCountMax options to have the SSH client exit if it finds itself no longer connected to the server. In many ways this may be a better solution than the monitoring port.</p></blockquote>
+
+<p>ということなので、0を指定するとsshがexitした時に再起動します。接続はServerAliveIntervalとServerAliveCountMaxだけ待って応答が来なければexitするので、その場合sshが再起動されるという事でしょう。「この方法がポートモニタするより良い方法だ」といっているので、そうすることにします。</p>
+
+<p>sshのデフォルト<a href="http://www.unixuser.org/~euske/doc/openssh/jman/ssh_config.html">設定</a>では<code>ServerAliveInterval</code>は0になっている(確認のメッセージを送らない）ようなので、適宜設定する必要があります。<br/>
+これがまたちょっと厄介ですね。あまり頻繁にパケットを送ると電話回線などプレミアムな回線を使っているときにコストがかさみます。本来はきちんとTPOで設定する必要があると思いますが、とりあえず30秒ぐらいに設定しておきます。</p>
+
+<pre><code class="sh configに追記">#  connection alive detecting. 30 x 3 [s]
+#
+ServerAliveInterval 30
+ServerAliveCountMax 3
+</code></pre>
+
+<p><code>ServerAliveCountMax</code>は3がデフォルトのようですので、応答がなくなったあと1分30秒で切断されるようになります。</p>
+
+<p>これで、ちゃんと接続できるか確認してみます。</p>
+
+<pre><code class="sh">$ ps ax | grep 'ssh'
+ 6543 ?        Ss     0:00 /usr/lib/autossh/autossh -M0 -N Broker
+ 6544 ?        S      0:00 /usr/bin/ssh -N Broker
+
+$ mosquitto_sub -v -p 22883 -t '$SYS/#'
+$SYS/broker/version mosquitto version 1.3.5
+$SYS/broker/timestamp 2014-10-18 21:06:44+0100
+ :
+ :
+</code></pre>
+
+<p>Okですね。
+さらに、keepalive確認のパケットがどのように出ているか確認してみます。</p>
+
+<p>IPアドレスは下記のようになっています。<br/>
+192.168.0.XXX クライアント<br/>
+192.168.0.YYY サーバ</p>
+
+<pre><code class="sh Keep Alive packets example">No.     Time        Source                Destination           Protocol Length Info
+      1 0.000000    192.168.0.XXX         192.168.0.YYY           TCP      130    41387 &gt; SSHPORT　 [PSH, ACK] 
+      2 0.010903    192.168.0.YYY         192.168.0.XXX           TCP      98     SSHPORT &gt; 41387 [PSH, ACK] 
+      3 0.010941    192.168.0.XXX         192.168.0.YYY           TCP      66     41387 &gt; SSHPORT [ACK] 
+      4 30.039772   192.168.0.XXX         192.168.0.YYY           TCP      130    41387 &gt; SSHPORT [PSH, ACK]
+      5 30.043964   192.168.0.YYY         192.168.0.XXX           TCP      98     SSHPORT &gt; 41387 [PSH, ACK]
+      6 30.044004   192.168.0.XXX         192.168.0.YYY           TCP      66     41387 &gt; SSHPORT [ACK]
+</code></pre>
+
+<p>30秒ごとに何かしらのパケットをやり取りしていることがわかりました。設定通りです。</p>
+
+<p>さらに、途中で回線を切断してみます。</p>
+
+<pre><code class="sh Packet example (in case of disconnection)">No.     Time        Source                Destination           Protocol Length Info
+#　正常なalive確認のパケットやり取り
+      1 0.000000    192.168.0.XXX         192.168.0.YYY         TCP      130    41405 &gt; SSHPORT [PSH, ACK]
+      2 0.002137    192.168.0.YYY         192.168.0.XXX         TCP      66     SSHPORT &gt; 41405 [ACK]
+      3 0.002566    192.168.0.YYY         192.168.0.XXX         TCP      98     SSHPORT &gt; 41405 [PSH, ACK]  
+      4 0.041204    192.168.0.XXX         192.168.0.YYY         TCP      66     41405 &gt; SSHPORT [ACK] 
+
+#　ここで回線を切断　sshがシャットダウンするまで130秒ぐらい待ち、回線を復旧させる
+#
+#  sshがautosshによって再起動されて通信を開始
+
+# 切断前のコネクションをリセット
+      5 138.686269  192.168.0.XXX         192.168.0.YYY         TCP      258    41405 &gt; SSHPORT [FIN, PSH, ACK]
+      6 138.687686  192.168.0.YYY         192.168.0.XXX         TCP      98     SSHPORT &gt; 41405 [PSH, ACK] 
+      7 138.687721  192.168.0.XXX         192.168.0.YYY         TCP      54     41405 &gt; SSHPORT [RST] 
+      8 138.689209  192.168.0.YYY         192.168.0.XXX         TCP      130    SSHPORT &gt; 41405 [FIN, PSH, ACK] 
+      9 138.689233  192.168.0.XXX         192.168.0.YYY         TCP      54     41405 &gt; SSHPORT [RST] 
+
+#　新たなコネクションのスタート
+     10 148.955582  192.168.0.XXX         192.168.0.YYY         TCP      74     41407 &gt; SSHPORT [SYN]
+     11 148.958766  192.168.0.YYY         192.168.0.XXX         TCP      74     SSHPORT &gt; 41407 [SYN, ACK] 
+</code></pre>
+
+<p>という感じになりました。何回か試して見ましたが、切断前のコネクションをリセットするやり取りがない場合が多いかもしれません。さらに、alive確認のパケットは2往復でなく1往復半という事もありました。</p>
+
+<p>無事sshの再起動も確認出来ました。</p>
+
+<p>接続確認のためのパケットのサイズは、今回の実験では360byteぐらいでした。もしこの設定（30秒に1回）だとすると1日で1Mbyteぐらいの通信量です。
+最近の安いデータ通信用のSIMにとってみれば大したデータ量ではないかもしれませんね。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[接続の暗号化]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/11/secure-connection/"/>
+    <updated>2015-01-11T11:05:38+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/11/secure-connection</id>
+    <content type="html"><![CDATA[<p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
+
+<!-- more -->
+
+
+<p>mosquitto.confを眺めてみると、mosquittoでは2つのやり方が準備されているようです。</p>
+
+<ul>
+<li><p>公開鍵認証・暗号化</p>
+
+<p>  公開鍵をお互いにやり取りして、お互いを認証・暗号化する普通のやり方ですね。</p></li>
+<li><p>証明書ベース認証・暗号化</p>
+
+<p>  HTTPで一般的に使われている証明書による認証ですね。https で始まるwebサイトでは暗号化されるように、この仕組みを使えばMQTTでも通信が暗号化されます。<br/>
+  サーバーがオープンで誰でもが接続できるような状況にするためには、必須です。</p></li>
+</ul>
+
+
+<p>mosquittoではユーザ（サブスクライバ、パブリッシャ）認証のためにユーザ名、パスワード方式が使えますが、認証時に平文でこれらがやり取りされるという事ですので、通信経路そのものの暗号化が欠かせません。</p>
+
+<p>MQTTブローカに頼らない暗号化という意味では ssh しかないでしょうか。
+ブローカがオープンでない場合であれば、ポートフォワードと合わせ技で安全性が高められるかもしれません。
+ただ、この場合、ネットワーク環境によってはsshのトンネリングができない（ポリシー的に）という場合もあるかと思うので、環境の調査が必要かと思います。</p>
+
+<p>最近は<a href="http://jpmens.net/2014/07/03/the-mosquitto-mqtt-broker-gets-websockets-support/">websocket</a>という接続方法もあるので、MQTTブローカをweb applicationでラップしてセキュアにするというやり方もあるかもしれません。</p>
+
+<p>今回はsshのポートフォワードで暗号化してみましたので報告です。</p>
+
+<p>まず、何はなくとも検索。ssh mosquittoあたりでgoogleさんに聞いてみたところ、<a href="http://diabolicalws.blogspot.jp/2012/02/tunneling-mqtt-over-ssh.html">この</a>サイトがヒット。正しくやろうとしていたことです。</p>
+
+<p>このページの最終目標としては、簡易的なVPNとしてのsshによるトンネリングを使ってMQTTプロトコルをセキュアにしようという事のようです。</p>
+
+<p>手順としては、</p>
+
+<ol>
+<li><p>トンネリングの設定</p></li>
+<li><p>トンネルを使った通信の設定</p></li>
+<li><p>パスフレーズなしでの接続方法とセキュリティ設定</p></li>
+</ol>
+
+
+<p>順を追ってやってみます。</p>
+
+<h2>トンネリングの設定</h2>
+
+<p>まずクライアント側の設定です。</p>
+
+<pre><code class="sh">ssh -f -L 22883:127.0.0.1:1883 SSHusername@MQTT -N  
+</code></pre>
+
+<p>とすることで、クライアント側のポート22883 に対する通信が暗号化された上でサーバ&#8221;MQTT&#8221;の1883に接続されます。ユーザ名は&#8221;SSHusername&#8221;です。
+各オプションの意味は以下のとおりです。</p>
+
+<p> -f : バックグラウンドで動作</p>
+
+<p> -L : ローカル側でのポートフォワード（クライアント側のポート変換が設定されます）</p>
+
+<p> -N : サーバ側でコマンドを実行しないように指定</p>
+
+<p>この例ではポートは標準の22となっています。必要に応じて-pオプションでssh通信そのもののポート番号を指定してください。 sshのポート番号も専用のものにしておくことで、更にセキュリティを確保できるかもしれません。<br/>
+ここらへんはsshのポートフォワード設定を参照してもらったほうが正しい理解が得られるかと。</p>
+
+<p>この接続をするためには、クライアント、サーバ共にsshが動く環境であることが必要です。適宜設定してください。</p>
+
+<p>このコマンドを実行するとパスワードを聞かれるはずです。実際の無人運用ではこれが問題になりますが、これは後ほど解決してもらえます。</p>
+
+<h2>トンネルを使った通信の設定</h2>
+
+<p>上記の操作でセキュアな通信経路が22883ポートに設定されましたので、これを使って実際にMQTTプロトコルのデータを流してみます。</p>
+
+<pre><code class="sh">mosquitto_sub -h 127.0.0.1 -p 22883 -u dan -P password -t 'test/#'
+</code></pre>
+
+<p>-P, -uでユーザ名とパスワードを指定してブローカにサブスクライバとしてログインしています。ホストはローカルホスト、ポートは先程トンネルを設定した22883に指定します。<br/>
+-P, -uは必須ではないです。私はこれらナシでつかってます。</p>
+
+<p>トピックを適切に設定してあれば、なにかメッセージを受け取れるはずです。</p>
+
+<h2>パスフレーズなしでの接続方法とセキュリティ設定</h2>
+
+<p>参考にしたページでは、&#8221;Key-Based authentification&#8221;と説明されていますが、公開キーを事前にやり取りしている間柄なら、十分信用できるだろうという事で、鍵を持っている相手はパスフレーズなしでログインさせましょう、という設定です。<br/>
+この設定では、ssh接続に際しパスフレーズなしで接続できるようになってしまうので、鍵を他の用途で使うとセキュリティに問題が出る可能性があります。そのため、「このトンネリングだけに使う専用の鍵を用意するように」と注意書きがあります。</p>
+
+<p>パスフレーズ無しでキーを作り、それをサーバに登録します。</p>
+
+<pre><code class="sh">ssh-keygen
+ssh-copy-id SSHusername@MQTT
+</code></pre>
+
+<p>サーバ側のセキュリティ確保のため、クライアントのキー記述の最初の部分に以下のような設定を追記します。</p>
+
+<pre><code class="sh">from="192.168.1.*",no-pty,permitopen="127.0.0.1:1883",command="/bin/false" ssh-rsa........
+</code></pre>
+
+<p>この例では</p>
+
+<ul>
+<li>接続先のIP制限 from=</li>
+<li>ターミナルのアサインをしない no-pty</li>
+<li>ローカルホストの指定ポートのみオープン可能にする permitopen=</li>
+<li>ログイン時に実行するコマンドを /bin/falseに設定</li>
+</ul>
+
+
+<p>ということを指定しています。
+具体的には、192.168.1.*のネットワークからの接続に限定、ターミナルをアサインしない、ローカルホストの1883への接続のみを許可する、リモートから接続するときに指定されたコマンドを実行しない。
+という事になりそうです。<br/>
+くわしくは、<a href="http://www.nxmnpg.com/ja/8/sshd#9">ここらへん</a>を参照してください。</p>
+
+<blockquote><p>この設定を書くときの注意ですが、設定同士の区切りはコンマですが、設定と鍵本体の区切りは、コンマでなくスペースです。ここを間違えて、2時間ほどハマりました。<br/>
+ここをコンマにすると鍵が正しく認識できないのでパスワードを要求されます。</p>
+
+<p>公開鍵をやり取りしていて有効であれば、パスフレーズを聞かれるか何もなしでログインできるかのどちらかです。</p></blockquote>
+
+<p>私の実験では、IPアドレスの制限をしない設定、で実行してうまく動いています。</p>
+
+<p>本来的には、証明書ベースの認証システムを組むのがいいのでしょうけれど、証明書の発行など、よくわかっていないと事故に繋がりそうなので、今回は初学者向けということでトンネリングを実験して見ました。<br/>
+小規模なシステムでネットワーク環境もある程度わかっているところにデバイスを配置するには十分な感じかと思います。</p>
+
+<p>また、MQTTプロトコル上からデバイスがつながっているシステムの操作をするときに、重要なパラメタの制御は1箇所でできないようにするとか、あるデバイスの許可とペアで設定して初めてアクチュエートするなど、システム上でのセキュリティ構築も必要かもしれません。</p>
+
+<h2>2015/1/14 追記</h2>
+
+<p>authorized_keysに記入する設定で、<code>permitopen</code>というパラメタがありますが、これを設定すると”コマンドからのsshでは接続出来なくて、configを用いた接続は可能”という変な状態になりました。</p>
+
+<p>具体的には、</p>
+
+<p><code>ssh -f -L 22883:localhost:1883 user@broker -i rsa_key</code></p>
+
+<p>と指定すると、一応sshは動いてトンネリングはできますが、接続しようとするとエラーになります。</p>
+
+<p>一方全く同じパラメタをconfigファイルに書きこんで、configに設定したhost名でsshを起動すると普通に接続できます。</p>
+
+<p>謎です。</p>
+]]></content>
+  </entry>
+  
+</feed>

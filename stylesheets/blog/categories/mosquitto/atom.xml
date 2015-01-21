@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mosquitto | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/mosquitto/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-18T17:08:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　準備]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/18/ore-ore-certificate/"/>
+    <updated>2015-01-18T11:28:32+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/18/ore-ore-certificate</id>
+    <content type="html"><![CDATA[<p>現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。
+ここでは、まず勉強。</p>
+
+<!-- more -->
+
+
+<p>英語のwebでは&#8221;self-signed certificate&#8221;なんて言われていますが、日本では「オレオレ詐欺」にちなんで、「オレオレ証明書」と呼ぶのがツウのやりかたのようです。でも、これは結構いいネーミングじゃないかと思います。日本で「オレオレ」というのはかなりダーティな印象があるので、「これ、オレオレ証明書だよね」というと、直感的に騙されそうな感じがします。</p>
+
+<p>昔の記事（2007年頃）ですが、銀行のオンラインバンキングなどでもオレオレ証明の一種が使われていたということで、間違ったITリテラシを教えてしまうという危険が<a href="http://takagi-hiromitsu.jp/diary/20071117.html">指摘</a>されています。</p>
+
+<p>このページの終わりの方には証明書の分類が挙げられており、一口に「オレオレ」といってもいろいろあるのだよ。ということがわかります。</p>
+
+<p>今回つくろうとしているのは、ここで言うところの「第四種オレオレ証明書」です。<br/>
+とくに悪意があってself-signedにするわけではなく、パブリックに公開されるサーバではないし、特定の用途にしか使わない、自分たち専用の暗号化経路ということです。</p>
+
+<p>ポリシーとしては、</p>
+
+<ul>
+<li>経路の暗号化には証明書ベースの共通鍵暗号化</li>
+<li>ログイン制御にはユーザ名/パスワード</li>
+<li>ポート番号の変更</li>
+</ul>
+
+
+<p>という3本柱で考えてみたいと思います。</p>
+
+<p>証明書ベースの認証を行うという事は、だれでも（ポート番号がわかれば）暗号化経路を作れる、ということになります。そのため、実際にブローカに接続できるかどうかは、ユーザ名による認証を行う必要があると思ったからです。実際には、IPやドメイン名の制限など、可能な接続制限を取る必要があると思います。</p>
+
+<h2>mosquitto.conf と mosquitto_pub/subの暗号化についての記載</h2>
+
+<p>まずは、いま使っているクライアント・サーバアプリケーションが証明書ベースの暗号化にどのように対応しているかを確認しておきます。
+まずは、ブローカ側の<code>mosquitto.conf</code>から</p>
+
+<h3>mosquitto.conf</h3>
+
+<h4>Authentication</h4>
+
+<blockquote><p>The authentication options described below allow a wide range of possibilities in conjunction with the listener options. This section aims to clarify the possibilities.</p>
+
+<p>以下に示す認証のオプションはリスナーのオプションとともに活用することで広いレンジの可能性を提供します。このセクションはその可能性を明らかにします。</p>
+
+<p>The simplest option is to have no authentication at all. This is the default if no other options are given. Unauthenticated encrypted support is provided by using the certificate based SSL/TLS based options cafile/capath, certfile and keyfile.</p>
+
+<p>最もシンプルなものは認証をしないようにすることです。これは他のオプションが与えられない限り、デフォルトの設定になります。認証なしの暗号化はcafile/capathオプションにより証明書ベースのSSL/TLSから提供されます。</p>
+
+<p>MQTT provides username/password authentication as part of the protocol. Use the password_file option to define the valid usernames and passwords. Be sure to use network encryption if you are using this option otherwise the username and password will be vulnerable to interception.</p>
+
+<p>MQTTはプロトコルの一部としてユーザ名／パスワードによる認証を提供しています。
+<code>password_file</code>オプションを使うことで有効なユーザ名とパスワードを設定できます。このオプションを使うときは経路の暗号化を必ず実施してください。そうしないとユーザ名／パスワードは盗聴の対象となってしまいます。</p>
+
+<p>When using certificate based encryption there are two options that affect authentication. The first is require_certificate, which may be set to true or false. If false, the SSL/TLS component of the client will verify the server but there is no requirement for the client to provide anything for the server: authentication is limited to the MQTT built in username/password. If require_certificate is true, the client must provide a valid certificate in order to connect successfully. In this case, the second option, use_identity_as_username, becomes relevant. If set to true, the Common Name (CN) from the client certificate is used instead of the MQTT username for access control purposes. The password is not replaced because it is assumed that only authenticated clients have valid certificates. If use_identity_as_username is false, the client must authenticate as normal (if required by password_file) through the MQTT options.</p>
+
+<p>証明書ベースの暗号化を行う場合、2つのオプションが認証に影響を与えます。<br/>
+1つめは<code>require_certificate</code>で、trueもしくはfalseに設定できます。<br/>
+falseの場合、クライアントのSSL/TLSコンポーネントはサーバが正確であるかどうかを確かめます。しかし、クライアントは何もサーバに提供する必要はありません。認証はMQTTにビルトインされたユーザ名・パスワードに制限されます。<br/>
+trueの場合、クライアントは有効な証明書を接続するために提供する必要があります。</p>
+
+<p>このケースでは2つ目のオプション、<code>use_identity_as_username</code>が関連してきます。<br/>
+これをtrueにセットするとアクセスコントロールのために証明書共通名(CN)がMQTTのユーザ名の代わりに使われます。パスワードは、認証取得をしたユーザのみが有効な証明書を持っていると考えているため変更されません。<br/>
+<code>use_identity_as_username</code>がfalseの場合、クライアントは通常と同じようにMQTTによって認証されます。（password_fileが必要です）</p>
+
+<p>When using pre-shared-key based encryption through the psk_hint and psk_file options, the client must provide a valid identity and key in order to connect to the broker before any MQTT communication takes place. If use_identity_as_username is true, the PSK identity is used instead of the MQTT username for access control purposes. If use_identity_as_username is false, the client may still authenticate using the MQTT username/password if using the password_file option.
+（ここは事前共有キーの話なのでパス）</p>
+
+<p>Both certificate and PSK based encryption are configured on a per-listener basis.</p>
+
+<p>この証明書ベース、PSKベースの暗号化どちらの場合でもリスナー単位での設定になります。</p>
+
+<p>Authentication plugins can be created to replace the password_file and psk_file options (as well as the ACL options) with e.g. SQL based lookups.</p>
+
+<p>たとえば、SQLデータベース参照などの認証プラグインを、ユーザ名／パスワード認証とPSKファイルのオプションをリプレイスするために設定することも可能です。</p>
+
+<p>It is possible to support multiple authentication schemes at once. A config could be created that had a listener for all of the different encryption options described above and hence a large number of ways of authenticating.</p>
+
+<p>また複数の認証スキームを一度にサポートするようにすることも可能です。設定ファイルは一つのリスナーに対して上記にあるすべての違った暗号化のオプション、つまりいくつもの認証方法を設定することも可能です。</p></blockquote>
+
+<p>と、ここまでの説明では、「いろんな方法で暗号化、認証ができます」というところだけしかわかりませんでした。<br/>
+これからやろうとしている証明書ベースの暗号化では、認証と絡めることもできるし、それとは別にすることもできる、というところでしょうか。</p>
+
+<p>証明書をクライアントが提供するようなやり方もできるように読めます。
+確かに、クライアントが証明書を提示するという方が理にかなっているかもしれません。今想定しているような構成では、接続してきたクライアントが「偽物」である可能性を排除したいわけで、一般的なHTTPプロトコルでの証明書のようにサーバ側の真贋をユーザのセキュリティのために提供するのとは全く逆になります。</p>
+
+<p>兎にも角にも手を動かさないことには勉強できないので、まずは、証明書をサーバが提供するという、一般的なやり方の設定をしてみようと思います。証明書ベースの暗号化経路を確立、次にユーザ名／パスワードでクライアント認証をする、という手順になります。</p>
+
+<p>今日のところは、これまで。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[接続の暗号化]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/11/secure-connection/"/>
+    <updated>2015-01-11T11:05:38+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/11/secure-connection</id>
+    <content type="html"><![CDATA[<p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
+
+<!-- more -->
+
+
+<p>mosquitto.confを眺めてみると、mosquittoでは2つのやり方が準備されているようです。</p>
+
+<ul>
+<li><p>公開鍵認証・暗号化</p>
+
+<p>  公開鍵をお互いにやり取りして、お互いを認証・暗号化する普通のやり方ですね。</p></li>
+<li><p>証明書ベース認証・暗号化</p>
+
+<p>  HTTPで一般的に使われている証明書による認証ですね。https で始まるwebサイトでは暗号化されるように、この仕組みを使えばMQTTでも通信が暗号化されます。<br/>
+  サーバーがオープンで誰でもが接続できるような状況にするためには、必須です。</p></li>
+</ul>
+
+
+<p>mosquittoではユーザ（サブスクライバ、パブリッシャ）認証のためにユーザ名、パスワード方式が使えますが、認証時に平文でこれらがやり取りされるという事ですので、通信経路そのものの暗号化が欠かせません。</p>
+
+<p>MQTTブローカに頼らない暗号化という意味では ssh しかないでしょうか。
+ブローカがオープンでない場合であれば、ポートフォワードと合わせ技で安全性が高められるかもしれません。
+ただ、この場合、ネットワーク環境によってはsshのトンネリングができない（ポリシー的に）という場合もあるかと思うので、環境の調査が必要かと思います。</p>
+
+<p>最近は<a href="http://jpmens.net/2014/07/03/the-mosquitto-mqtt-broker-gets-websockets-support/">websocket</a>という接続方法もあるので、MQTTブローカをweb applicationでラップしてセキュアにするというやり方もあるかもしれません。</p>
+
+<p>今回はsshのポートフォワードで暗号化してみましたので報告です。</p>
+
+<p>まず、何はなくとも検索。ssh mosquittoあたりでgoogleさんに聞いてみたところ、<a href="http://diabolicalws.blogspot.jp/2012/02/tunneling-mqtt-over-ssh.html">この</a>サイトがヒット。正しくやろうとしていたことです。</p>
+
+<p>このページの最終目標としては、簡易的なVPNとしてのsshによるトンネリングを使ってMQTTプロトコルをセキュアにしようという事のようです。</p>
+
+<p>手順としては、</p>
+
+<ol>
+<li><p>トンネリングの設定</p></li>
+<li><p>トンネルを使った通信の設定</p></li>
+<li><p>パスフレーズなしでの接続方法とセキュリティ設定</p></li>
+</ol>
+
+
+<p>順を追ってやってみます。</p>
+
+<h2>トンネリングの設定</h2>
+
+<p>まずクライアント側の設定です。</p>
+
+<pre><code class="sh">ssh -f -L 22883:127.0.0.1:1883 SSHusername@MQTT -N  
+</code></pre>
+
+<p>とすることで、クライアント側のポート22883 に対する通信が暗号化された上でサーバ&#8221;MQTT&#8221;の1883に接続されます。ユーザ名は&#8221;SSHusername&#8221;です。
+各オプションの意味は以下のとおりです。</p>
+
+<p> -f : バックグラウンドで動作</p>
+
+<p> -L : ローカル側でのポートフォワード（クライアント側のポート変換が設定されます）</p>
+
+<p> -N : サーバ側でコマンドを実行しないように指定</p>
+
+<p>この例ではポートは標準の22となっています。必要に応じて-pオプションでssh通信そのもののポート番号を指定してください。 sshのポート番号も専用のものにしておくことで、更にセキュリティを確保できるかもしれません。<br/>
+ここらへんはsshのポートフォワード設定を参照してもらったほうが正しい理解が得られるかと。</p>
+
+<p>この接続をするためには、クライアント、サーバ共にsshが動く環境であることが必要です。適宜設定してください。</p>
+
+<p>このコマンドを実行するとパスワードを聞かれるはずです。実際の無人運用ではこれが問題になりますが、これは後ほど解決してもらえます。</p>
+
+<h2>トンネルを使った通信の設定</h2>
+
+<p>上記の操作でセキュアな通信経路が22883ポートに設定されましたので、これを使って実際にMQTTプロトコルのデータを流してみます。</p>
+
+<pre><code class="sh">mosquitto_sub -h 127.0.0.1 -p 22883 -u dan -P password -t 'test/#'
+</code></pre>
+
+<p>-P, -uでユーザ名とパスワードを指定してブローカにサブスクライバとしてログインしています。ホストはローカルホスト、ポートは先程トンネルを設定した22883に指定します。<br/>
+-P, -uは必須ではないです。私はこれらナシでつかってます。</p>
+
+<p>トピックを適切に設定してあれば、なにかメッセージを受け取れるはずです。</p>
+
+<h2>パスフレーズなしでの接続方法とセキュリティ設定</h2>
+
+<p>参考にしたページでは、&#8221;Key-Based authentification&#8221;と説明されていますが、公開キーを事前にやり取りしている間柄なら、十分信用できるだろうという事で、鍵を持っている相手はパスフレーズなしでログインさせましょう、という設定です。<br/>
+この設定では、ssh接続に際しパスフレーズなしで接続できるようになってしまうので、鍵を他の用途で使うとセキュリティに問題が出る可能性があります。そのため、「このトンネリングだけに使う専用の鍵を用意するように」と注意書きがあります。</p>
+
+<p>パスフレーズ無しでキーを作り、それをサーバに登録します。</p>
+
+<pre><code class="sh">ssh-keygen
+ssh-copy-id SSHusername@MQTT
+</code></pre>
+
+<p>サーバ側のセキュリティ確保のため、クライアントのキー記述の最初の部分に以下のような設定を追記します。</p>
+
+<pre><code class="sh">from="192.168.1.*",no-pty,permitopen="127.0.0.1:1883",command="/bin/false" ssh-rsa........
+</code></pre>
+
+<p>この例では</p>
+
+<ul>
+<li>接続先のIP制限 from=</li>
+<li>ターミナルのアサインをしない no-pty</li>
+<li>ローカルホストの指定ポートのみオープン可能にする permitopen=</li>
+<li>ログイン時に実行するコマンドを /bin/falseに設定</li>
+</ul>
+
+
+<p>ということを指定しています。
+具体的には、192.168.1.*のネットワークからの接続に限定、ターミナルをアサインしない、ローカルホストの1883への接続のみを許可する、リモートから接続するときに指定されたコマンドを実行しない。
+という事になりそうです。<br/>
+くわしくは、<a href="http://www.nxmnpg.com/ja/8/sshd#9">ここらへん</a>を参照してください。</p>
+
+<blockquote><p>この設定を書くときの注意ですが、設定同士の区切りはコンマですが、設定と鍵本体の区切りは、コンマでなくスペースです。ここを間違えて、2時間ほどハマりました。<br/>
+ここをコンマにすると鍵が正しく認識できないのでパスワードを要求されます。</p>
+
+<p>公開鍵をやり取りしていて有効であれば、パスフレーズを聞かれるか何もなしでログインできるかのどちらかです。</p></blockquote>
+
+<p>私の実験では、IPアドレスの制限をしない設定、で実行してうまく動いています。</p>
+
+<p>本来的には、証明書ベースの認証システムを組むのがいいのでしょうけれど、証明書の発行など、よくわかっていないと事故に繋がりそうなので、今回は初学者向けということでトンネリングを実験して見ました。<br/>
+小規模なシステムでネットワーク環境もある程度わかっているところにデバイスを配置するには十分な感じかと思います。</p>
+
+<p>また、MQTTプロトコル上からデバイスがつながっているシステムの操作をするときに、重要なパラメタの制御は1箇所でできないようにするとか、あるデバイスの許可とペアで設定して初めてアクチュエートするなど、システム上でのセキュリティ構築も必要かもしれません。</p>
+
+<h2>2015/1/14 追記</h2>
+
+<p>authorized_keysに記入する設定で、<code>permitopen</code>というパラメタがありますが、これを設定すると”コマンドからのsshでは接続出来なくて、configを用いた接続は可能”という変な状態になりました。</p>
+
+<p>具体的には、</p>
+
+<p><code>ssh -f -L 22883:localhost:1883 user@broker -i rsa_key</code></p>
+
+<p>と指定すると、一応sshは動いてトンネリングはできますが、接続しようとするとエラーになります。</p>
+
+<p>一方全く同じパラメタをconfigファイルに書きこんで、configに設定したhost名でsshを起動すると普通に接続できます。</p>
+
+<p>謎です。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
+    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
+    <updated>2014-12-19T20:45:30+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
+    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+<!-- more -->
+
+
+<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+
+<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
+
+<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
+
+<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
+
+<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
+
+<p>具体的には、</p>
+
+<pre><code class="sh Why Two topics comes up??">$ mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
+(古いRaspiからのデータ）
+^c
+　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（古いRaspiからのデータ）
+（新しいRaspiからのデータ）
+^C
+
+　　？？なぜ2つから？？
+    --disable-clean-sessionがあると一度サブスクライブしたセッションは、
+    IDに張り付いているのでは？？？
+    だから、同じIDで違うトピックをサブスクライブしようとしても、
+    前のセッションも復活する？
+    ならば、昔のセッションをクリアにしてあげればいいはず。
+
+$ mosquitto_sub --id abcd -t data/OLD_pi -q 1
+^c
+    clean sessionで接続してすぐに切断。
+    これで、古いサブスクライブのセッションが切れたはず。
+
+$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+（新しいRaspiからのデータ）
+
+　　思ったとおり
+</code></pre>
+
+<p>という感じです。</p>
+
+<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ipconfig | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/ipconfig/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-18T17:08:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[自分のIPアドレスを送信する]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/13/ipaddress/"/>
+    <updated>2015-01-13T20:43:51+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/13/ipaddress</id>
+    <content type="html"><![CDATA[<p>自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。</p>
+
+<!-- more -->
+
+
+<p>Raspberry Pi で、まずは、どうやってIPアドレスを抽出するかです。</p>
+
+<p>自分のIPアドレスは<code>ifconfig</code>で出てきますが、これは人間用なのでフォーマットがややこしい。</p>
+
+<pre><code class="sh example of result of "ifconfig" command">$ ifconfig eth0
+
+eth0      Link encap:Ethernet  HWaddr b8:27:eb:29:61:2d  
+          inet addr:192.168.0.xyz  Bcast:192.168.0.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:95729 errors:0 dropped:67 overruns:0 frame:0
+          TX packets:62090 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:10362519 (9.8 MiB)  TX bytes:6910384 (6.5 MiB)
+</code></pre>
+
+<p>色々と悩んだ末、こんな感じのコマンドラインではどうかと。。。。</p>
+
+<pre><code class="sh a example of one-liner extracting IP adress from "ifconfig" command">ifconfig eth0 | grep -o '^ *inet addr:.*B' | grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'
+</code></pre>
+
+<p>最初のgrepでインターフェイスのIPアドレスを表示しているフレーズだけを抜き出します。<br/>
+具体的には行頭から任意の数のスペースがあって、&#8221;inet addr:&ldquo;とあって、任意の文字が続き&#8221;B&#8221;で終わる部分です。</p>
+
+<p><code>grep -o '^ *inet addr:.*B'</code></p>
+
+<p>次に、そのフレーズの中には1つしかIPアドレスは入っていないはずなので、それを抜き出します。</p>
+
+<p><code>grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'</code></p>
+
+<p>だいたいこれで、行けそうです。
+試しにやってみると。</p>
+
+<pre><code class="sh test for the one-liner ">$ ifconfig eth0 | grep -o '^ *inet addr:.*B' | grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'
+192.168.0.xyz
+</code></pre>
+
+<p>今回の目的には十分かとおもいます。</p>
+
+<p>しかし、なんかもっといい方法（どっかのファイルを見るとか）がありそうなきもします。。。。</p>
+
+<p>さて、このコマンドラインをデバイスのスクリプト（cronで動く）にいれてみたところ、うまく動かない。具体的には、結果がNULLになってしまうのです。試しに、手元でコマンドラインから実行するとうまく動く。うう〜ん。<br/>
+さっぱり理由が分からず、いろいろ調べてみたところ「<a href="http://higelog.brassworks.jp/?p=1775">動かないときはエラーログを取れ！</a>」という啓示をいただき、試してみたところ、<code>command not found</code>とのこと。ifconfigコマンドへのパスが通ってない、という情けないという状況。言われてみれば確かにそんなことをどこかで見たような気がするなあ。。。。</p>
+
+<p>ということで、ifconfigコマンドを絶対パスで指定して事なきを得ました。</p>
+
+<p><strong>「CRONのコマンドは絶対パス指定」</strong>　勉強しました。。。</p>
+]]></content>
+  </entry>
+  
+</feed>

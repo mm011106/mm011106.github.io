@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: fromat examples | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/fromat-examples/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-18T17:08:55+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[手始めに、色々と試してみます]]></title>
+    <link href="http://mm011106.github.io/blog/2014/11/29/first-step/"/>
+    <updated>2014-11-29T14:52:11+09:00</updated>
+    <id>http://mm011106.github.io/blog/2014/11/29/first-step</id>
+    <content type="html"><![CDATA[<p>シェルコマンドの表示例です。</p>
+
+<pre><code class="sh">echo ${test}
+cat /var/log/syslog | grep 'test_log' &gt; temp.txt
+</code></pre>
+
+<!-- more -->
+
+
+<pre><code class="sh">rake watch
+</code></pre>
+
+<p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
+
+<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。<br/>
+日本語も大丈夫。</p>
+
+<p>改行するときは行末に２文字の半角空白を置くと、<br/>
+こんなふうに改行できます。</p>
+
+<p>現在、octopressのディレクトリ内からソースファイルをエディットして、自動でgenerate、適当なところで手動でweb用のリポジトリ内にコピー、そこからcommit &amp; pushしています。<br/>
+ちょっと効率が悪い、ソースがローカルに保存されてしまう、という欠点があるので何とかしたいと思います。<br/>
+世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。<br/>
+やはり大元の<a href="http://octopress.org/docs/deploying/github/">ここ</a>が詳しいか？</p>
+
+<h2>写真</h2>
+
+<p>本題に入る前に、区切り線の挿入。
+区切り線の前の行は文字が大きくなり、タイトルっぽくなります。</p>
+
+<p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた<br/>
+<code>
+![これは写真です](/images/hana.jpg "HANA!")
+</code></p>
+
+<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" />
+写真の次のテキストはこんな位置に来ます。</p>
+
+<pre><code>![これは小さい写真です](/images/hana_small.jpg "Shrinked HANA!")
+</code></pre>
+
+<p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
+
+<p>改行を１行入れたあとの、写真の次のテキストはこんな位置に来ます。<br/>
+次に、octopressでのタグフォーマットです。
+フォーマットはこんな形になります。
+<code>
+<img class="[class names]" src="/path/to/image" title="[width] [height] [title text [alt text]]" >
+</code>
+class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
+
+<pre><code><img src="/images/hana.jpg" title="'HANA!'" >
+</code></pre>
+
+<p><img src="/images/hana.jpg" title="&lsquo;HANA!&rsquo;" ></p>
+
+<p>このフォーマットだと左右に寄せることができ、サイズも指定できます。
+<code>
+<img class="center" src="/images/hana.jpg" width="400" title="'center 400 HANA!'" >
+</code></p>
+
+<p><img class="center" src="/images/hana.jpg" width="400" title="&lsquo;center 400 HANA!&rsquo;" ></p>
+
+<p>すぐ次の行に文字を入れるとこんなかんじです。<br/>
+多分写真の下に文字が来ると思いますが。。。</p>
+
+<pre><code><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" >
+</code></pre>
+
+<p><img class="left" src="/images/hana.jpg" width="300" title="&lsquo;300 HANA!&rsquo;" ></p>
+
+<p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br/>
+写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
+
+<p>それは、それで正しいフォーマッティングかと思います。<br/>
+この行数では、safari上で行数が足りません。firefoxよりも文字が小さく表示されるようです。</p>
+
+<h2>この状態で「区切り」を入れてみます。</h2>
+
+<p>やっぱりうまく行きませんね。</p>
+
+<pre><code><img class="right" src="/images/hana_small.jpg" title="'Shrinked HANA!'　'ハナさん'" >
+</code></pre>
+
+<p><img class="right" src="/images/hana_small.jpg" title="&lsquo;Shrinked HANA!&rsquo; &lsquo;ハナさん&rsquo;" ></p>
+
+<p>ここにも少し文章が必要です。<br/>
+ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
+  　　<br/>
+　　<br/>
+　　<br/>
+　　　　</p>
+
+<p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
+
+<p><img class="left" src="/images/hana.jpg" width="200" title="&lsquo;left HANA!&rsquo;" >
+<img class="right" src="/images/hana.jpg" width="200" title="&lsquo;right HANA!&rsquo;" ></p>
+
+<p>そして、この文章は写真の次の行です。<br/>
+写真と写真の間に流し込まれているかしら？</p>
+
+<p>　　</p>
+
+<p>　　</p>
+
+<p>　　
+　　</p>
+]]></content>
+  </entry>
+  
+</feed>

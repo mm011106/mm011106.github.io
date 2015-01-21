@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Paho MQTT のインストール - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。
+手順は、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Paho MQTT のインストール</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+<!-- more -->
+
+
+<p>インストールする前に、簡単にお勉強。</p>
+
+<p>Phao Projectとは一体何者？
+<a href="http://www.eclipse.org/paho/">Paho project</a></p>
+
+<blockquote><p>The Paho project provides scalable open-source client implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine‑to‑Machine (M2M) and Internet of Things (IoT).</p>
+
+<p>M2M、IoTへのアプリケーションに向けた、オープンで標準なメッセージングプロトコルの、スケーラブルでオープンソースのクライアント実装を提供するプロジェクトです。</p></blockquote>
+
+<p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
+
+<ul>
+<li><h2>MQTT Clients</h2></li>
+<li><h3>C/C++</h3>
+
+<p>  Posix C / Windows C<br/>
+  embedded systems<br/>
+  Posix C++ / Windows C++<br/>
+  embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p></li>
+<li><h3>Java</h3>
+
+<p>  J2SE<br/>
+  Android Service</p></li>
+<li><h3>JavaScript</h3></li>
+<li><h3>Python</h3></li>
+<li><h3>Go Client</h3></li>
+<li><h3>C# .Net and WinRT</h3></li>
+<li><h3>Utilities</h3>
+
+<p>  MQTT Conformance/Interoperability Testing</p></li>
+</ul>
+
+
+<p>で、目的のPython向けのクライアントモジュールは、</p>
+
+<p><a href="http://www.eclipse.org/paho/clients/python/">Python support:</a></p>
+
+<blockquote><p>The Paho Python Client provides a client class with support for both MQTT v3.1 and v3.1.1 on Python 2.7 or 3.x.</p></blockquote>
+
+<p>ということで、2.7と3.xの両方をサポートしているようです。</p>
+
+<p>ここまで確認した所で、インストールを始めました。</p>
+
+<figure class='code'><figcaption><span>steps installing Paho-mqtt for Python</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python --version
+</span><span class='line'>Python 2.7.3
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install python-pip
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>sudo pip install paho-mqtt
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>cat paho-mqtt-test.py
+</span><span class='line'>
+</span><span class='line'>import paho.mqtt.client as mqtt
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'>def on_connect<span class="o">(</span>client, userdata, rc<span class="o">)</span>:
+</span><span class='line'>    print<span class="o">(</span><span class="s2">&quot;Connected with result code &quot;</span>+str<span class="o">(</span>rc<span class="o">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    client.subscribe<span class="o">(</span><span class="s2">&quot;$SYS/#&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'>def on_message<span class="o">(</span>client, userdata, msg<span class="o">)</span>:
+</span><span class='line'>    print<span class="o">(</span>msg.topic+<span class="s2">&quot; &quot;</span>+str<span class="o">(</span>msg.payload<span class="o">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">client</span> <span class="o">=</span> mqtt.Client<span class="o">()</span>
+</span><span class='line'>client.on_connect <span class="o">=</span> on_connect
+</span><span class='line'>client.on_message <span class="o">=</span> on_message
+</span><span class='line'>
+</span><span class='line'>client.connect<span class="o">(</span><span class="s2">&quot;iot.eclipse.org&quot;</span>, 1883, 60<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'>client.loop_forever<span class="o">()</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>python ./paho-mqtt-test.py
+</span><span class='line'>
+</span><span class='line'>Connected with result code 0
+</span><span class='line'><span class="nv">$SYS</span>/broker/version mosquitto version 1.3.5
+</span><span class='line'>..
+</span><span class='line'>..
+</span><span class='line'><span class="nv">$SYS</span>/broker/uptime <span class="m">1258785</span> seconds
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/total 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/inactive 1
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/active 1
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/maximum 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/clients/expired 0
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/stored 72
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/received 80212
+</span><span class='line'><span class="nv">$SYS</span>/broker/messages/sent 65057
+</span><span class='line'><span class="nv">$SYS</span>/broker/subscriptions/count 2
+</span><span class='line'><span class="nv">$SYS</span>/broker/retained messages/count 50
+</span><span class='line'><span class="nv">$SYS</span>/broker/heap/current 12888
+</span><span class='line'><span class="nv">$SYS</span>/broker/heap/maximum 23872
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/dropped 5069
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/received 20949
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/sent 5802
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/received 598854
+</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/sent 382692
+</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/received 2003874
+</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/sent 1025439
+</span><span class='line'>.....
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となりました。
+ここまで、10分かからず完了。</p>
+
+<p>先人に感謝。引き続き、巨人の肩の上で仕事させてもらいます。</p>
+
+<hr />
+
+<p><a href="http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf">MQTT-SN</a></p>
+
+<p>MQTT For Sensor Networks</p>
+
+<p>だそうです。概略だけ、かいつまんでみると。</p>
+
+<blockquote><p>It is optimized for communications over networks where bandwidth is at a premium or where the network con-
+nection could be intermittent. However MQTT requires an underlying network, such as TCP/IP, that provides
+an ordered lossless connection capability and this is too complex for very simple, small footprint, and low-cost
+devices such as wireless SAs.
+The purpose of this document is to specify MQTT-SN, a pub/sub protocol for wireless sensor networks.
+MQTT-SN can be considered as a version of MQTT which is adapted to the peculiarities of a wireless commu-
+nication environment.</p>
+
+<p>センサーネットワークのような、回線の費用がかかるような場所、しばしば回線が落ちるようなところに最適化されたMQTTプロトコルではありますが、小さなローコストのシンプルデバイスにとっては、複雑すぎるTCP/IPのようなロスレスのコネクションを基礎にしています。
+このドキュメントはワイヤレスセンサネットワークのためのパブリッシュ・サブスクライブプロトコルであるMQTT-SNの仕様を規定します。MQTT-SNはワイヤレスコミュニケーション環境の特色に特化したMQTTのバージョンだと考えられます。</p></blockquote>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mqtt/'>mqtt</a>, <a class='category' href='/blog/categories/paho/'>paho</a>, <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/20/mqtt-packets/" title="Previous Post: MQTTのパケットを覗いてみた(1)">&laquo; MQTTのパケットを覗いてみた(1)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/12/29/vim/" title="Next Post: paho-mqttで回線を切るとどうなるか">paho-mqttで回線を切るとどうなるか &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

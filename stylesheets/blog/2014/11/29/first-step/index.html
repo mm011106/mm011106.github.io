@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>手始めに、色々と試してみます - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="シェルコマンドの表示例です。 1
+2
+echo ${test}
+cat /var/log/syslog | grep &#39;test_log&#39; &gt; temp.txt 1
+rake watch を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/11/29/first-step/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">手始めに、色々と試してみます</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">2014 / 11 / 29</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>シェルコマンドの表示例です。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">echo</span> <span class="k">${</span><span class="nv">test</span><span class="k">}</span>
+</span><span class='line'>cat /var/log/syslog <span class="p">|</span> grep <span class="s1">&#39;test_log&#39;</span> &gt; temp.txt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>rake watch
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
+
+<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。<br/>
+日本語も大丈夫。</p>
+
+<p>改行するときは行末に２文字の半角空白を置くと、<br/>
+こんなふうに改行できます。</p>
+
+<p>現在、octopressのディレクトリ内からソースファイルをエディットして、自動でgenerate、適当なところで手動でweb用のリポジトリ内にコピー、そこからcommit &amp; pushしています。<br/>
+ちょっと効率が悪い、ソースがローカルに保存されてしまう、という欠点があるので何とかしたいと思います。<br/>
+世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。<br/>
+やはり大元の<a href="http://octopress.org/docs/deploying/github/">ここ</a>が詳しいか？</p>
+
+<h2>写真</h2>
+
+<p>本題に入る前に、区切り線の挿入。
+区切り線の前の行は文字が大きくなり、タイトルっぽくなります。</p>
+
+<p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは写真です<span class="o">](</span>/images/hana.jpg <span class="s2">&quot;HANA!&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="/images/hana.jpg" title="HANA!" alt="これは写真です" />
+写真の次のテキストはこんな位置に来ます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>!<span class="o">[</span>これは小さい写真です<span class="o">](</span>/images/hana_small.jpg <span class="s2">&quot;Shrinked HANA!&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="/images/hana_small.jpg" title="Shrinked HANA!" alt="これは小さい写真です" /></p>
+
+<p>改行を１行入れたあとの、写真の次のテキストはこんな位置に来ます。<br/>
+次に、octopressでのタグフォーマットです。
+フォーマットはこんな形になります。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img <span class="o">[</span>class names<span class="o">]</span> /path/to/image <span class="o">[</span>width<span class="o">]</span> <span class="o">[</span>height<span class="o">]</span> <span class="o">[</span>title text <span class="o">[</span>alt text<span class="o">]]</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img /images/hana.jpg <span class="s1">&#39;HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="/images/hana.jpg" title="'HANA!'" ></p>
+
+<p>このフォーマットだと左右に寄せることができ、サイズも指定できます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img center /images/hana.jpg <span class="m">400</span> <span class="s1">&#39;center 400 HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="center" src="/images/hana.jpg" width="400" title="'center 400 HANA!'" ></p>
+
+<p>すぐ次の行に文字を入れるとこんなかんじです。<br/>
+多分写真の下に文字が来ると思いますが。。。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img left /images/hana.jpg <span class="m">300</span> <span class="s1">&#39;300 HANA!&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="left" src="/images/hana.jpg" width="300" title="'300 HANA!'" ></p>
+
+<p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br/>
+写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。</p>
+
+<p>それは、それで正しいフォーマッティングかと思います。<br/>
+この行数では、safari上で行数が足りません。firefoxよりも文字が小さく表示されるようです。</p>
+
+<h2>この状態で「区切り」を入れてみます。</h2>
+
+<p>やっぱりうまく行きませんね。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% img right /images/hana_small.jpg <span class="s1">&#39;Shrinked HANA!&#39;</span>　<span class="s1">&#39;ハナさん&#39;</span> %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img class="right" src="/images/hana_small.jpg" title="Shrinked HANA!" alt="ハナさん"></p>
+
+<p>ここにも少し文章が必要です。<br/>
+ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。<br/>
+  　　<br/>
+　　<br/>
+　　<br/>
+　　　　</p>
+
+<p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
+
+<p><img class="left" src="/images/hana.jpg" width="200" title="'left HANA!'" >
+<img class="right" src="/images/hana.jpg" width="200" title="'right HANA!'" ></p>
+
+<p>そして、この文章は写真の次の行です。<br/>
+写真と写真の間に流し込まれているかしら？</p>
+
+<p>　　</p>
+
+<p>　　</p>
+
+<p>　　
+　　</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">2014 / 11 / 29</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/fromat-examples/'>fromat examples</a>, <a class='category' href='/blog/categories/test/'>test</a>, <a class='category' href='/blog/categories/ri-ben-yu/'>日本語</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/11/29/first-step/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/11/29/first-step/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/11/29/motivation/" title="Next Post: このwebでは...">このwebでは&#8230; &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

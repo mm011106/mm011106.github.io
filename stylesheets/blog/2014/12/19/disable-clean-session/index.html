@@ -1,0 +1,375 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>2つのトピックが。。。 - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">2つのトピックが。。。</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+<!-- more -->
+
+
+<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+
+<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
+
+<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
+
+<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
+
+<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
+
+<p>具体的には、</p>
+
+<figure class='code'><figcaption><span>Why Two topics comes up??</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
+</span><span class='line'><span class="o">(</span>古いRaspiからのデータ）
+</span><span class='line'>^c
+</span><span class='line'>　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+</span><span class='line'>（古いRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>^C
+</span><span class='line'>
+</span><span class='line'>　　？？なぜ2つから？？
+</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、
+</span><span class='line'>  IDに張り付いているのでは？？？
+</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、
+</span><span class='line'>  前のセッションも復活する？
+</span><span class='line'>  ならば、昔のセッションをクリアにしてあげればいいはず。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --id abcd -t data/OLD_pi -q 1
+</span><span class='line'>^c
+</span><span class='line'>  clean sessionで接続してすぐに切断。
+</span><span class='line'>  これで、古いサブスクライブのセッションが切れたはず。
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'>
+</span><span class='line'>　　思ったとおり
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>という感じです。</p>
+
+<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>, <a class='category' href='/blog/categories/raspi/'>raspi</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/14/ime/" title="Previous Post: 日本語入力">&laquo; 日本語入力</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/12/20/mqtt-packets/" title="Next Post: MQTTのパケットを覗いてみた(1)">MQTTのパケットを覗いてみた(1) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/12/autossh/">autossh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
