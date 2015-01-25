@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: raspi | MQTT and ...]]></title>
-  <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
+  <title><![CDATA[Category: webcam | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/webcam/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
   <updated>2015-01-25T11:34:02+09:00</updated>
   <id>http://mm011106.github.io/</id>
@@ -226,123 +226,6 @@ $ fswebcam /run/shm/picture.jpg
 <p>ここまで来ると、立派な定点カメラの出来上がり、という感じです。</p>
 
 <p>MQTTのサブスクライバをつければ、シャッタや解像度のコントロールがMQTT経由でできますね。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[自分のIPアドレスを送信する]]></title>
-    <link href="http://mm011106.github.io/blog/2015/01/13/ipaddress/"/>
-    <updated>2015-01-13T20:43:51+09:00</updated>
-    <id>http://mm011106.github.io/blog/2015/01/13/ipaddress</id>
-    <content type="html"><![CDATA[<p>自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。</p>
-
-<!-- more -->
-
-
-<p>Raspberry Pi で、まずは、どうやってIPアドレスを抽出するかです。</p>
-
-<p>自分のIPアドレスは<code>ifconfig</code>で出てきますが、これは人間用なのでフォーマットがややこしい。</p>
-
-<pre><code class="sh example of result of "ifconfig" command">$ ifconfig eth0
-
-eth0      Link encap:Ethernet  HWaddr b8:27:eb:29:61:2d  
-          inet addr:192.168.0.xyz  Bcast:192.168.0.255  Mask:255.255.255.0
-          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-          RX packets:95729 errors:0 dropped:67 overruns:0 frame:0
-          TX packets:62090 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000 
-          RX bytes:10362519 (9.8 MiB)  TX bytes:6910384 (6.5 MiB)
-</code></pre>
-
-<p>色々と悩んだ末、こんな感じのコマンドラインではどうかと。。。。</p>
-
-<pre><code class="sh a example of one-liner extracting IP adress from "ifconfig" command">ifconfig eth0 | grep -o '^ *inet addr:.*B' | grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'
-</code></pre>
-
-<p>最初のgrepでインターフェイスのIPアドレスを表示しているフレーズだけを抜き出します。<br/>
-具体的には行頭から任意の数のスペースがあって、&#8221;inet addr:&ldquo;とあって、任意の文字が続き&#8221;B&#8221;で終わる部分です。</p>
-
-<p><code>grep -o '^ *inet addr:.*B'</code></p>
-
-<p>次に、そのフレーズの中には1つしかIPアドレスは入っていないはずなので、それを抜き出します。</p>
-
-<p><code>grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'</code></p>
-
-<p>だいたいこれで、行けそうです。
-試しにやってみると。</p>
-
-<pre><code class="sh test for the one-liner ">$ ifconfig eth0 | grep -o '^ *inet addr:.*B' | grep -E -o '([0-9]{1,3}\.){3}[0-9]{1,3}'
-192.168.0.xyz
-</code></pre>
-
-<p>今回の目的には十分かとおもいます。</p>
-
-<p>しかし、なんかもっといい方法（どっかのファイルを見るとか）がありそうなきもします。。。。</p>
-
-<p>さて、このコマンドラインをデバイスのスクリプト（cronで動く）にいれてみたところ、うまく動かない。具体的には、結果がNULLになってしまうのです。試しに、手元でコマンドラインから実行するとうまく動く。うう〜ん。<br/>
-さっぱり理由が分からず、いろいろ調べてみたところ「<a href="http://higelog.brassworks.jp/?p=1775">動かないときはエラーログを取れ！</a>」という啓示をいただき、試してみたところ、<code>command not found</code>とのこと。ifconfigコマンドへのパスが通ってない、という情けないという状況。言われてみれば確かにそんなことをどこかで見たような気がするなあ。。。。</p>
-
-<p>ということで、ifconfigコマンドを絶対パスで指定して事なきを得ました。</p>
-
-<p><strong>「CRONのコマンドは絶対パス指定」</strong>　勉強しました。。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
-    <updated>2014-12-19T20:45:30+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
-    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
-
-<!-- more -->
-
-
-<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
-
-<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
-
-<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
-
-<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
-
-<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
-
-<p>具体的には、</p>
-
-<pre><code class="sh Why Two topics comes up??">$ mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
-(古いRaspiからのデータ）
-^c
-　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
-
-$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-（古いRaspiからのデータ）
-（新しいRaspiからのデータ）
-^C
-
-　　？？なぜ2つから？？
-    --disable-clean-sessionがあると一度サブスクライブしたセッションは、
-    IDに張り付いているのでは？？？
-    だから、同じIDで違うトピックをサブスクライブしようとしても、
-    前のセッションも復活する？
-    ならば、昔のセッションをクリアにしてあげればいいはず。
-
-$ mosquitto_sub --id abcd -t data/OLD_pi -q 1
-^c
-    clean sessionで接続してすぐに切断。
-    これで、古いサブスクライブのセッションが切れたはず。
-
-$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-（新しいRaspiからのデータ）
-（新しいRaspiからのデータ）
-（新しいRaspiからのデータ）
-
-　　思ったとおり
-</code></pre>
-
-<p>という感じです。</p>
-
-<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
 ]]></content>
   </entry>
   
