@@ -9,7 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、 &hellip;">
+  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/20/mqtt-packets/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -445,50 +489,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/03/mqtt-option/">mosquitto_subのオプション</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
-
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/03/mqtt-option/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -536,6 +536,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
       </li>
     
@@ -549,10 +553,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
       </li>
     
   </ul>
@@ -595,6 +595,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
       </li>
     
@@ -608,10 +612,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
       </li>
     
   </ul>

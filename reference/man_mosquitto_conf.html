@@ -1,0 +1,1230 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>man mosquitto.conf - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="man mosquitto.conf 2015 / 01 / 26 このページは書きかけです！ 名前 mosquitto.conf - mosquittoのための設定ファイル 概要 mosquitto.conf 説明
+mosquitto.conf はmosquittoのための（唯一の） &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/reference/man_mosquitto_conf.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">man mosquitto.conf</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-26T00:00:00+09:00" pubdate data-updated="true">2015 / 01 / 26</time></p>
+  </header>
+  
+  <h2>このページは書きかけです！</h2>
+
+<p>名前
+       mosquitto.conf - mosquittoのための設定ファイル</p>
+
+<p>概要
+       mosquitto.conf</p>
+
+<p>説明
+mosquitto.conf はmosquittoのための（唯一の）設定ファイルです。このファイルはmosquittoが読める限りどこにおいても構いません。デフォルトではmosquittoは設定ファイルを必要とせず、下記のようなデフォルト値が設定されます。設定ファイルの読み込みについてはmosquitto(8)を参照してください。</p>
+
+<p>ファイルの書式
+行の最初に#がある場合はコメントとして扱われます。</p>
+
+<p>設定のための行の記述は変数名で始まります。設定値は変数名と一つのスペースで区切られています。</p>
+
+<p>AUTHENTICATION
+       The authentication options described below allow a wide range of
+       possibilities in conjunction with the listener options. This section
+       aims to clarify the possibilities.</p>
+
+<pre><code>   The simplest option is to have no authentication at all. This is the
+   default if no other options are given. Unauthenticated encrypted
+   support is provided by using the certificate based SSL/TLS based
+   options cafile/capath, certfile and keyfile.
+
+   MQTT provides username/password authentication as part of the protocol.
+   Use the password_file option to define the valid usernames and
+   passwords. Be sure to use network encryption if you are using this
+   option otherwise the username and password will be vulnerable to
+   interception.
+
+   When using certificate based encryption there are two options that
+   affect authentication. The first is require_certificate, which may be
+   set to true or false. If false, the SSL/TLS component of the client
+   will verify the server but there is no requirement for the client to
+   provide anything for the server: authentication is limited to the MQTT
+   built in username/password. If require_certificate is true, the client
+   must provide a valid certificate in order to connect successfully. In
+   this case, the second option, use_identity_as_username, becomes
+   relevant. If set to true, the Common Name (CN) from the client
+   certificate is used instead of the MQTT username for access control
+   purposes. The password is not replaced because it is assumed that only
+   authenticated clients have valid certificates. If
+   use_identity_as_username is false, the client must authenticate as
+   normal (if required by password_file) through the MQTT options.
+
+   When using pre-shared-key based encryption through the psk_hint and
+   psk_file options, the client must provide a valid identity and key in
+   order to connect to the broker before any MQTT communication takes
+   place. If use_identity_as_username is true, the PSK identity is used
+   instead of the MQTT username for access control purposes. If
+   use_identity_as_username is false, the client may still authenticate
+   using the MQTT username/password if using the password_file option.
+
+   Both certificate and PSK based encryption are configured on a
+   per-listener basis.
+
+   Authentication plugins can be created to replace the password_file and
+   psk_file options (as well as the ACL options) with e.g. SQL based
+   lookups.
+
+   It is possible to support multiple authentication schemes at once. A
+   config could be created that had a listener for all of the different
+   encryption options described above and hence a large number of ways of
+   authenticating.
+</code></pre>
+
+<p>一般設定</p>
+
+<pre><code>   acl_file file path
+    アクセスコントロールリスト(ACL)へのパスです。設定された場合、ファイルの中身はブローカが持っているトピックスへのクライアントのアクセスをコントロールします。このパラメータが設定された場合、リストアップされたトピックスだけがアクセスできるようになります。トピックへのアクセスは次のようなフォーマットで指定します。
+
+       topic [read|write] &lt;topic&gt;
+アクセスタイプは"read"もしくは”write"で制御します。これはオプションで、書かなければread/writeが許可されます。
+&lt;topic&gt;はサブスクリプションのように + や # のワイルドカード使うことができます。
+allow_anonymousがtureであるという前提で、最初のトピックスのセットは匿名のクライアントに対して設定されます。特定のユーザに対するトピックのACLは次のようなuser行の後に追加します。
+
+       user &lt;username&gt;
+</code></pre>
+
+<p>ここでのusernameはpassword_fileに記載されているものと同じです。clientidではありません。</p>
+
+<pre><code>       It is also possible to define ACLs based on pattern substitution
+       within the topic. The form is the same as for the topic keyword,
+       but using pattern as the keyword.
+</code></pre>
+
+<p>トピックにパターンを代用することによるアクセスコントロールリストを作ることも可能です。書式はトピックキーワードと同じですがパターンがキーワードとして使われます。</p>
+
+<pre><code>       pattern [read|write] &lt;topic&gt;
+
+       The patterns available for substition are:
+</code></pre>
+
+<p>パターンとして使えるのは以下のものです：</p>
+
+<pre><code>       ·   %c to match the client id of the client
+</code></pre>
+
+<p>%c:クライアントIDにマッチします</p>
+
+<pre><code>       ·   %u to match the username of the client
+</code></pre>
+
+<p>%u:クライアントのusernameにマッチします</p>
+
+<pre><code>       The substitution pattern must be the only text for that level of
+       hierarchy. Pattern ACLs apply to all users even if the "user"
+       keyword has previously been given.
+</code></pre>
+
+<p>パターンは階層のそのレベルのテキストだけでなくてはなりません。</p>
+
+<pre><code>       Example:
+</code></pre>
+
+<p>例：
+           pattern write sensor/%u/data</p>
+
+<pre><code>       Allow access for bridge connection messages:
+</code></pre>
+
+<p>これは、ブリッジ接続メッセージのためのアクセス許可です。</p>
+
+<pre><code>       pattern write $SYS/broker/connection/%c/state
+
+       If the first character of a line of the ACL file is a # it is
+       treated as a comment.
+</code></pre>
+
+<p>もし、アクセスコントロールファイルに#で始まる行があれば、それはコメントとして扱われます。</p>
+
+<pre><code>       Reloaded on reload signal. The currently loaded ACLs will be freed
+       and reloaded. Existing subscriptions will be affected after the
+       reload.
+</code></pre>
+
+<p>ACLはリロードシグナルでリロードされます。現在ロードされているACL設定は解除されて再読込されます。サブスクリプトされているものはリロード後に影響を受けるようになります。</p>
+
+<pre><code>   allow_anonymous [ true | false ]
+       Boolean value that determines whether clients that connect without
+       providing a username are allowed to connect. If set to false then
+       another means of connection should be created to control
+       authenticated client access. Defaults to true.
+</code></pre>
+
+<p>ユーザ名なしでのクライアントの接続を許可するかどうかを決定します。falseに設定されれば、認証されたクライントを管理するための別の手段の接続が作られます。デフォルトではtrueです。</p>
+
+<pre><code>       Reloaded on reload signal.
+</code></pre>
+
+<p>reload信号でリロードされます</p>
+
+<pre><code>   allow_duplicate_messages [ true | false ]
+       If a client is subscribed to multiple subscriptions that overlap,
+       e.g. foo/# and foo/+/baz , then MQTT expects that when the broker
+       receives a message on a topic that matches both subscriptions, such
+       as foo/bar/baz, then the client should only receive the message
+       once.
+</code></pre>
+
+<p>一つのクライアントが多重にサブスクライブしていて、それがオーバーラップしている場合、たとえばfoo/#とfoo/+/baz、MQTTは、ブローカが両方のサブスクリプションにマッチするようなメッセージ、例えばfoo/bar/baz、を受け取った場合、クライアントはそのメッセージの１つを受信することを期待しています。</p>
+
+<pre><code>       Mosquitto keeps track of which clients a message has been sent to
+       in order to meet this requirement. This option allows this
+       behaviour to be disabled, which may be useful if you have a large
+       number of clients subscribed to the same set of topics and want to
+       minimise memory usage.
+</code></pre>
+
+<p>mosquittoはこの要求にあわせてメッセージが送られるように、どのクライアントにどのメッセージが送られるか監視しています。
+このオプションは、この動作を停止させます。これは多くのクラアイアントがあって同じトピックスのセットをサブスクライブする場合やメモリを節約するのに便利かもしれません。</p>
+
+<pre><code>       It can be safely set to true if you know in advance that your
+       clients will never have overlapping subscriptions, otherwise your
+       clients must be able to correctly deal with duplicate messages even
+       when then have QoS=2.
+</code></pre>
+
+<p>もしクライアントが絶対にオーバーラップしたサブスクリプションを指定しないという事がわかっているなら、tureに設定するのが安全になるでしょう。そうでなければQoS=2を指定していても多重メッセージに配慮する必要が出てきます。</p>
+
+<pre><code>       Defaults to true.
+</code></pre>
+
+<p>デフォルトはtrueです。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   auth_opt_* value
+       Options to be passed to the auth plugin. See the specific plugin
+       instructions.
+</code></pre>
+
+<p>authプラグインへオプションを渡します。プラグインの説明を参照してください。</p>
+
+<pre><code>   auth_plugin file path
+       Specify an external module to use for authentication and access
+       control. This allows custom username/password and access control
+       functions to be created.
+
+       Not currently reloaded on reload signal.
+</code></pre>
+
+<p>アクセスコントロールと認証につかう外部モジュールを指定します。これはカスタマイズしたユーザ名/パスワードとアクセスコントロール機能を構築することを可能にします。
+リロードシグナルではリロードされません。</p>
+
+<pre><code>   autosave_interval seconds
+       The number of seconds that mosquitto will wait between each time it
+       saves the in-memory database to disk. If set to 0, the in-memory
+       database will only be saved when mosquitto exits or when receiving
+       the SIGUSR1 signal. Note that this setting only has an effect if
+       persistence is enabled. Defaults to 1800 seconds (30 minutes).
+</code></pre>
+
+<p>内部メモリ上のデータベースをディスクに保存する時間間隔を秒数で指定します。0にセットされるとmosquittoが終了するときか、SIGUSR1信号を受け取った時のみディスクに保存します。この設定はパーシスタンスが有効になっている時だけ効力があります。
+デフォルトは1800秒（30分）です。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   autosave_on_changes [ true | false ]
+       If true, mosquitto will count the number of subscription changes,
+       retained messages received and queued messages and if the total
+       exceeds autosave_interval then the in-memory database will be saved
+       to disk. If false, mosquitto will save the in-memory database to
+       disk by treating autosave_interval as a time in seconds.
+</code></pre>
+
+<p>trueに設定したとき、mosquittoはサブスクリプションの変更、リテインメッセージの受信数、保管されているメッセージをカウントし、autosave_interval（訳注：多分 autosave_on_changesの間違い）で設定された値を超えた場合、内蔵メモリのデータベースをディスクに保存します。Falseなら autosave_intervalの時間指定にしたがってメモリのデータベースをディスクに保存します。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   clientid_prefixes prefix
+       If defined, only clients that have a clientid with a prefix that
+       matches clientid_prefixes will be allowed to connect to the broker.
+       For example, setting "secure-" here would mean a client
+       "secure-client" could connect but another with clientid "mqtt"
+       couldn't. By default, all client ids are valid.
+</code></pre>
+
+<p>これが指定されている場合、 その指定にマッチするクライアントIDを持ったクライアントだけがブローカに接続することができます。
+たとえば&#8221;secure-&ldquo;と設定した場合、&#8221;secure-client&#8221;は接続できますが、他のクライアントID,&#8221;mqtt&#8221;などは接続できません。
+ デフォルトではすべてのクライアントIDが有効です。</p>
+
+<pre><code>       Reloaded on reload signal. Note that currently connected clients
+       will be unaffected by any changes.
+</code></pre>
+
+<p>リロードシグナルでリロードされます。ただし、接続中のクライアントについては影響を受けません。</p>
+
+<pre><code>   connection_messages [ true | false ]
+       If set to true, the log will include entries when clients connect
+       and disconnect. If set to false, these entries will not appear.
+</code></pre>
+
+<p>tureにセットされた場合、クライアントが接続／切断したことをログに書き込むようになります。falseにセットした場合、これらの項目は記録されません。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   include_dir dir
+       External configuration files may be included by using the
+       include_dir option. This defines a directory that will be searched
+       for config files. All files that end in '.conf' will be loaded as a
+       configuration file. It is best to have this as the last option in
+       the main file. This option will only be processed from the main
+       configuration file. The directory specified must not contain the
+       main configuration file.
+</code></pre>
+
+<p>外部の設定ファイルがこのinclude_dirオプションによってインクルードされるようになります。これは設定ファイルを探すディレクトリを指定します。
+すべての&#8217;.conf&#8217;で終わるファイルが設定ファイルとしてロードされます。このオプションは主たる設定ファイルの最後の設定項目とするのがいいでしょう。このオプションは主たる設定ファイルの中でのみ有効です。ここに指定するディレクトリには主たる設定ファイルがある場所を示してはいけません。（訳注：主たる設定ファイルはmosquitto.conf で、これはmosquittoが確認できる場所ならどこに置いても良い、つまりパスの通っているところならどこでも良い、と思います）</p>
+
+<pre><code>   log_dest destinations
+       Send log messages to a particular destination. Possible
+       destinations are: stdoutstderrsyslogtopic.
+</code></pre>
+
+<p>ログメッセージを特定の場所に送ります。設定可能な宛先は、stdout, stderr, syslog, topic です。</p>
+
+<pre><code>       stdout and stderr log to the console on the named output.
+</code></pre>
+
+<p>stdoutとstderr（意味不明）</p>
+
+<pre><code>       syslog uses the userspace syslog facility which usually ends up in
+       /var/log/messages or similar and topic logs to the broker topic
+       '$SYS/broker/log/&lt;severity&gt;', where severity is one of D, E, W, N,
+       I, M which are debug, error, warning, notice, information and
+       message. Message type severity is used by the subscribe and
+       unsubscribe log_type options and publishes log messages at
+       $SYS/broker/log/M/subscribe and $SYS/broker/log/M/unsubscribe.
+</code></pre>
+
+<p>syslogは通常/var/log/messageかそれに似た場所に行き着くユーザスペースsyslog機能を使用し、ブローカトピックの&#8217;$SYS/broker/log/<severity>&lsquo;をlogします。severityはD,E,W,N,I,Mのうちいずれかとなり、それぞれdebug, error, warning, notice, information, message を意味します。</p>
+
+<pre><code>       The file destination requires an additional parameter which is the
+       file to be logged to, e.g. "log_dest file /var/log/mosquitto.log".
+       The file will be closed and reopened when the broker receives a HUP
+       signal. Only a single file destination may be configured.
+</code></pre>
+
+<p>ファイルへの宛先指定では、ログされるファイルの指定を追加する必要があります。例えば、&#8221;log_dist file /var/log/mosquitto.log&#8221;のように。
+指定されたファイルはブローカがHUPシグナルを受け取るとcloseされ再度openされます。指定できるのは1つのファイルだけです。</p>
+
+<pre><code>       Use "log_dest none" if you wish to disable logging. Defaults to
+       stderr. This option may be specified multiple times.
+</code></pre>
+
+<p>ログをしたくなければ、&#8221;log_dest none&#8221;を指定します。
+デフォルトはstderr出力です。このオプションは複数回指定することも可能です。</p>
+
+<pre><code>       Note that if the broker is running as a Windows service it will
+       default to "log_dest none" and neither stdout nor stderr logging is
+       available.
+</code></pre>
+
+<p>もしブローカがwindowsのサービスとして実行されているなら、ログされないのがデフォルトで、stdoutもstderrも選択できません。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   log_timestamp [ true | false ]
+       Boolean value, if set to true a timestamp value will be added to
+       each log entry. The default is true.
+</code></pre>
+
+<p>設定は論理値で、trueにセットされた場合、タイムスタンプが全てのログエントリに追加されます。デフォルトではtrueです。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   log_type types
+       Choose types of messages to log. Possible types are: debug, error,
+       warning, notice, information, none, all. Defaults to error,
+       warning, notice and information. This option may be specified
+       multiple times. Note that the debug type (used for decoding
+       incoming/outgoing network packets) is never logged in topics.
+</code></pre>
+
+<p>ログされるメッセージのタイプを選択します。指定可能なタイプは、debug, error, warning, notice, information, none, allです。デフォルトでは、error, warning, notice, informationとなります。このオプションは複数回指定することが出来ます。debugタイプ（入出りするネットワークパケットをデコードするために使われます）はトピックに対してログされません。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   max_inflight_messages count
+       The maximum number of QoS 1 or 2 messages that can be in the
+       process of being transmitted simultaneously. This includes messages
+       currently going through handshakes and messages that are being
+       retried. Defaults to 20. Set to 0 for no maximum. If set to 1, this
+       will guarantee in-order delivery of messages.
+</code></pre>
+
+<p>同時に転送されるための処理に入れるQoS1,2のメッセージの最大数を指定します。
+これには現在ハンドシェークされているメッセージと、リテインしているメッセージも含まれます。デフォルトでは20となります。0にすると上限を設定しません。1にセットすると順次にメッセージを送信することを保証します。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   max_queued_messages count
+       The maximum number of QoS 1 or 2 messages to hold in the queue
+       above those messages that are currently in flight. Defaults to 100.
+       Set to 0 for no maximum (not recommended). See also the
+       queue_qos0_messages option.
+</code></pre>
+
+<p>現在やりとり中のメッセージを含めてキューに入るQoS1,2のメッセージの最大数を指定します。デフォルトでは100です。
+0では上限を設定しません（お勧めしません）。queue_qos0_messagesオプションも参照して下さい。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   message_size_limit limit
+       This option sets the maximum publish payload size that the broker
+       will allow. Received messages that exceed this size will not be
+       accepted by the broker. The default value is 0, which means that
+       all valid MQTT messages are accepted. MQTT imposes a maximum
+       payload size of 268435455 bytes.
+</code></pre>
+
+<p>このオプションはブローカが許可する最大のペーロードサイズを指定します。この指定されたサイズを超えたメッセージは受け付けられません。
+デフォルトでは0で、これは全てのMQTTメッセージを受け付けることを意味します。MQTTプロトコルでは268435455（訳注:256MB）のペイロードサイズが最大です。</p>
+
+<pre><code>   password_file file path
+       Set the path to a password file. If defined, the contents of the
+       file are used to control client access to the broker. The file can
+       be created using the mosquitto_passwd(1) utility. If mosquitto is
+       compiled without TLS support (it is recommended that TLS support is
+       included), then the password file should be a text file with each
+       line in the format "username:password", where the colon and
+       password are optional but recommended. If allow_anonymous is set to
+       false, only users defined in this file will be able to connect.
+       Setting allow_anonymous to true when password_fileis defined is
+       valid and could be used with acl_file to have e.g. read only
+       guest/anonymous accounts and defined users that can publish.
+</code></pre>
+
+<p>パスワードファイルへのパスを指定します。指定された場合、ファイルの中身はクライアントのアクセスコントロールに使用されます。ファイルはmosquitto_passwd(1)ユーティリティを使って生成することが可能です。mosquittoがTLSサポートなしでコンパイルされている場合（TLSサポートを含めてコンパイルするのが推奨されています）、パスワードファイルは各行に&#8221;username:password&#8221;というフォーマットでなければなりません。コロンとパスワードはオプションですが、指定することが推奨されます。allow_anonymousがfalseにセットされている場合、このファイルに指定しているユーザのみがアクセスすることが可能になります。
+password_fileが指定されていてallow_anonymousをtrueにするということは有効で、acl_fileと一緒に使うことで例えばリードオンリのゲスト/匿名のアカウントを持てたり、パブリッシュできるユーザを定義することが出来ます。（訳注：この段落、訳が正しいかどうか自信なし。原文併記）
+Setting allow_anonymous to true when password_file is defined is valid and could be used with acl_file to have e.g. read only guest/anonymous accounts and defined users that can publish.</p>
+
+<pre><code>       Reloaded on reload signal. The currently loaded username and
+       password data will be freed and reloaded. Clients that are already
+       connected will not be affected.
+</code></pre>
+
+<p>リロードシグナルでリロードされます。その時点でロードされているusernameとpasswordデータは解除されて再度読み込まれます。すでに接続されているクライアントは影響を受けません。</p>
+
+<pre><code>       See also mosquitto_passwd(1).
+</code></pre>
+
+<p>mosquitto_passwd(1)を参照してください。</p>
+
+<pre><code>   persistence [ true | false ]
+       If true, connection, subscription and message data will be written
+       to the disk in mosquitto.db at the location dictated by
+       persistence_location. When mosquitto is restarted, it will reload
+       the information stored in mosquitto.db. The data will be written to
+       disk when mosquitto closes and also at periodic intervals as
+       defined by autosave_interval. Writing of the persistence database
+       may also be forced by sending mosquitto the SIGUSR1 signal. If
+       false, the data will be stored in memory only. Defaults to false.
+</code></pre>
+
+<p>trueに設定した場合、接続、サブスクリプション、メッセージのデータはpersistence_locationで指定された場所のmosquitto.dbの中に書き込まれます。mosquittoがリスタートした場合、mosquitto.dbに入っている情報がリロードされます。データはmosquittoがクローズする場合とautosave_intervalで指定された周期的なインターバルの時に書き込まれます。パーシスタンスデータベースへの書き込みはmosquittoにSIGUSR1シグナルを送ることによっても行われます。
+falseに設定した場合、メモリのみにデータは保存されます。デフォルトではfalse（訳注：メモリだけの動作）になります。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   persistence_file file name
+       The filename to use for the persistent database. Defaults to
+       mosquitto.db.
+</code></pre>
+
+<p>パーシステントデータベースに使われるファイル名を指定します。デフォルトでは&#8217;mosquitto.db&#8217;です。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   persistence_location path
+       The path where the persistence database should be stored. Must end
+       in a trailing slash. If not given, then the current directory is
+       used.
+</code></pre>
+
+<p>パーシステントデータベースが保管されるパスを指定します。スラッシュで終わっている必要があります。このオプションを指定しない場合カレントディレクトリが使用されます。</p>
+
+<pre><code>       Reloaded on reload signal.
+
+   persistent_client_expiration duration
+       This option allows persistent clients (those with clean session set
+       to false) to be removed if they do not reconnect within a certain
+       time frame. This is a non-standard option. As far as the MQTT spec
+       is concerned, persistent clients persist forever.
+
+       Badly designed clients may set clean session to false whilst using
+       a randomly generated client id. This leads to persistent clients
+       that will never reconnect. This option allows these clients to be
+       removed.
+
+       The expiration period should be an integer followed by one of d w m
+       y for day, week, month and year respectively. For example:
+
+       ·   persistent_client_expiration 2m
+
+       ·   persistent_client_expiration 14d
+
+       ·   persistent_client_expiration 1y
+
+       As this is a non-standard option, the default if not set is to
+       never expire persistent clients.
+
+       Reloaded on reload signal.
+
+   pid_file file path
+       Write a pid file to the file specified. If not given (the default),
+       no pid file will be written. If the pid file cannot be written,
+       mosquitto will exit. This option only has an effect is mosquitto is
+       run in daemon mode.
+
+       If mosquitto is being automatically started by an init script it
+       will usually be required to write a pid file. This should then be
+       configured as e.g. /var/run/mosquitto.pid
+
+       Not reloaded on reload signal.
+
+   psk_file file path
+       Set the path to a pre-shared-key file. This option requires a
+       listener to be have PSK support enabled. If defined, the contents
+       of the file are used to control client access to the broker. Each
+       line should be in the format "identity:key", where the key is a
+       hexadecimal string with no leading "0x". A client connecting to a
+       listener that has PSK support enabled must provide a matching
+       identity and PSK to allow the encrypted connection to proceed.
+
+       Reloaded on reload signal. The currently loaded identity and key
+       data will be freed and reloaded. Clients that are already connected
+       will not be affected.
+
+   queue_qos0_messages [ true | false ]
+       Set to true to queue messages with QoS 0 when a persistent client
+       is disconnected. These messages are included in the limit imposed
+       by max_queued_messages. Defaults to false.
+
+       Note that the MQTT v3.1 spec states that only QoS 1 and 2 messages
+       should be saved in this situation so this is a non-standard option.
+
+       Reloaded on reload signal.
+
+   retained_persistence [ true | false ]
+       This is a synonym of the persistence option.
+
+       Reloaded on reload signal.
+
+   retry_interval seconds
+       The integer number of seconds after a QoS=1 or QoS=2 message has
+       been sent that mosquitto will wait before retrying when no response
+       is received. If unset, defaults to 20 seconds.
+
+       Reloaded on reload signal.
+
+   store_clean_interval seconds
+       The integer number of seconds between the internal message store
+       being cleaned of messages that are no longer referenced. Lower
+       values will result in lower memory usage but more processor time,
+       higher values will have the opposite effect. Setting a value of 0
+       means the unreferenced messages will be disposed of as quickly as
+       possible. Defaults to 10 seconds.
+
+       Reloaded on reload signal.
+
+   sys_interval seconds
+       The integer number of seconds between updates of the $SYS
+       subscription hierarchy, which provides status information about the
+       broker. If unset, defaults to 10 seconds.
+
+       Set to 0 to disable publishing the $SYS hierarchy completely.
+
+       Reloaded on reload signal.
+
+   upgrade_outgoing_qos [ true | false ]
+       The MQTT specification requires that the QoS of a message delivered
+       to a subscriber is never upgraded to match the QoS of the
+       subscription. Enabling this option changes this behaviour. If
+       upgrade_outgoing_qos is set true, messages sent to a subscriber
+       will always match the QoS of its subscription. This is a
+       non-standard option not provided for by the spec. Defaults to
+       false.
+
+       Reloaded on reload signal.
+
+   user username
+       When run as root, change to this user and its primary group on
+       startup. If mosquitto is unable to change to this user and group,
+       it will exit with an error. The user specified must have read/write
+       access to the persistence database if it is to be written. If run
+       as a non-root user, this setting has no effect. Defaults to
+       mosquitto.
+
+       This setting has no effect on Windows and so you should run
+       mosquitto as the user you wish it to run as.
+
+       Not reloaded on reload signal.
+</code></pre>
+
+<p>LISTENERS
+       The network ports that mosquitto listens on can be controlled using
+       listeners. The default listener options can be overridden and further
+       listeners can be created.</p>
+
+<p>   General Options
+       bind_address address
+           Listen for incoming network connections on the specified IP
+           address/hostname only. This is useful to restrict access to certain
+           network interfaces. To restrict access to mosquitto to the local
+           host only, use &ldquo;bind_address localhost&rdquo;. This only applies to the
+           default listener. Use the listener variable to control other
+           listeners.</p>
+
+<pre><code>       Not reloaded on reload signal.
+
+   listener port
+       Listen for incoming network connection on the specified port. A
+       second optional argument allows the listener to be bound to a
+       specific ip address/hostname. If this variable is used and neither
+       bind_address nor port are used then the default listener will not
+       be started. This option may be specified multiple times. See also
+       the mount_point option.
+
+       Not reloaded on reload signal.
+
+   max_connections count
+       Limit the total number of clients connected for the current
+       listener. Set to -1 to have "unlimited" connections. Note that
+       other limits may be imposed that are outside the control of
+       mosquitto. See e.g.  limits.conf(5).
+
+       Not reloaded on reload signal.
+
+   mount_point topic prefix
+       This option is used with the listener option to isolate groups of
+       clients. When a client connects to a listener which uses this
+       option, the string argument is attached to the start of all topics
+       for this client. This prefix is removed when any messages are sent
+       to the client. This means a client connected to a listener with
+       mount point example can only see messages that are published in the
+       topic hierarchy example and above.
+
+       Not reloaded on reload signal.
+
+   port port number
+       Set the network port for the default listener to listen on.
+       Defaults to 1883.
+
+       Not reloaded on reload signal.
+</code></pre>
+
+<p>   Certificate based SSL/TLS Support
+       The following options are available for all listeners to configure
+       certificate based SSL support. See also &ldquo;Pre-shared-key based SSL/TLS
+       support&rdquo;.</p>
+
+<pre><code>   cafile file path
+       At least one of cafile or capath must be provided to allow SSL
+       support.
+
+       cafile is used to define the path to a file containing the PEM
+       encoded CA certificates that are trusted.
+
+   capath directory path
+       At least one of cafile or capath must be provided to allow SSL
+       support.
+
+       capath is used to define a directory that contains PEM encoded CA
+       certificates that are trusted. For capath to work correctly, the
+       certificates files must have ".pem" as the file ending and you must
+       run "c_rehash &lt;path to capath&gt;" each time you add/remove a
+       certificate.
+
+   certfile file path
+       Path to the PEM encoded server certificate.
+
+   ciphers cipher:list
+       The list of allowed ciphers, each separated with a colon. Available
+       ciphers can be obtained using the "openssl ciphers" command.
+
+   crlfile file path
+       If you have require_certificate set to true, you can create a
+       certificate revocation list file to revoke access to particular
+       client certificates. If you have done this, use crlfile to point to
+       the PEM encoded revocation file.
+
+   keyfile file path
+       Path to the PEM encoded keyfile.
+
+   require_certificate [ true | false ]
+       By default an SSL/TLS enabled listener will operate in a similar
+       fashion to a https enabled web server, in that the server has a
+       certificate signed by a CA and the client will verify that it is a
+       trusted certificate. The overall aim is encryption of the network
+       traffic. By setting require_certificate to true, the client must
+       provide a valid certificate in order for the network connection to
+       proceed. This allows access to the broker to be controlled outside
+       of the mechanisms provided by MQTT.
+
+   tls_version version
+       Configure the version of the TLS protocol to be used for this
+       listener. Possible values are tlsv1.2, tlsv1.1 and tlsv1. Defaults
+       to tlsv1.2.
+
+   use_identity_as_username [ true | false ]
+       If require_certificate is true, you may set
+       use_identity_as_username to true to use the CN value from the
+       client certificate as a username. If this is true, the
+       password_file option will not be used for this listener.
+</code></pre>
+
+<p>   Pre-shared-key based SSL/TLS Support
+       The following options are available for all listeners to configure
+       pre-shared-key based SSL support. See also &ldquo;Certificate based SSL/TLS
+       support&rdquo;.</p>
+
+<pre><code>   ciphers cipher:list
+       When using PSK, the encryption ciphers used will be chosen from the
+       list of available PSK ciphers. If you want to control which ciphers
+       are available, use this option. The list of available ciphers can
+       be optained using the "openssl ciphers" command and should be
+       provided in the same format as the output of that command.
+
+   psk_hint hint
+       The psk_hint option enables pre-shared-key support for this
+       listener and also acts as an identifier for this listener. The hint
+       is sent to clients and may be used locally to aid authentication.
+       The hint is a free form string that doesn't have much meaning in
+       itself, so feel free to be creative.
+
+       If this option is provided, see psk_file to define the pre-shared
+       keys to be used or create a security plugin to handle them.
+
+   tls_version version
+       Configure the version of the TLS protocol to be used for this
+       listener. Possible values are tlsv1.2, tlsv1.1 and tlsv1. Defaults
+       to tlsv1.2.
+
+   use_identity_as_username [ true | false ]
+       Set use_identity_as_username to have the psk identity sent by the
+       client used as its username. The username will be checked as
+       normal, so password_file or another means of authentication
+       checking must be used. No password will be used.
+</code></pre>
+
+<p>CONFIGURING BRIDGES
+       Multiple bridges (connections to other brokers) can be configured using
+       the following variables.</p>
+
+<pre><code>   Bridges cannot currently be reloaded on reload signal.
+
+   address address[:port] [address[:port]], addresses address[:port]
+   [address[:port]]
+       Specify the address and optionally the port of the bridge to
+       connect to. This must be given for each bridge connection. If the
+       port is not specified, the default of 1883 is used.
+
+       Multiple host addresses can be specified on the address config. See
+       the round_robin option for more details on the behaviour of bridges
+       with multiple addresses.
+
+   cleansession [ true | false ]
+       Set the clean session option for this bridge. Setting to false (the
+       default), means that all subscriptions on the remote broker are
+       kept in case of the network connection dropping. If set to true,
+       all subscriptions and messages on the remote broker will be cleaned
+       up if the connection drops. Note that setting to true may cause a
+       large amount of retained messages to be sent each time the bridge
+       reconnects.
+
+       If you are using bridges with cleansession set to false (the
+       default), then you may get unexpected behaviour from incoming
+       topics if you change what topics you are subscribing to. This is
+       because the remote broker keeps the subscription for the old topic.
+       If you have this problem, connect your bridge with cleansession set
+       to true, then reconnect with cleansession set to false as normal.
+
+   clientid id
+       Set the client id for this bridge connection. If not defined, this
+       defaults to 'name.hostname', where name is the connection name and
+       hostname is the hostname of this computer.
+
+   connection name
+       This variable marks the start of a new bridge connection. It is
+       also used to give the bridge a name which is used as the client id
+       on the remote broker.
+
+   keepalive_interval seconds
+       Set the number of seconds after which the bridge should send a ping
+       if no other traffic has occurred. Defaults to 60. A minimum value
+       of 5 seconds isallowed.
+
+   idle_timeout seconds
+       Set the amount of time a bridge using the lazy start type must be
+       idle before it will be stopped. Defaults to 60 seconds.
+
+   notifications [ true | false ]
+       If set to true, publish notification messages to the local and
+       remote brokers giving information about the state of the bridge
+       connection. Retained messages are published to the topic
+       $SYS/broker/connection/&lt;clientid&gt;/state unless otherwise set with
+       notification_topics. If the message is 1 then the connection is
+       active, or 0 if the connection has failed. Defaults to true.
+
+   notification_topic topic
+       Choose the topic on which notifications will be published for this
+       bridge. If not set the messages will be sent on the topic
+       $SYS/broker/connection/&lt;clientid&gt;/state.
+
+   password value
+       Configure a password for the bridge. This is used for
+       authentication purposes when connecting to a broker that support
+       MQTT v3.1 and requires a username and/or password to connect. This
+       option is only valid if a username is also supplied.
+
+   restart_timeout value
+       Set the amount of time a bridge using the automatic start type will
+       wait until attempting to reconnect. Defaults to 30 seconds.
+
+   round_robin [ true | false ]
+       If the bridge has more than one address given in the
+       address/addresses configuration, the round_robin option defines the
+       behaviour of the bridge on a failure of the bridge connection. If
+       round_robin is false, the default value, then the first address is
+       treated as the main bridge connection. If the connection fails, the
+       other secondary addresses will be attempted in turn. Whilst
+       connected to a secondary bridge, the bridge will periodically
+       attempt to reconnect to the main bridge until successful.
+
+       If round_robin is true, then all addresses are treated as equals.
+       If a connection fails, the next address will be tried and if
+       successful will remain connected until it fails.
+
+   start_type [ automatic | lazy | once ]
+       Set the start type of the bridge. This controls how the bridge
+       starts and can be one of three types: automatic, lazy and once.
+       Note that RSMB provides a fourth start type "manual" which isn't
+       currently supported by mosquitto.
+
+       automatic is the default start type and means that the bridge
+       connection will be started automatically when the broker starts and
+       also restarted after a short delay (30 seconds) if the connection
+       fails.
+
+       Bridges using the lazy start type will be started automatically
+       when the number of queued messages exceeds the number set with the
+       threshold option. It will be stopped automatically after the time
+       set by the idle_timeout parameter. Use this start type if you wish
+       the connection to only be active when it is needed.
+
+       A bridge using the once start type will be started automatically
+       when the broker starts but will not be restarted if the connection
+       fails.
+
+   threshold count
+       Set the number of messages that need to be queued for a bridge with
+       lazy start type to be restarted. Defaults to 10 messages.
+
+   topic pattern [[[ out | in | both ] qos-level] local-prefix
+   remote-prefix]
+       Define a topic pattern to be shared between the two brokers. Any
+       topics matching the pattern (which may include wildcards) are
+       shared. The second parameter defines the direction that the
+       messages will be shared in, so it is possible to import messages
+       from a remote broker using in, export messages to a remote broker
+       using out or share messages in both directions. If this parameter
+       is not defined, the default of out is used. The QoS level defines
+       the publish/subscribe QoS level used for this topic and defaults to
+       0.
+
+       The local-prefix and remote-prefix options allow topics to be
+       remapped when publishing to and receiving from remote brokers. This
+       allows a topic tree from the local broker to be inserted into the
+       topic tree of the remote broker at an appropriate place.
+
+       For incoming topics, the bridge will prepend the pattern with the
+       remote prefix and subscribe to the resulting topic on the remote
+       broker. When a matching incoming message is received, the remote
+       prefix will be removed from the topic and then the local prefix
+       added.
+
+       For outgoing topics, the bridge will prepend the pattern with the
+       local prefix and subscribe to the resulting topic on the local
+       broker. When an outgoing message is processed, the local prefix
+       will be removed from the topic then the remote prefix added.
+
+       When using topic mapping, an empty prefix can be defined using the
+       place marker "". Using the empty marker for the topic itself is
+       also valid. The table below defines what combination of empty or
+       value is valid.
+
+       ┌──┬───────┬──────────────┬───────────────┬──────────────┐
+       │  │ Topic │ Local Prefix │ Remote Prefix │ Validity     │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │1 │ value │ value        │ value         │ valid        │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │2 │ value │ value        │ ""            │ valid        │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │3 │ value │ ""           │ value         │ valid        │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │4 │ value │ ""           │ ""            │ valid (no    │
+       │  │       │              │               │ remapping)   │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │5 │ ""    │ value        │ value         │ valid (remap │
+       │  │       │              │               │ single local │
+       │  │       │              │               │ topic to     │
+       │  │       │              │               │ remote)      │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │6 │ ""    │ value        │ ""            │ invalid      │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │7 │ ""    │ ""           │ value         │ invalid      │
+       ├──┼───────┼──────────────┼───────────────┼──────────────┤
+       │8 │ ""    │ ""           │ ""            │ invalid      │
+       └──┴───────┴──────────────┴───────────────┴──────────────┘
+       To remap an entire topic tree, use e.g.:
+
+           topic # both 2 local/topic/ remote/topic/
+
+       This option can be specified multiple times per bridge.
+
+       Care must be taken to ensure that loops are not created with this
+       option. If you are experiencing high CPU load from a broker, it is
+       possible that you have a loop where each broker is forever
+       forwarding each other the same messages.
+
+       See also the cleansession option if you have messages arriving on
+       unexpected topics when using incoming topics.
+
+       Example Bridge Topic Remapping.  The configuration below connects a
+       bridge to the broker at test.mosquitto.org. It subscribes to the
+       remote topic $SYS/broker/clients/total and republishes the messages
+       received to the local topic test/mosquitto/org/clients/total
+
+           connection test-mosquitto-org
+           address test.mosquitto.org
+           cleansession true
+           topic clients/total in 0 test/mosquitto/org $SYS/broker/
+
+   try_private [ true | false ]
+       If try_private is set to true, the bridge will attempt to indicate
+       to the remote broker that it is a bridge not an ordinary client. If
+       successful, this means that loop detection will be more effective
+       and that retained messages will be propagated correctly. Not all
+       brokers support this feature so it may be necessary to set
+       try_private to false if your bridge does not connect properly.
+
+       Defaults to true.
+
+   username name
+       Configure a username for the bridge. This is used for
+       authentication purposes when connecting to a broker that support
+       MQTT v3.1 and requires a username and/or password to connect. See
+       also the password option.
+</code></pre>
+
+<p>   SSL/TLS Support
+       The following options are available for all bridges to configure
+       SSL/TLS support.</p>
+
+<pre><code>   bridge_cafile file path
+       One of bridge_cafile or bridge_capath must be provided to allow
+       SSL/TLS support.
+
+       bridge_cafile is used to define the path to a file containing the
+       PEM encoded CA certificates that have signed the certificate for
+       the remote broker.
+
+   bridge_capath file path
+       One of bridge_capath or bridge_capath must be provided to allow
+       SSL/TLS support.
+
+       bridge_capath is used to define the path to a directory containing
+       the PEM encoded CA certificates that have signed the certificate
+       for the remote broker. For bridge_capath to work correctly, the
+       certificate files must have ".crt" as the file ending and you must
+       run "c_rehash &lt;path to bridge_capath&gt;" each time you add/remove a
+       certificate.
+
+   bridge_certfile file path
+       Path to the PEM encoded client certificate for this bridge, if
+       required by the remote broker.
+
+   bridge_identity identity
+       Pre-shared-key encryption provides an alternative to certificate
+       based encryption. A bridge can be configured to use PSK with the
+       bridge_identity and bridge_psk options. This is the client identity
+       used with PSK encryption. Only one of certificate and PSK based
+       encryption can be used on one bridge at once.
+
+   bridge_insecure [ true | false ]
+       When using certificate based TLS, the bridge will attempt to verify
+       the hostname provided in the remote certificate matches the
+       host/address being connected to. This may cause problems in testing
+       scenarios, so bridge_insecure may be set to false to disable the
+       hostname verification.
+
+       Setting this option to true means that a malicious third party
+       could potentially inpersonate your server, so it should always be
+       set to false in production environments.
+
+   bridge_keyfile file path
+       Path to the PEM encoded private key for this bridge, if required by
+       the remote broker.
+
+   bridge_psk key
+       Pre-shared-key encryption provides an alternative to certificate
+       based encryption. A bridge can be configured to use PSK with the
+       bridge_identity and bridge_psk options. This is the pre-shared-key
+       in hexadecimal format with no "0x". Only one of certificate and PSK
+       based encryption can be used on one bridge at once.
+
+   bridge_tls_version version
+       Configure the version of the TLS protocol to be used for this
+       bridge. Possible values are tlsv1.2, tlsv1.1 and tlsv1. Defaults to
+       tlsv1.2. The remote broker must support the same version of TLS for
+       the connection to succeed.
+</code></pre>
+
+<p>FILES
+       mosquitto.conf</p>
+
+<p>BUGS
+       mosquitto bug information can be found at
+       <a href="http://launchpad.net/mosquitto">http://launchpad.net/mosquitto</a></p>
+
+<p>SEE ALSO
+       mosquitto(8), mosquitto_passwd(1), mosquitto-tls(7), mqtt(7),
+       limits.conf(5)</p>
+
+<p>AUTHOR
+       Roger Light <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#58;&#x72;&#x6f;&#x67;&#x65;&#x72;&#64;&#x61;&#x74;&#x63;&#104;&#111;&#111;&#46;&#111;&#x72;&#103;">&#x72;&#x6f;&#x67;&#101;&#x72;&#64;&#97;&#116;&#99;&#x68;&#111;&#x6f;&#x2e;&#111;&#x72;&#103;</a></p>
+
+<p>Mosquitto Project                 10/08/2014                 MOSQUITTO.CONF(5)</p>
+
+  
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

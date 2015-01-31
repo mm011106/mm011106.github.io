@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、 &hellip;">
+  <meta name="description" content="Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +50,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-31T11:05:35+09:00" pubdate data-updated="true">2015 / 01 / 31</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、できるだけきちんとシャットダウンしたいものです。<br/>
+ここでは外部装置からの停止信号検出で止まれるように、GPIOを利用したシャットダウンスイッチを検討してみます。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/31/shutdown-switch/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -436,49 +479,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
-ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/20/mqtt-packets/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -524,6 +524,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
       </li>
     
@@ -537,10 +541,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
       </li>
     
   </ul>
@@ -583,6 +583,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
       </li>
     
@@ -596,10 +600,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
       </li>
     
   </ul>

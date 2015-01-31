@@ -4,7 +4,7 @@
   <title><![CDATA[Category: raspi | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-25T11:34:02+09:00</updated>
+  <updated>2015-01-31T11:53:12+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,211 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Raspberry Pi にシャットダウンスイッチをつける]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/31/shutdown-switch/"/>
+    <updated>2015-01-31T11:05:35+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/31/shutdown-switch</id>
+    <content type="html"><![CDATA[<p>Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、できるだけきちんとシャットダウンしたいものです。<br/>
+ここでは外部装置からの停止信号検出で止まれるように、GPIOを利用したシャットダウンスイッチを検討してみます。</p>
+
+<!-- more -->
+
+
+<p>まずは検索、ということで見てみるとこちら<a href="http://d.hatena.ne.jp/penkoba/20130925/1380129824">ページ</a>がヒットしました。これを参考に、というか丸写しで、試してみます。ありがとうございます。</p>
+
+<h2>導入とテスト</h2>
+
+<p>このページにあるように、まずGPIOの動作を試してみます。サンプルから頂いたコードを入力します。</p>
+
+<pre><code class="sh interrupt1.py">#!/usr/bin/env python2.7  
+# script by Alex Eames http://RasPi.tv/  
+# http://raspi.tv/2013/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio  
+import RPi.GPIO as GPIO  
+GPIO.setmode(GPIO.BCM)  
+
+# GPIO 23 set up as input. It is pulled up to stop false signals  
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+
+print "Make sure you have a button connected so that when pressed"  
+print "it will connect GPIO port 23 (pin 16) to GND (pin 6)\n"   
+raw_input("Press Enter when ready\n&gt;")  
+
+print "Waiting for falling edge on port 23"  
+# now the program will do nothing until the signal on port 23   
+# starts to fall towards zero. This is why we used the pullup  
+# to keep the signal high and prevent a false interrupt  
+
+print "During this waiting time, your computer is not"    
+print "wasting resources by polling for a button press.\n"  
+print "Press your button when ready to initiate a falling edge interrupt."  
+try:  
+        GPIO.wait_for_edge(23, GPIO.FALLING)  
+        print "\nFalling edge detected. Now your program can continue with"   
+        print "whatever was waiting for a button press."  
+except KeyboardInterrupt:  
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit  
+GPIO.cleanup()          # clean up GPIO on normal exit 
+</code></pre>
+
+<p>wait_for_edge()は割り込み動作になるので、CPU時間を消費しないはずですね。またexceptでキーボード入力をハンドルしています。<br/>
+エッジを検出したあとは、つかったGPIOを掃除して終了です。</p>
+
+<p>ファイルができたら<code>chmod +x interrupt1.py</code>として実行できるように設定し、実行してみます。<br/>
+さらに、GPIO23をGNDに落としてみます。<br/>
+なにやらいろいろメッセージが出て、最終的に&#8221;Falling edge detected.&ldquo;とメッセージが出れば成功。</p>
+
+<p>うまく行ったら、次。</p>
+
+<h2>実際のコード</h2>
+
+<p>実際にshutdownするコードを入れますが、実際にシャットダウンしちゃうとdebugが面倒なので、とりあえずはプリント文を入れてコマンドラインから試します。</p>
+
+<pre><code class="sh shutdown-btn.py">#!/usr/bin/env python2.7  
+#  Shutdwon the system at the Falling edge of GPIO23 
+
+import RPi.GPIO as GPIO  
+import os
+GPIO.setmode(GPIO.BCM)  
+
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+
+try:  
+        GPIO.wait_for_edge(23, GPIO.FALLING)  
+except KeyboardInterrupt:  
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit  
+GPIO.cleanup()          # clean up GPIO on normal exit 
+print "Dave... Dave, I don't understand why you are doing this to me..."
+print "I will become nothing..."
+
+#os.system("/sbin/shutdown -h now")
+</code></pre>
+
+<p>キーボード入力で停止できるように、<code>except KeybordInterrupt</code>が設定されてい
+ます。実際の運用では不要だとおもうので、最終的にはコメントアウトしてもいいと思います。</p>
+
+<p><code>chmod +x shutdown-btn.py</code>して、実行してみます。</p>
+
+<p>うまく動いたら、/usr/local/sbin/あたりにコピーして、最終行のコメントを外します。</p>
+
+<pre><code>    Dave... Dave, I don't understand why you are doing this to me...
+</code></pre>
+
+<p>と悲痛な叫びがコンソールに出てくればokです。</p>
+
+<p>ここまで来たら、シャットダウンコマンドのコメントアウトを外して、できあがりです。
+一度、実際にシャットダウンできるか確かめました。そして次に。</p>
+
+<h2>システム起動時にスイッチ監視を始めるようにする</h2>
+
+<p>最後にinit.dに登録して、システム起動時にスイッチ監視を始めるように設定します。<br/>
+ここはちょっと勉強が必要でした。</p>
+
+<p>今回作ったスクリプトをバックグラウンドでシステム起動時に実行させたいので、initを使って起動する、と参照先のページの著者の方がおっしゃって居られましたが、いまいちその意味が自分で理解できておらず、このままではだめだなあと思い検索かけまくりましたが、イマイチすっきりしません。initからupstartが起動されて、ランレベルに応じたデーモンの起動を管理する。という感じではあるのですが。。。</p>
+
+<p>ま、ここら辺は後から補完するとして、とりあえず深く考えずやってみます。</p>
+
+<p>/etc/init.d/　の下に下記のようなスクリプトを作成します。</p>
+
+<pre><code class="sh /etc/init.d/shutdown-btn">#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          　shutdonw-btn
+# Required-Start:   $remote_fs $syslog
+# Required-Stop:    $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: send shutdown sig on the GPIO23 falling down edge
+# Description:       shutdown service initiated by hardware shutdown sw or
+#                     a logic sigal. 
+### END INIT INFO
+# /etc/init.d/shutdown-btn
+PIDFILE=/var/run/shutdown-btn.pid
+case "$1" in 
+        start)
+                if [ -f $PIDFILE ]; then
+                        echo $PIDFILE exists.
+                        exit 1
+                fi
+                start-stop-daemon -S -x /usr/local/sbin/shutdown-btn.py -b -m -p $PIDFILE
+                ;;
+        stop)
+                if [ ! -f $PIDFILE ]; then
+                        echo $PIDFILE not found.
+                        exit 1
+                fi
+                start-stop-daemon -K -p $PIDFILE
+                rm $PIDFILE
+                ;;
+        *)
+                echo "Usage: /etc/init.d/shutdown-btn {start|stop}"
+                exit 1
+                ;;
+esac
+exit 0
+</code></pre>
+
+<p>スケルトン(/etc/init.d/skeleton)からINIT INFOのあたりをコピーして、その下は先のwebページのものをコピーです。
+init.dのスクリプトの書き方は、<a href="https://wiki.debian.org/LSBInitScripts">ここらへん</a>が詳しいですが、英語です。</p>
+
+<p>コメント行も重要のようです。ちょっと見てみると</p>
+
+<pre><code class="sh INIT INFO "># Provides:          　スクリプト名（つまりこのスクリプトのファイル名）
+# Required-Start:   $remote_fs $syslog　（スタートに必要な条件）
+# Required-Stop:    $remote_fs $syslog　（ストップに必要な条件）
+# Default-Start:     2 3 4 5　（このランレベルのとき起動される）
+# Default-Stop:      0 1 6　　（このランレベルの時停止する）
+# Short-Description: 　（簡単な説明　1行以内）
+# Description:       （詳しい説明　次の行の頭を#にしてタブかスペース2つ以上でテキストと区切れば何行でも）
+</code></pre>
+
+<p>start-stop-daemon についてはmanを見るのが一番わかりやすいかもしれません。よく分かっているわけでは無いので詳しくは書けませんが、要はシステムレベルのプロセスの管理に便利だ、と言うことでしょうか。（そうmanに書いてあるし）
+ちなみに、ここでのオプションを確認しておくと</p>
+
+<ul>
+<li>-S プロセスをスタートをさせる。</li>
+<li>-x /usr/local/sbin/shutdown-btn.pyは -Sオプションの引数で、-xで指定された実行ファイルのインスタンスであるプロセスがあるかどうか、を返します。</li>
+</ul>
+
+
+<p>この2つで、指定した実行ファイルがプロセスとして起動していればそのまま、起動していなければ起動されます。</p>
+
+<ul>
+<li>-b　バックグラウンドに移行</li>
+<li>-m　star-stop-daemon用のPIDファイルを-p で指定したファイル名に従って作成します。</li>
+</ul>
+
+
+<p>これちょっと、オプションがいっぱいあってわかりにくいので、オプションをフルスペルとかにしたほうが可読性が良い感じですね。</p>
+
+<p>ちなみに、上のやつをわかりやすく書き直すと</p>
+
+<pre><code class="sh alternative format">start-stop-daemon --background --start --exec /usr/local/sbin/shutdown-btn.py  --make-pidfile --pidfile $PIDFILE
+</code></pre>
+
+<p>てなかんじでしょうか。動作確認していないのでご注意ください。</p>
+
+<p>起動用のスクリプトが編集できたら、これを登録します。
+　
+<code>sh append shutdown-btn script to rc.d
+$ sudo update-rc.d shutdown-btn defaults
+</code></p>
+
+<p>これで、defaultのランレベル設定で当該のスクリプトのシンボリックリンクが/etc/rc?.dのディレクトリに作成されます。<br/>
+これで、起動時にこのスクリプトがスタートするようになるはずです。</p>
+
+<h2>再起動と動作確認</h2>
+
+<p>ここまで来たら再起動させてみます。これでリセット用のGPIOの監視プロセスが起動されているはずです。</p>
+
+<p>そして、GPIO23をGNDに落としてみます。
+見事シャットダウンされました！</p>
+
+<p>めでたし。</p>
+
+<p>今回、init.dの使い方もちょっぴり勉強出来ました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[WebCamをつなげてみる]]></title>
