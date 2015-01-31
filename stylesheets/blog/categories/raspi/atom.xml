@@ -4,7 +4,7 @@
   <title><![CDATA[Category: raspi | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-18T17:08:55+09:00</updated>
+  <updated>2015-01-31T15:07:43+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,427 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Raspberry Pi にシャットダウンスイッチをつける]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/31/shutdown-switch/"/>
+    <updated>2015-01-31T11:05:35+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/31/shutdown-switch</id>
+    <content type="html"><![CDATA[<p>Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、できるだけきちんとシャットダウンしたいものです。<br/>
+ここでは外部装置からの停止信号検出で止まれるように、GPIOを利用したシャットダウンスイッチを検討してみます。</p>
+
+<!-- more -->
+
+
+<p>まずは検索、ということで見てみるとこちら<a href="http://d.hatena.ne.jp/penkoba/20130925/1380129824">ページ</a>がヒットしました。これを参考に、というか丸写しで、試してみます。ありがとうございます。</p>
+
+<h2>導入とテスト</h2>
+
+<p>このページにあるように、まずGPIOの動作を試してみます。サンプルから頂いたコードを入力します。</p>
+
+<pre><code class="sh interrupt1.py">#!/usr/bin/env python2.7  
+# script by Alex Eames http://RasPi.tv/  
+# http://raspi.tv/2013/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio  
+import RPi.GPIO as GPIO  
+GPIO.setmode(GPIO.BCM)  
+
+# GPIO 23 set up as input. It is pulled up to stop false signals  
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+
+print "Make sure you have a button connected so that when pressed"  
+print "it will connect GPIO port 23 (pin 16) to GND (pin 6)\n"   
+raw_input("Press Enter when ready\n&gt;")  
+
+print "Waiting for falling edge on port 23"  
+# now the program will do nothing until the signal on port 23   
+# starts to fall towards zero. This is why we used the pullup  
+# to keep the signal high and prevent a false interrupt  
+
+print "During this waiting time, your computer is not"    
+print "wasting resources by polling for a button press.\n"  
+print "Press your button when ready to initiate a falling edge interrupt."  
+try:  
+        GPIO.wait_for_edge(23, GPIO.FALLING)  
+        print "\nFalling edge detected. Now your program can continue with"   
+        print "whatever was waiting for a button press."  
+except KeyboardInterrupt:  
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit  
+GPIO.cleanup()          # clean up GPIO on normal exit 
+</code></pre>
+
+<p>wait_for_edge()は割り込み動作になるので、CPU時間を消費しないはずですね。またexceptでキーボード入力をハンドルしています。<br/>
+エッジを検出したあとは、つかったGPIOを掃除して終了です。</p>
+
+<p>ファイルができたら<code>chmod +x interrupt1.py</code>として実行できるように設定し、実行してみます。<br/>
+さらに、GPIO23をGNDに落としてみます。<br/>
+なにやらいろいろメッセージが出て、最終的に&#8221;Falling edge detected.&ldquo;とメッセージが出れば成功。</p>
+
+<p>うまく行ったら、次。</p>
+
+<h2>実際のコード</h2>
+
+<p>実際にshutdownするコードを入れますが、実際にシャットダウンしちゃうとdebugが面倒なので、とりあえずはプリント文を入れてコマンドラインから試します。</p>
+
+<pre><code class="sh shutdown-btn.py">#!/usr/bin/env python2.7  
+#  Shutdwon the system at the Falling edge of GPIO23 
+
+import RPi.GPIO as GPIO  
+import os
+GPIO.setmode(GPIO.BCM)  
+
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+
+try:  
+        GPIO.wait_for_edge(23, GPIO.FALLING)  
+except KeyboardInterrupt:  
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit  
+GPIO.cleanup()          # clean up GPIO on normal exit 
+print "Dave... Dave, I don't understand why you are doing this to me..."
+print "I will become nothing..."
+
+#os.system("/sbin/shutdown -h now")
+</code></pre>
+
+<p>キーボード入力で停止できるように、<code>except KeybordInterrupt</code>が設定されてい
+ます。実際の運用では不要だとおもうので、最終的にはコメントアウトしてもいいと思います。</p>
+
+<p><code>chmod +x shutdown-btn.py</code>して、実行してみます。</p>
+
+<p>うまく動いたら、/usr/local/sbin/あたりにコピーして、最終行のコメントを外します。</p>
+
+<pre><code>    Dave... Dave, I don't understand why you are doing this to me...
+</code></pre>
+
+<p>と悲痛な叫びがコンソールに出てくればokです。</p>
+
+<p>ここまで来たら、シャットダウンコマンドのコメントアウトを外して、できあがりです。
+一度、実際にシャットダウンできるか確かめました。そして次に。</p>
+
+<h2>システム起動時にスイッチ監視を始めるようにする</h2>
+
+<p>最後にinit.dに登録して、システム起動時にスイッチ監視を始めるように設定します。<br/>
+ここはちょっと勉強が必要でした。</p>
+
+<p>今回作ったスクリプトをバックグラウンドでシステム起動時に実行させたいので、initを使って起動する、と参照先のページの著者の方がおっしゃって居られましたが、いまいちその意味が自分で理解できておらず、このままではだめだなあと思い検索かけまくりましたが、イマイチすっきりしません。initからupstartが起動されて、ランレベルに応じたデーモンの起動を管理する。という感じではあるのですが。。。</p>
+
+<p>ま、ここら辺は後から補完するとして、とりあえず深く考えずやってみます。</p>
+
+<p>/etc/init.d/　の下に下記のようなスクリプトを作成します。</p>
+
+<pre><code class="sh /etc/init.d/shutdown-btn">#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          　shutdonw-btn
+# Required-Start:   $remote_fs $syslog
+# Required-Stop:    $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: send shutdown sig on the GPIO23 falling down edge
+# Description:       shutdown service initiated by hardware shutdown sw or
+#                     a logic sigal. 
+### END INIT INFO
+# /etc/init.d/shutdown-btn
+PIDFILE=/var/run/shutdown-btn.pid
+case "$1" in 
+        start)
+                if [ -f $PIDFILE ]; then
+                        echo $PIDFILE exists.
+                        exit 1
+                fi
+                start-stop-daemon -S -x /usr/local/sbin/shutdown-btn.py -b -m -p $PIDFILE
+                ;;
+        stop)
+                if [ ! -f $PIDFILE ]; then
+                        echo $PIDFILE not found.
+                        exit 1
+                fi
+                start-stop-daemon -K -p $PIDFILE
+                rm $PIDFILE
+                ;;
+        *)
+                echo "Usage: /etc/init.d/shutdown-btn {start|stop}"
+                exit 1
+                ;;
+esac
+exit 0
+</code></pre>
+
+<p>スケルトン(/etc/init.d/skeleton)からINIT INFOのあたりをコピーして、その下は先のwebページのものをコピーです。
+init.dのスクリプトの書き方は、<a href="https://wiki.debian.org/LSBInitScripts">ここらへん</a>が詳しいですが、英語です。</p>
+
+<p>コメント行も重要のようです。ちょっと見てみると</p>
+
+<pre><code class="sh INIT INFO "># Provides:          　スクリプト名（つまりこのスクリプトのファイル名）
+# Required-Start:   $remote_fs $syslog　（スタートに必要な条件）
+# Required-Stop:    $remote_fs $syslog　（ストップに必要な条件）
+# Default-Start:     2 3 4 5　（このランレベルのとき起動される）
+# Default-Stop:      0 1 6　　（このランレベルの時停止する）
+# Short-Description: 　（簡単な説明　1行以内）
+# Description:       （詳しい説明　次の行の頭を#にしてタブかスペース2つ以上でテキストと区切れば何行でも）
+</code></pre>
+
+<p>start-stop-daemon についてはmanを見るのが一番わかりやすいかもしれません。よく分かっているわけでは無いので詳しくは書けませんが、要はシステムレベルのプロセスの管理に便利だ、と言うことでしょうか。（そうmanに書いてあるし）
+ちなみに、ここでのオプションを確認しておくと</p>
+
+<ul>
+<li>-S プロセスをスタートをさせる。</li>
+<li>-x /usr/local/sbin/shutdown-btn.pyは -Sオプションの引数で、-xで指定された実行ファイルのインスタンスであるプロセスがあるかどうか、を返します。</li>
+</ul>
+
+
+<p>この2つで、指定した実行ファイルがプロセスとして起動していればそのまま、起動していなければ起動されます。</p>
+
+<ul>
+<li>-b　バックグラウンドに移行</li>
+<li>-m　star-stop-daemon用のPIDファイルを-p で指定したファイル名に従って作成します。</li>
+</ul>
+
+
+<p>これちょっと、オプションがいっぱいあってわかりにくいので、オプションをフルスペルとかにしたほうが可読性が良い感じですね。</p>
+
+<p>ちなみに、上のやつをわかりやすく書き直すと</p>
+
+<pre><code class="sh alternative format">start-stop-daemon --background --start --exec /usr/local/sbin/shutdown-btn.py  --make-pidfile --pidfile $PIDFILE
+</code></pre>
+
+<p>てなかんじでしょうか。動作確認していないのでご注意ください。</p>
+
+<p>起動用のスクリプトが編集できたら、これを登録します。
+　
+<code>sh append shutdown-btn script to rc.d
+$ sudo update-rc.d shutdown-btn defaults
+</code></p>
+
+<p>これで、defaultのランレベル設定で当該のスクリプトのシンボリックリンクが/etc/rc?.dのディレクトリに作成されます。<br/>
+これで、起動時にこのスクリプトがスタートするようになるはずです。</p>
+
+<h2>再起動と動作確認</h2>
+
+<p>ここまで来たら再起動させてみます。これでリセット用のGPIOの監視プロセスが起動されているはずです。</p>
+
+<p>そして、GPIO23をGNDに落としてみます。
+見事シャットダウンされました！</p>
+
+<p>めでたし。</p>
+
+<p>今回、init.dの使い方もちょっぴり勉強出来ました。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[WebCamをつなげてみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/25/webcam/"/>
+    <updated>2015-01-25T09:20:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/25/webcam</id>
+    <content type="html"><![CDATA[<p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
+
+<!-- more -->
+
+
+<p>webカムはRaspberry Piに接続できるのかどうか調べてみると、意外と簡単に接続できそうです。一昔前は結構苦労していたように感じたので、時代は進んだなあと。</p>
+
+<p>で、キャプチャするソフトをリストアップしてみると。</p>
+
+<ul>
+<li>fswebcam　スチル撮影</li>
+<li>motion　画像の変化を検出して記録</li>
+<li>guvcview 動画のキャプチャ（GUI必要？）</li>
+</ul>
+
+
+<p>と言ったところが皆さんに使われているようです。特に監視カメラ用途ではmotionが便利そうです。</p>
+
+<p>今回は、能動的にシャッターを切って記録する用途ですので、fswebcamを使うことにしました。</p>
+
+<hr />
+
+<h3>USBカメラを接続してみる</h3>
+
+<p>とりあえずUSBカメラを何も考えずRaspberry Piにつないでみます。</p>
+
+<p>認識されているか確認してみると</p>
+
+<pre><code class="sh UBS device list">$ lsusb
+Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. 
+Bus 001 Device 006: ID 046d:080a Logitech, Inc. Portable Webcam C905
+</code></pre>
+
+<p>こんなかんじで認識されています。</p>
+
+<p>次に、fswebcamをインストール。参考にしたのは<a href="http://www.raspberrypi.org/documentation/usage/webcams/">こちら</a></p>
+
+<p>続けて試し撮りなどしてみます。</p>
+
+<pre><code class="sh install fswebcam">$ sudo apt-get install fswebcam
+
+$ fswebcam -v   #こうすると色々教えてくれます。
+--- Opening /dev/video0...
+Trying source module v4l2...
+/dev/video0 opened.
+src_v4l2_get_capability,87: /dev/video0 information:
+src_v4l2_get_capability,88: cap.driver: "uvcvideo"
+src_v4l2_get_capability,89: cap.card: "UVC Camera (046d:080a)"
+src_v4l2_get_capability,90: cap.bus_info: "usb-bcm2708_usb-1.4"
+src_v4l2_get_capability,91: cap.capabilities=0x84000001
+src_v4l2_get_capability,92: - VIDEO_CAPTURE
+src_v4l2_get_capability,103: - STREAMING
+No input was specified, using the first.
+src_v4l2_set_input,181: /dev/video0: Input 0 information:
+src_v4l2_set_input,182: name = "Camera 1"
+src_v4l2_set_input,183: type = 00000002
+src_v4l2_set_input,185: - CAMERA
+src_v4l2_set_input,186: audioset = 00000000
+src_v4l2_set_input,187: tuner = 00000000
+src_v4l2_set_input,188: status = 00000000
+src_v4l2_set_pix_format,541: Device offers the following V4L2 pixel formats:
+src_v4l2_set_pix_format,554: 0: [0x56595559] 'YUYV' (YUV 4:2:2 (YUYV))
+src_v4l2_set_pix_format,554: 1: [0x47504A4D] 'MJPG' (MJPEG)
+Using palette MJPEG
+Adjusting resolution from 384x288 to 352x288.
+src_v4l2_set_mmap,693: mmap information:
+src_v4l2_set_mmap,694: frames=4
+src_v4l2_set_mmap,741: 0 length=102400
+src_v4l2_set_mmap,741: 1 length=102400
+src_v4l2_set_mmap,741: 2 length=102400
+src_v4l2_set_mmap,741: 3 length=102400
+--- Capturing frame...
+verify_jpeg_dht,94: Inserting DHT segment into JPEG frame.
+Captured frame in 0.00 seconds.
+--- Processing captured image...
+There are unsaved changes to the image.
+
+$ fswebcam -r 1000 ./test.jpg
+--- Opening /dev/video0...
+Trying source module v4l2...
+/dev/video0 opened.
+No input was specified, using the first.
+Adjusting resolution from 1000x-1 to 960x720.
+--- Capturing frame...
+Captured frame in 0.00 seconds.
+--- Processing captured image...
+Writing JPEG image to './test.jpg'.
+</code></pre>
+
+<p>上の例では解像度1000pxぐらいの絵をとってtest.jpgで保存してもらう例です。実際にはカメラの撮影可能な解像度に適宜調整されるようです。</p>
+
+<p>撮影したのはいいですが、このままでは本当にとれているのか絵を觀ることができないので判りません。scpなどのコマンドで転送してもいいですが、すぐにMQTTで転送することを考えなきゃいけないので、とりあえず手動でmosquittoを使って転送してみます。</p>
+
+<p>プロトコルとしては、どんなファイルでも（中身に関係なく）送れるのですが、mosquittoはコマンドラインということもあり、メッセージをサブスクライブしたときペイロードの内容を出力したあと改行コードを出力してしまいます。文字情報の時は便利なのですが、バイナリのときはちょっと厄介です。<br/>
+それを抑止するために-N オプションがあり、これを使うとバイナリファイルも比較的扱いやすくなるはずです。</p>
+
+<p>これを試してみます。</p>
+
+<pre><code class="sh binary file subscription via MQTT">#サブスクライブ側を用意
+$ mosquitto_sub -N -h MY.BROKER -t MY/DEVICE/photo &gt; test.jpg
+
+#写真をとったエッジデバイス側でファイルまるごとパブリッシュ
+$ mosquitto_pub -h MY.BROKER -t MY/DEVICE/photo -f ./test.jpg
+</code></pre>
+
+<p>このあと、サブスクライブ側をCtrl−Cで中断して、サブスクライブしたtest.jpgを確認してください。</p>
+
+<p>手動で中断しないといけないのが、イマイチですが一応転送はできます。</p>
+
+<p>スクリプトによる写真データのサブスクリプションは、mosquitto_subでは対処しきれない感じがします。
+ここは、paho版の出番になりそうですね。(もちろん、mosquittoのライブラリをつかってCで書いてもいいのですけど、わたしはCができませんので。。。。)</p>
+
+<h2>おまけ</h2>
+
+<p>このままじゃあまり役立たないので、webサーバを動かして写真を配信する設定を試して見ました。
+こちらの<a href="http://nofx2.txt-nifty.com/it/2013/07/raspberry-pi-ng.html">ページ</a>丸写しです。ありがとうございます。</p>
+
+<p>webサーバにはいまどきの、nginxを選びました。apacheは昔苦労した記憶があり、めんどくさいし時間がかかりそうというイメージでしたので今時流行りを。</p>
+
+<pre><code class="sh install nginx"># Nginxインストール
+$ sudo apt-get install nginx
+# 1.2.1-2.2+wheezy3がインストールされました。
+
+# web page 用ディレクトリの作成
+$ cd ~
+$ mkdir www
+
+# Nginxの設定の変更
+$ sudo vi /etc/nginx/sites-available/default
+# 設定フアイルは/etc/nginx/nginx.confにもありますが、
+#　ここらへんの使い分けはよくわかっていません。
+# server {　}
+#   の中にある公開するweb pageディレクトリを先ほど作ったディレクトリに変更します
+
+    #root /usr/share/nginx/www;
+    root /home/pi/www;
+
+
+# サイトを有効にするため、シンボリックリンクを張る。
+$ sudo ln -s /etc/nginx/sites-available/pi /etc/nginx/sites-enabled/
+#  ここらへんは詳細不明です。
+#　多分これがなくても先ほどの設定変更はdefaultに対して行ったので、
+#　有効になると思います。
+#　すでに、/etc/nginx/sites-enabled/には
+#  /etc/nginx/sites-available/defaultのリンクが置かれていました。
+
+# Nginxの設定ファイルに問題が無いかチェック
+$ sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# Nginx再起動
+$ sudo service nginx restart
+
+# 自動起動設定
+$ sudo update-rc.d nginx defaults
+
+# index.htmlの作成
+#　とりあえず、nginxの初期設定のindex.htmlをコピー
+
+cp /usr/share/nginx/www/index.html ~/www/
+</code></pre>
+
+<p>ここまでできたら、webサーバにアクセスしてみてください。
+なにか反応があるはずです。</p>
+
+<p>次に、とった写真を見れるようにします。</p>
+
+<h3>　写真入りindex.htmlを用意</h3>
+
+<p>&#8220;`sh
+$ vi ~/www/index.html
+<html>
+<head>
+<title>Welcome to nginx!</title>
+</head>
+<body bgcolor="white" text="black"></p>
+
+<center><h1><img src="./test.jpg" alt="test picture" ></h1></center>
+
+
+<p></body>
+</html></p>
+
+<h1>写真をとってwwwディレクトリに入れてみます。</h1>
+
+<p>$ fswebcam ~/www/test.jpg
+&#8220;`</p>
+
+<p>ここでwebをアクセスすると写真が見えるはずです。</p>
+
+<p>一段落。</p>
+
+<p>さて、このファイルはフラッシュメモリ上に展開されているので、あまり派手に何回もとっては消しをすると、あっという間にフラッシュメモリが使えなくなります。そこで、ramdiskを写真の置き場に使うことにします。
+webサーバは指定したwebページ保存場所以外のファイルは読めないようなので、最初にramdisk上の写真ファイルのリンクをwwwディレクトリ上に作っておきます。</p>
+
+<pre><code>$ ln -s /run/shm/picture.jpg ~/www/test.jpg 
+# /run/shmのディレクトリはRAM-DISKになっています。
+
+$ fswebcam /run/shm/picture.jpg
+#　これでwebページ上の写真が、今撮ったものに変わるはずです。
+</code></pre>
+
+<p>ここまで来ると、立派な定点カメラの出来上がり、という感じです。</p>
+
+<p>MQTTのサブスクライバをつければ、シャッタや解像度のコントロールがMQTT経由でできますね。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[自分のIPアドレスを送信する]]></title>

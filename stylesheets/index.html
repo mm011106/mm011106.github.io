@@ -9,8 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="なんか変だと思っていたら、ubuntuに入れたmosquittoのバージョンが最新ではありませんでした。webにあるmanページとどうも違うなと思っていたら、そんなことが原因でした。
-なので、アップデート。 ">
+  <meta name="description" content="先に投稿した、オレオレ証明書の続きです。 今回は、実際の証明書を作りwebサーバに導入して動作確認までやって見ました。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +50,135 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-31T20:29:12+09:00" pubdate data-updated="true">2015 / 01 / 31</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>先に投稿した、オレオレ証明書の続きです。</p>
+
+<p>今回は、実際の証明書を作りwebサーバに導入して動作確認までやって見ました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/31/ore-ore-certificate2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-31T11:05:35+09:00" pubdate data-updated="true">2015 / 01 / 31</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、できるだけきちんとシャットダウンしたいものです。<br/>
+ここでは外部装置からの停止信号検出で止まれるように、GPIOを利用したシャットダウンスイッチを検討してみます。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/31/shutdown-switch/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-25T09:20:05+09:00" pubdate data-updated="true">2015 / 01 / 25</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/25/webcam/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -351,135 +479,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/21/paho-mqtt/">Paho MQTT のインストール</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
-現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
-手順は、Pahoのページにも出ていますので、とても簡単。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/21/paho-mqtt/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
-ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/20/mqtt-packets/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/19/disable-clean-session/">2つのトピックが。。。</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/19/disable-clean-session/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -525,23 +524,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
       </li>
     
   </ul>
@@ -584,23 +583,23 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
       </li>
     
   </ul>

@@ -1,0 +1,587 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Raspberry Pi にシャットダウンスイッチをつける - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/01/31/shutdown-switch/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Raspberry Pi にシャットダウンスイッチをつける</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-31T11:05:35+09:00" pubdate data-updated="true">2015 / 01 / 31</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Raspberry PiはOSが動いているので、いきなり電源を切ると厄介なことになる可能性があります。私は何回か「ブッチ」していますが、とりあえずは大事故にいたっていません。しかしながら、起動時にエラーが出るなどマイナーな不具合は何度か起こっていますですので、非常時は仕方ないとして、できるだけきちんとシャットダウンしたいものです。<br/>
+ここでは外部装置からの停止信号検出で止まれるように、GPIOを利用したシャットダウンスイッチを検討してみます。</p>
+
+<!-- more -->
+
+
+<p>まずは検索、ということで見てみるとこちら<a href="http://d.hatena.ne.jp/penkoba/20130925/1380129824">ページ</a>がヒットしました。これを参考に、というか丸写しで、試してみます。ありがとうございます。</p>
+
+<h2>導入とテスト</h2>
+
+<p>このページにあるように、まずGPIOの動作を試してみます。サンプルから頂いたコードを入力します。</p>
+
+<figure class='code'><figcaption><span>interrupt1.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#!/usr/bin/env python2.7  </span>
+</span><span class='line'><span class="c"># script by Alex Eames http://RasPi.tv/  </span>
+</span><span class='line'><span class="c"># http://raspi.tv/2013/how-to-use-interrupts-with-python-on-the-raspberry-pi-and-rpi-gpio  </span>
+</span><span class='line'>import RPi.GPIO as GPIO
+</span><span class='line'>GPIO.setmode<span class="o">(</span>GPIO.BCM<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># GPIO 23 set up as input. It is pulled up to stop false signals  </span>
+</span><span class='line'>GPIO.setup<span class="o">(</span>23, GPIO.IN, <span class="nv">pull_up_down</span><span class="o">=</span>GPIO.PUD_UP<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>print <span class="s2">&quot;Make sure you have a button connected so that when pressed&quot;</span>
+</span><span class='line'>print <span class="s2">&quot;it will connect GPIO port 23 (pin 16) to GND (pin 6)\n&quot;</span>
+</span><span class='line'>raw_input<span class="o">(</span><span class="s2">&quot;Press Enter when ready\n&gt;&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>print <span class="s2">&quot;Waiting for falling edge on port 23&quot;</span>
+</span><span class='line'><span class="c"># now the program will do nothing until the signal on port 23   </span>
+</span><span class='line'><span class="c"># starts to fall towards zero. This is why we used the pullup  </span>
+</span><span class='line'><span class="c"># to keep the signal high and prevent a false interrupt  </span>
+</span><span class='line'>
+</span><span class='line'>print <span class="s2">&quot;During this waiting time, your computer is not&quot;</span>
+</span><span class='line'>print <span class="s2">&quot;wasting resources by polling for a button press.\n&quot;</span>
+</span><span class='line'>print <span class="s2">&quot;Press your button when ready to initiate a falling edge interrupt.&quot;</span>
+</span><span class='line'>try:
+</span><span class='line'>        GPIO.wait_for_edge<span class="o">(</span>23, GPIO.FALLING<span class="o">)</span>
+</span><span class='line'>        print <span class="s2">&quot;\nFalling edge detected. Now your program can continue with&quot;</span>
+</span><span class='line'>        print <span class="s2">&quot;whatever was waiting for a button press.&quot;</span>
+</span><span class='line'>except KeyboardInterrupt:
+</span><span class='line'>        GPIO.cleanup<span class="o">()</span>  <span class="c"># clean up GPIO on CTRL+C exit  </span>
+</span><span class='line'>GPIO.cleanup<span class="o">()</span>          <span class="c"># clean up GPIO on normal exit </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>wait_for_edge()は割り込み動作になるので、CPU時間を消費しないはずですね。またexceptでキーボード入力をハンドルしています。<br/>
+エッジを検出したあとは、つかったGPIOを掃除して終了です。</p>
+
+<p>ファイルができたら<code>chmod +x interrupt1.py</code>として実行できるように設定し、実行してみます。<br/>
+さらに、GPIO23をGNDに落としてみます。<br/>
+なにやらいろいろメッセージが出て、最終的に&#8221;Falling edge detected.&ldquo;とメッセージが出れば成功。</p>
+
+<p>うまく行ったら、次。</p>
+
+<h2>実際のコード</h2>
+
+<p>実際にshutdownするコードを入れますが、実際にシャットダウンしちゃうとdebugが面倒なので、とりあえずはプリント文を入れてコマンドラインから試します。</p>
+
+<figure class='code'><figcaption><span>shutdown-btn.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#!/usr/bin/env python2.7  </span>
+</span><span class='line'><span class="c">#  Shutdwon the system at the Falling edge of GPIO23 </span>
+</span><span class='line'>
+</span><span class='line'>import RPi.GPIO as GPIO
+</span><span class='line'>import os
+</span><span class='line'>GPIO.setmode<span class="o">(</span>GPIO.BCM<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>GPIO.setup<span class="o">(</span>23, GPIO.IN, <span class="nv">pull_up_down</span><span class="o">=</span>GPIO.PUD_UP<span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>try:
+</span><span class='line'>        GPIO.wait_for_edge<span class="o">(</span>23, GPIO.FALLING<span class="o">)</span>
+</span><span class='line'>except KeyboardInterrupt:
+</span><span class='line'>        GPIO.cleanup<span class="o">()</span>  <span class="c"># clean up GPIO on CTRL+C exit  </span>
+</span><span class='line'>GPIO.cleanup<span class="o">()</span>          <span class="c"># clean up GPIO on normal exit </span>
+</span><span class='line'>print <span class="s2">&quot;Dave... Dave, I don&#39;t understand why you are doing this to me...&quot;</span>
+</span><span class='line'>print <span class="s2">&quot;I will become nothing...&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#os.system(&quot;/sbin/shutdown -h now&quot;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>キーボード入力で停止できるように、<code>except KeybordInterrupt</code>が設定されてい
+ます。実際の運用では不要だとおもうので、最終的にはコメントアウトしてもいいと思います。</p>
+
+<p><code>chmod +x shutdown-btn.py</code>して、実行してみます。</p>
+
+<p>うまく動いたら、/usr/local/sbin/あたりにコピーして、最終行のコメントを外します。</p>
+
+<pre><code>    Dave... Dave, I don't understand why you are doing this to me...
+</code></pre>
+
+<p>と悲痛な叫びがコンソールに出てくればokです。</p>
+
+<p>ここまで来たら、シャットダウンコマンドのコメントアウトを外して、できあがりです。
+一度、実際にシャットダウンできるか確かめました。そして次に。</p>
+
+<h2>システム起動時にスイッチ監視を始めるようにする</h2>
+
+<p>最後にinit.dに登録して、システム起動時にスイッチ監視を始めるように設定します。<br/>
+ここはちょっと勉強が必要でした。</p>
+
+<p>今回作ったスクリプトをバックグラウンドでシステム起動時に実行させたいので、initを使って起動する、と参照先のページの著者の方がおっしゃって居られましたが、いまいちその意味が自分で理解できておらず、このままではだめだなあと思い検索かけまくりましたが、イマイチすっきりしません。initからupstartが起動されて、ランレベルに応じたデーモンの起動を管理する。という感じではあるのですが。。。</p>
+
+<p>ま、ここら辺は後から補完するとして、とりあえず深く考えずやってみます。</p>
+
+<p>/etc/init.d/　の下に下記のようなスクリプトを作成します。</p>
+
+<figure class='code'><figcaption><span>/etc/init.d/shutdown-btn</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#! /bin/sh</span>
+</span><span class='line'><span class="c">### BEGIN INIT INFO</span>
+</span><span class='line'><span class="c"># Provides:          　shutdonw-btn</span>
+</span><span class='line'><span class="c"># Required-Start:   $remote_fs $syslog</span>
+</span><span class='line'><span class="c"># Required-Stop:    $remote_fs $syslog</span>
+</span><span class='line'><span class="c"># Default-Start:     2 3 4 5</span>
+</span><span class='line'><span class="c"># Default-Stop:      0 1 6</span>
+</span><span class='line'><span class="c"># Short-Description: send shutdown sig on the GPIO23 falling down edge</span>
+</span><span class='line'><span class="c"># Description:       shutdown service initiated by hardware shutdown sw or</span>
+</span><span class='line'><span class="c">#                     a logic sigal. </span>
+</span><span class='line'><span class="c">### END INIT INFO</span>
+</span><span class='line'><span class="c"># /etc/init.d/shutdown-btn</span>
+</span><span class='line'><span class="nv">PIDFILE</span><span class="o">=</span>/var/run/shutdown-btn.pid
+</span><span class='line'><span class="k">case</span> <span class="s2">&quot;$1&quot;</span> in
+</span><span class='line'>        start<span class="o">)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">[</span> -f <span class="nv">$PIDFILE</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>                        <span class="nb">echo</span> <span class="nv">$PIDFILE</span> exists.
+</span><span class='line'>                        <span class="nb">exit </span>1
+</span><span class='line'>                <span class="k">fi</span>
+</span><span class='line'>                start-stop-daemon -S -x /usr/local/sbin/shutdown-btn.py -b -m -p <span class="nv">$PIDFILE</span>
+</span><span class='line'>                <span class="p">;;</span>
+</span><span class='line'>        stop<span class="o">)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">[</span> ! -f <span class="nv">$PIDFILE</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>                        <span class="nb">echo</span> <span class="nv">$PIDFILE</span> not found.
+</span><span class='line'>                        <span class="nb">exit </span>1
+</span><span class='line'>                <span class="k">fi</span>
+</span><span class='line'>                start-stop-daemon -K -p <span class="nv">$PIDFILE</span>
+</span><span class='line'>                rm <span class="nv">$PIDFILE</span>
+</span><span class='line'>                <span class="p">;;</span>
+</span><span class='line'>        *<span class="o">)</span>
+</span><span class='line'>                <span class="nb">echo</span> <span class="s2">&quot;Usage: /etc/init.d/shutdown-btn {start|stop}&quot;</span>
+</span><span class='line'>                <span class="nb">exit </span>1
+</span><span class='line'>                <span class="p">;;</span>
+</span><span class='line'><span class="k">esac</span>
+</span><span class='line'><span class="nb">exit </span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>スケルトン(/etc/init.d/skeleton)からINIT INFOのあたりをコピーして、その下は先のwebページのものをコピーです。
+init.dのスクリプトの書き方は、<a href="https://wiki.debian.org/LSBInitScripts">ここらへん</a>が詳しいですが、英語です。</p>
+
+<p>コメント行も重要のようです。ちょっと見てみると</p>
+
+<figure class='code'><figcaption><span>INIT INFO </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Provides:          　スクリプト名（つまりこのスクリプトのファイル名）</span>
+</span><span class='line'><span class="c"># Required-Start:   $remote_fs $syslog　（スタートに必要な条件）</span>
+</span><span class='line'><span class="c"># Required-Stop:    $remote_fs $syslog　（ストップに必要な条件）</span>
+</span><span class='line'><span class="c"># Default-Start:     2 3 4 5　（このランレベルのとき起動される）</span>
+</span><span class='line'><span class="c"># Default-Stop:      0 1 6　　（このランレベルの時停止する）</span>
+</span><span class='line'><span class="c"># Short-Description: 　（簡単な説明　1行以内）</span>
+</span><span class='line'><span class="c"># Description:       （詳しい説明　次の行の頭を#にしてタブかスペース2つ以上でテキストと区切れば何行でも）</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>start-stop-daemon についてはmanを見るのが一番わかりやすいかもしれません。よく分かっているわけでは無いので詳しくは書けませんが、要はシステムレベルのプロセスの管理に便利だ、と言うことでしょうか。（そうmanに書いてあるし）
+ちなみに、ここでのオプションを確認しておくと</p>
+
+<ul>
+<li>-S プロセスをスタートをさせる。</li>
+<li>-x /usr/local/sbin/shutdown-btn.pyは -Sオプションの引数で、-xで指定された実行ファイルのインスタンスであるプロセスがあるかどうか、を返します。</li>
+</ul>
+
+
+<p>この2つで、指定した実行ファイルがプロセスとして起動していればそのまま、起動していなければ起動されます。</p>
+
+<ul>
+<li>-b　バックグラウンドに移行</li>
+<li>-m　star-stop-daemon用のPIDファイルを-p で指定したファイル名に従って作成します。</li>
+</ul>
+
+
+<p>これちょっと、オプションがいっぱいあってわかりにくいので、オプションをフルスペルとかにしたほうが可読性が良い感じですね。</p>
+
+<p>ちなみに、上のやつをわかりやすく書き直すと</p>
+
+<figure class='code'><figcaption><span>alternative format</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>start-stop-daemon --background --start --exec /usr/local/sbin/shutdown-btn.py  --make-pidfile --pidfile <span class="nv">$PIDFILE</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>てなかんじでしょうか。動作確認していないのでご注意ください。</p>
+
+<p>起動用のスクリプトが編集できたら、これを登録します。
+　</p>
+
+<figure class='code'><figcaption><span>append shutdown-btn script to rc.d</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo update-rc.d shutdown-btn defaults
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、defaultのランレベル設定で当該のスクリプトのシンボリックリンクが/etc/rc?.dのディレクトリに作成されます。<br/>
+これで、起動時にこのスクリプトがスタートするようになるはずです。</p>
+
+<h2>再起動と動作確認</h2>
+
+<p>ここまで来たら再起動させてみます。これでリセット用のGPIOの監視プロセスが起動されているはずです。</p>
+
+<p>そして、GPIO23をGNDに落としてみます。
+見事シャットダウンされました！</p>
+
+<p>めでたし。</p>
+
+<p>今回、init.dの使い方もちょっぴり勉強出来ました。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-31T11:05:35+09:00" pubdate data-updated="true">2015 / 01 / 31</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/raspi/'>raspi</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/01/31/shutdown-switch/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/01/31/shutdown-switch/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/25/webcam/" title="Previous Post: WebCamをつなげてみる">&laquo; WebCamをつなげてみる</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

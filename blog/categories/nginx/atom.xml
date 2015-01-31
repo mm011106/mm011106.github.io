@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: nginx, | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/nginx/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-01-31T20:48:42+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践１]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2/"/>
+    <updated>2015-01-31T20:29:12+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2</id>
+    <content type="html"><![CDATA[<p>先に投稿した、オレオレ証明書の続きです。</p>
+
+<p>今回は、実際の証明書を作りwebサーバに導入して動作確認までやって見ました。</p>
+
+<!-- more -->
+
+
+<h2>オレオレ証明書を作る</h2>
+
+<p>いったいどこから手を付ければ良いか分からないので、検索してみます。
+いろいろなところで例が示されていますが、opensslで作れそうな感じです。とくに<a href="http://d.hatena.ne.jp/ozuma/20130511/1368284304">こちらのページ</a>に非常にわかりやすくまとめられていましたので、こちらをそのまま順番に試していこうと思います。</p>
+
+<p>詳しい解説は、そちらをご覧ください。</p>
+
+<h3>1.秘密鍵を作る</h3>
+
+<p>まずは、秘密鍵(server.key)を作ります。</p>
+
+<pre><code class="sh ">$ openssl genrsa 2048 &gt; server.key
+</code></pre>
+
+<p>これで2048bitのRSAキーが作られます。参考ページの解説によると、この情報の中に暗号化に必要な全てのものが入っています。ここから公開鍵も作られます。</p>
+
+<p>中身を見てみます。</p>
+
+<pre><code class="sh ">$ openssl rsa -text &lt; server.key 
+Private-Key: (2048 bit)
+modulus:
+  :
+  :
+</code></pre>
+
+<p>見てもよく分かりませんが、なんか出来てます。</p>
+
+<h3>2.証明書署名リクエストファイルを作る</h3>
+
+<p>次に、証明書にサインしてもらうためのリクエストファイルを作ります。
+このファイルには、秘密鍵から作られた公開鍵と秘密鍵のハッシュ値（鍵の情報を要約した物）が入っています。さらに証明書に記載する署名情報（サーバのFQDNとか組織名とか）が加わります。</p>
+
+<pre><code class="sh ">$ openssl req -new -key server.key &gt; server.csr
+</code></pre>
+
+<p>このときに、サーバのFQDNや組織名、所在地など聞かれます。適当で良いようですが、サーバのFQDNはきちんと入れておいた方が良いようです。証明書のFQDNとそれを設置したサーバのFQDNが違うのはダメなような気がしますね。</p>
+
+<p>再び内容を確認します。</p>
+
+<pre><code class="sh ">$ openssl req -test &lt; server.csr 
+</code></pre>
+
+<h3>3.認証局に成り代わって、証明書にサインします</h3>
+
+<p>できあがった証明書署名リクエストファイルに署名をして正式な証明書にします。<br/>
+本来これは認証局がやることですが、「おれおれ」なので「おれ」が証明書にサインします。</p>
+
+<pre><code class="">openssl x509 -req -days 7300 -signkey server.key &lt; server.csr &gt; server.crt
+</code></pre>
+
+<p>-days オプションでは有効期限を指定します。ここでは7300日、20年、だいたい私が死ぬまで有効。</p>
+
+<p>できあがりを確認してみます。</p>
+
+<pre><code>$ openssl x509 -text &lt; server.crt 
+</code></pre>
+
+<p>先ほど入力した組織名やFQDNが見えてくると思います。</p>
+
+<p>必要なファイルは、.crtファイル（証明書）と.key（秘密鍵）です。
+両方ともownをrootにして、パーミッションを600に設定しておきます。</p>
+
+<h2>まずはwebサーバに設定してみる</h2>
+
+<p>先のwebcamの投稿でnginxをインストールしましたが、このサーバに作った鍵を設定して試してみます。</p>
+
+<p>これも、設定方法を検索したところ、そのものずばり<a href="http://heartbeats.jp/hbblog/2012/06/nginx06.html">&ldquo;nginxのTLS設定&rdquo;</a>というページが見つかりました。この連載、とてもわかりやすくnginxの設定方法が書かれていますので、あとでよく勉強しておこうと思います。</p>
+
+<p>やることとしては、configファイルを変更してhttpsの受け口を作り、そこに先ほど作った証明書をいれる、ということになります。</p>
+
+<p>設定ファイルは、先のページを参考に以下の様にしました。</p>
+
+<pre><code class="sh /etc/nginx/sites-sites-available/default">server {
+    listen 443 ssl;
+    server_name my.www.server.jp;
+    root /home/mynginx/www;
+    index index.html index.htm;
+
+    ssl_certificate /etc/nginx/server.crt;
+    ssl_certificate_key /etc/nginx/server.key;
+
+    ssl_session_timeout 5m;
+    ssl_session_cache shared:SSL:10m;
+
+    ssl_protocols SSLv3 TLSv1;
+    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        try_files $uri $uri/ =404;
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+}
+</code></pre>
+
+<ul>
+<li>httpsのポートを443に設定してsslを有効にします。</li>
+<li>サーバのFQDNを設定</li>
+<li>webサーバのドキュメントルートを設定</li>
+<li>証明書と秘密鍵を指定</li>
+<li>タイムアウトとキャッシュを設定（ここら辺は参考webページの写しです）</li>
+<li>SSLのプロトコル指定と暗号化スイートの指定です。ここら辺はnginxのデフォルト設定ファイルのコピー</li>
+<li>ドキュメントの特定の場所のビヘイビアの指定です。ここではルート以下の全てのアクセスでBasic認証を要求するような設定です</li>
+</ul>
+
+
+<p>認証のために.htpasswdが必要になりますが、これはhttp-toolsのなかにあるhtpasswdコマンドでつくりました。</p>
+
+<pre><code class="sh how-to make a password file">$ sudo htpasswd -c .htpasswd UserName
+New password:
+Re-type new password:
+</code></pre>
+
+<p>のようにしてパスワードファイルを作成して、設定します。</p>
+
+<h3>4.設定を有効にして、再起動</h3>
+
+<p>設定を書き終えたら設定を確認して、読み込ませます。</p>
+
+<pre><code class="sh restart nginx">$ sudo nginx -t
+$ sudo nginx -s reload
+</code></pre>
+
+<h3>5.動作確認</h3>
+
+<p>これで、TLSが有効になっているはずです。アクセスしてみます。</p>
+
+<p><code>https://my.www.server.jp</code></p>
+
+<p>ブラウザからは「この証明書は無効です」などのワーニングが出てきました。証明書に有効なサインがない、サインした人が「ちゃんとした」人じゃ無いので、このようにワーニングがでます。
+出てきたワーニングから「証明書を確認する」などのボタンをおして、自分が作った証明書だということを確認します。</p>
+
+<p>確認できたら、ワーニングを無視して進みます。
+ここでログイン（Basic認証）のポップアップが出てくるはずです。先ほど設定したログイン名とパスワードを入力します。無事ログインして、webページがみれました。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T15:07:43+09:00</updated>
+  <updated>2015-01-31T20:48:42+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,202 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践１]]></title>
+    <link href="http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2/"/>
+    <updated>2015-01-31T20:29:12+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2</id>
+    <content type="html"><![CDATA[<p>先に投稿した、オレオレ証明書の続きです。</p>
+
+<p>今回は、実際の証明書を作りwebサーバに導入して動作確認までやって見ました。</p>
+
+<!-- more -->
+
+
+<h2>オレオレ証明書を作る</h2>
+
+<p>いったいどこから手を付ければ良いか分からないので、検索してみます。
+いろいろなところで例が示されていますが、opensslで作れそうな感じです。とくに<a href="http://d.hatena.ne.jp/ozuma/20130511/1368284304">こちらのページ</a>に非常にわかりやすくまとめられていましたので、こちらをそのまま順番に試していこうと思います。</p>
+
+<p>詳しい解説は、そちらをご覧ください。</p>
+
+<h3>1.秘密鍵を作る</h3>
+
+<p>まずは、秘密鍵(server.key)を作ります。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>openssl genrsa <span class="m">2048</span> &gt; server.key
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで2048bitのRSAキーが作られます。参考ページの解説によると、この情報の中に暗号化に必要な全てのものが入っています。ここから公開鍵も作られます。</p>
+
+<p>中身を見てみます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>openssl rsa -text &lt; server.key
+</span><span class='line'>Private-Key: <span class="o">(</span><span class="m">2048</span> bit<span class="o">)</span>
+</span><span class='line'>modulus:
+</span><span class='line'>  :
+</span><span class='line'>  :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>見てもよく分かりませんが、なんか出来てます。</p>
+
+<h3>2.証明書署名リクエストファイルを作る</h3>
+
+<p>次に、証明書にサインしてもらうためのリクエストファイルを作ります。
+このファイルには、秘密鍵から作られた公開鍵と秘密鍵のハッシュ値（鍵の情報を要約した物）が入っています。さらに証明書に記載する署名情報（サーバのFQDNとか組織名とか）が加わります。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>openssl req -new -key server.key &gt; server.csr
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このときに、サーバのFQDNや組織名、所在地など聞かれます。適当で良いようですが、サーバのFQDNはきちんと入れておいた方が良いようです。証明書のFQDNとそれを設置したサーバのFQDNが違うのはダメなような気がしますね。</p>
+
+<p>再び内容を確認します。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>openssl req -test &lt; server.csr
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.認証局に成り代わって、証明書にサインします</h3>
+
+<p>できあがった証明書署名リクエストファイルに署名をして正式な証明書にします。<br/>
+本来これは認証局がやることですが、「おれおれ」なので「おれ」が証明書にサインします。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>openssl x509 -req -days <span class="m">7300</span> -signkey server.key &lt; server.csr &gt; server.crt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>-days オプションでは有効期限を指定します。ここでは7300日、20年、だいたい私が死ぬまで有効。</p>
+
+<p>できあがりを確認してみます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>openssl x509 -text &lt; server.crt
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>先ほど入力した組織名やFQDNが見えてくると思います。</p>
+
+<p>必要なファイルは、.crtファイル（証明書）と.key（秘密鍵）です。
+両方ともownをrootにして、パーミッションを600に設定しておきます。</p>
+
+<h2>まずはwebサーバに設定してみる</h2>
+
+<p>先のwebcamの投稿でnginxをインストールしましたが、このサーバに作った鍵を設定して試してみます。</p>
+
+<p>これも、設定方法を検索したところ、そのものずばり<a href="http://heartbeats.jp/hbblog/2012/06/nginx06.html">&ldquo;nginxのTLS設定&rdquo;</a>というページが見つかりました。この連載、とてもわかりやすくnginxの設定方法が書かれていますので、あとでよく勉強しておこうと思います。</p>
+
+<p>やることとしては、configファイルを変更してhttpsの受け口を作り、そこに先ほど作った証明書をいれる、ということになります。</p>
+
+<p>設定ファイルは、先のページを参考に以下の様にしました。</p>
+
+<figure class='code'><figcaption><span>/etc/nginx/sites-sites-available/default</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>server <span class="o">{</span>
+</span><span class='line'>  listen <span class="m">443</span> ssl<span class="p">;</span>
+</span><span class='line'>  server_name my.www.server.jp<span class="p">;</span>
+</span><span class='line'>  root /home/mynginx/www<span class="p">;</span>
+</span><span class='line'>  index index.html index.htm<span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  ssl_certificate /etc/nginx/server.crt<span class="p">;</span>
+</span><span class='line'>  ssl_certificate_key /etc/nginx/server.key<span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  ssl_session_timeout 5m<span class="p">;</span>
+</span><span class='line'>  ssl_session_cache shared:SSL:10m<span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  ssl_protocols SSLv3 TLSv1<span class="p">;</span>
+</span><span class='line'>  ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP<span class="p">;</span>
+</span><span class='line'>  ssl_prefer_server_ciphers on<span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  location / <span class="o">{</span>
+</span><span class='line'>      try_files <span class="nv">$uri</span> <span class="nv">$uri</span>/ <span class="o">=</span>404<span class="p">;</span>
+</span><span class='line'>      auth_basic <span class="s2">&quot;Restricted&quot;</span><span class="p">;</span>
+</span><span class='line'>      auth_basic_user_file /etc/nginx/.htpasswd<span class="p">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>httpsのポートを443に設定してsslを有効にします。</li>
+<li>サーバのFQDNを設定</li>
+<li>webサーバのドキュメントルートを設定</li>
+<li>証明書と秘密鍵を指定</li>
+<li>タイムアウトとキャッシュを設定（ここら辺は参考webページの写しです）</li>
+<li>SSLのプロトコル指定と暗号化スイートの指定です。ここら辺はnginxのデフォルト設定ファイルのコピー</li>
+<li>ドキュメントの特定の場所のビヘイビアの指定です。ここではルート以下の全てのアクセスでBasic認証を要求するような設定です</li>
+</ul>
+
+
+<p>認証のために.htpasswdが必要になりますが、これはhttp-toolsのなかにあるhtpasswdコマンドでつくりました。</p>
+
+<figure class='code'><figcaption><span>how-to make a password file</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo htpasswd -c .htpasswd UserName
+</span><span class='line'>New password:
+</span><span class='line'>Re-type new password:
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>のようにしてパスワードファイルを作成して、設定します。</p>
+
+<h3>4.設定を有効にして、再起動</h3>
+
+<p>設定を書き終えたら設定を確認して、読み込ませます。</p>
+
+<figure class='code'><figcaption><span>restart nginx</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo nginx -t
+</span><span class='line'><span class="nv">$ </span>sudo nginx -s reload
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>5.動作確認</h3>
+
+<p>これで、TLSが有効になっているはずです。アクセスしてみます。</p>
+
+<p><code>https://my.www.server.jp</code></p>
+
+<p>ブラウザからは「この証明書は無効です」などのワーニングが出てきました。証明書に有効なサインがない、サインした人が「ちゃんとした」人じゃ無いので、このようにワーニングがでます。
+出てきたワーニングから「証明書を確認する」などのボタンをおして、自分が作った証明書だということを確認します。</p>
+
+<p>確認できたら、ワーニングを無視して進みます。
+ここでログイン（Basic認証）のポップアップが出てくるはずです。先ほど設定したログイン名とパスワードを入力します。無事ログインして、webページがみれました。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Raspberry Pi にシャットダウンスイッチをつける]]></title>
@@ -2735,84 +2931,6 @@ allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;
 all client ids are valid.</p></blockquote>
 
 <p>となるようです。セキュリティの一助になるかしら？</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mosquitto.confを見てみた]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf/"/>
-    <updated>2014-12-04T20:21:14+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/04/mosquitto-dot-conf</id>
-    <content type="html"><![CDATA[<p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
-原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
-
-<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
-
-<!-- more -->
-
-
-<p><strong>mount_point</strong>  <em>topic prefix</em></p>
-
-<blockquote><p>This option is used with the listener option to isolate groups of clients.
-When a client connects to a listener which uses this option, the string argument is attached to the start of all topics for this client. This prefix is removed when any messages are sent to the client. This means a client connected to a listener with mount point <em><strong>example</strong></em> can only see messages that are published in the topic hierarchy <em><strong>example</strong></em> and above.</p></blockquote>
-
-<p>さらに、<code>mosquitto.conf</code>のデフォルトでは、この部分が</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># The listener can be restricted to operating within a topic hierarchy using
-</span><span class='line'># the mount_point option. This is achieved be prefixing the mount_point string
-</span><span class='line'># to all topics for any clients connected to this listener. This prefixing only
-</span><span class='line'># happens internally to the broker; the client will not see the prefix.
-</span><span class='line'>#mount_point</span></code></pre></td></tr></table></div></figure>
-
-
-<p>となっています。</p>
-
-<p>「クライアント」と「リスナー」という言葉が出てきて？？？な感じです。。。。</p>
-
-<blockquote><p>The network ports that mosquitto listens on can be controlled using listeners.</p></blockquote>
-
-<p>とあるので、ブローカーがパブリッシャからの聞き耳を立てるポートをコントロールするためのものが「リスナー」なんでしょうか。どうも、そうみたいですね。
-「リスナー」は、MQTTのプロトコルを通信するためのポートに、この設定ファイルで設定できるようなメソッドを組み込んだオブジェクトみたいな感じでしょうか。</p>
-
-<p>その「リスナー」の部分、<code>mosquitto.conf</code>では</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># Listen on a port/ip address combination. By using this variable 
-</span><span class='line'># multiple times, mosquitto can listen on more than one port. If 
-</span><span class='line'># this variable is used and neither bind_address nor port given, 
-</span><span class='line'># then the default listener will not be started.
-</span><span class='line'># The port number to listen on must be given. Optionally, an ip 
-</span><span class='line'># address or host name may be supplied as a second argument. In 
-</span><span class='line'># this case, mosquitto will attempt to bind the listener to that 
-</span><span class='line'># address and so restrict access to the associated network and 
-</span><span class='line'># interface. By default, mosquitto will listen on all interfaces.
-</span><span class='line'># listener port-number [ip address/host name]
-</span><span class='line'>#listener</span></code></pre></td></tr></table></div></figure>
-
-
-<p>となっているので、ポートを「リスナー」として設定して開けば、その一つ一つに個別のマウントポイントを設定できる、という感じですかね。でもサブスクライバの方はどうなるんでしょ？サブスクライブできるトピックを限定できるのかなあ。そうか、ポート毎（リスナー毎）にマウントポイントを設定できればそのポート（リスナー）のサブスクライバは全部そのマウントポイントしか見えない、ってことか。パブリッシャも同様。
-listenerごとにipアドレスやホストネームをバインドできるのはそのためですかね。とすれば、IPアドレスは複数設定できなきゃいけませんね。。。。</p>
-
-<p>その他セキュリティ設定のところでも、特定のトピックの読み書きが可能なように設定できたりするようです。</p>
-
-<p>そもそも「クライアント」はサブスクライバとパブリッシャの両方のことを意味するのかしら？？？</p>
-
-<p>奥深し。。。。。</p>
 ]]></content>
   </entry>
   

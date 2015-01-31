@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
-そこで、awkを使って普通の表示にしてやります。 ">
+  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,135 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/20/mqtt-packets/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/19/disable-clean-session/">2つのトピックが。。。</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/19/disable-clean-session/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/14/ime/">日本語入力</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-14T20:07:28+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>日本語入力を変更しました。Mozcです。</p>
+
+<p>なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/14/ime/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -360,136 +489,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/03/mqtt-option/">mosquitto_subのオプション</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
-
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/03/mqtt-option/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/02/minor-adjustment/">Octopress+OCT2のちょっとした修正</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-02T20:28:23+09:00" pubdate data-updated="true">2014 / 12 / 02</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今まで、ブログのポスト日時表示がうまく行かなかったので色々と調べまわっていました。しかし、web上ではなかなか情報がなく、半分諦めていました。ふと、昔はどうだったかなあ、と気になってoctopressをインストールしたばかりの時に試しに使っていたテーマで生成したHTMLコードを見てみたところ、ブログページに日付が入っていることを発見。なら、この部分だけ持ってきて入れなおしてみるかな、とやってみたところうまく行きました！</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/02/minor-adjustment/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/01/overview/">試作システムの概要</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-01T20:20:23+09:00" pubdate data-updated="true">2014 / 12 / 01</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>概略の仕様</h3>
-
-<p>試作しようとしているシステムの概要は以下のような感じです。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/01/overview/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -537,23 +536,23 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
       </li>
     
   </ul>
@@ -596,23 +595,23 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/12/autossh/">autossh</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a>
       </li>
     
   </ul>

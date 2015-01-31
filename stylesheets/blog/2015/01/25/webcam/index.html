@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>WebCamをつなげてみる - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/01/25/webcam/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">WebCamをつなげてみる</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-25T09:20:05+09:00" pubdate data-updated="true">2015 / 01 / 25</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
+
+<!-- more -->
+
+
+<p>webカムはRaspberry Piに接続できるのかどうか調べてみると、意外と簡単に接続できそうです。一昔前は結構苦労していたように感じたので、時代は進んだなあと。</p>
+
+<p>で、キャプチャするソフトをリストアップしてみると。</p>
+
+<ul>
+<li>fswebcam　スチル撮影</li>
+<li>motion　画像の変化を検出して記録</li>
+<li>guvcview 動画のキャプチャ（GUI必要？）</li>
+</ul>
+
+
+<p>と言ったところが皆さんに使われているようです。特に監視カメラ用途ではmotionが便利そうです。</p>
+
+<p>今回は、能動的にシャッターを切って記録する用途ですので、fswebcamを使うことにしました。</p>
+
+<hr />
+
+<h3>USBカメラを接続してみる</h3>
+
+<p>とりあえずUSBカメラを何も考えずRaspberry Piにつないでみます。</p>
+
+<p>認識されているか確認してみると</p>
+
+<figure class='code'><figcaption><span>UBS device list</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>lsusb
+</span><span class='line'>Bus <span class="m">001</span> Device 002: ID 0424:9514 Standard Microsystems Corp.
+</span><span class='line'>Bus <span class="m">001</span> Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+</span><span class='line'>Bus <span class="m">001</span> Device 003: ID 0424:ec00 Standard Microsystems Corp.
+</span><span class='line'>Bus <span class="m">001</span> Device 006: ID 046d:080a Logitech, Inc. Portable Webcam C905
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>こんなかんじで認識されています。</p>
+
+<p>次に、fswebcamをインストール。参考にしたのは<a href="http://www.raspberrypi.org/documentation/usage/webcams/">こちら</a></p>
+
+<p>続けて試し撮りなどしてみます。</p>
+
+<figure class='code'><figcaption><span>install fswebcam</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install fswebcam
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>fswebcam -v   <span class="c">#こうすると色々教えてくれます。</span>
+</span><span class='line'>--- Opening /dev/video0...
+</span><span class='line'>Trying <span class="nb">source </span>module v4l2...
+</span><span class='line'>/dev/video0 opened.
+</span><span class='line'>src_v4l2_get_capability,87: /dev/video0 information:
+</span><span class='line'>src_v4l2_get_capability,88: cap.driver: <span class="s2">&quot;uvcvideo&quot;</span>
+</span><span class='line'>src_v4l2_get_capability,89: cap.card: <span class="s2">&quot;UVC Camera (046d:080a)&quot;</span>
+</span><span class='line'>src_v4l2_get_capability,90: cap.bus_info: <span class="s2">&quot;usb-bcm2708_usb-1.4&quot;</span>
+</span><span class='line'>src_v4l2_get_capability,91: cap.capabilities<span class="o">=</span>0x84000001
+</span><span class='line'>src_v4l2_get_capability,92: - VIDEO_CAPTURE
+</span><span class='line'>src_v4l2_get_capability,103: - STREAMING
+</span><span class='line'>No input was specified, using the first.
+</span><span class='line'>src_v4l2_set_input,181: /dev/video0: Input <span class="m">0</span> information:
+</span><span class='line'>src_v4l2_set_input,182: <span class="nv">name</span> <span class="o">=</span> <span class="s2">&quot;Camera 1&quot;</span>
+</span><span class='line'>src_v4l2_set_input,183: <span class="nb">type</span> <span class="o">=</span> 00000002
+</span><span class='line'>src_v4l2_set_input,185: - CAMERA
+</span><span class='line'>src_v4l2_set_input,186: <span class="nv">audioset</span> <span class="o">=</span> 00000000
+</span><span class='line'>src_v4l2_set_input,187: <span class="nv">tuner</span> <span class="o">=</span> 00000000
+</span><span class='line'>src_v4l2_set_input,188: <span class="nv">status</span> <span class="o">=</span> 00000000
+</span><span class='line'>src_v4l2_set_pix_format,541: Device offers the following V4L2 pixel formats:
+</span><span class='line'>src_v4l2_set_pix_format,554: 0: <span class="o">[</span>0x56595559<span class="o">]</span> <span class="s1">&#39;YUYV&#39;</span> <span class="o">(</span>YUV 4:2:2 <span class="o">(</span>YUYV<span class="o">))</span>
+</span><span class='line'>src_v4l2_set_pix_format,554: 1: <span class="o">[</span>0x47504A4D<span class="o">]</span> <span class="s1">&#39;MJPG&#39;</span> <span class="o">(</span>MJPEG<span class="o">)</span>
+</span><span class='line'>Using palette MJPEG
+</span><span class='line'>Adjusting resolution from 384x288 to 352x288.
+</span><span class='line'>src_v4l2_set_mmap,693: mmap information:
+</span><span class='line'>src_v4l2_set_mmap,694: <span class="nv">frames</span><span class="o">=</span>4
+</span><span class='line'>src_v4l2_set_mmap,741: <span class="m">0</span> <span class="nv">length</span><span class="o">=</span>102400
+</span><span class='line'>src_v4l2_set_mmap,741: <span class="m">1</span> <span class="nv">length</span><span class="o">=</span>102400
+</span><span class='line'>src_v4l2_set_mmap,741: <span class="m">2</span> <span class="nv">length</span><span class="o">=</span>102400
+</span><span class='line'>src_v4l2_set_mmap,741: <span class="m">3</span> <span class="nv">length</span><span class="o">=</span>102400
+</span><span class='line'>--- Capturing frame...
+</span><span class='line'>verify_jpeg_dht,94: Inserting DHT segment into JPEG frame.
+</span><span class='line'>Captured frame in 0.00 seconds.
+</span><span class='line'>--- Processing captured image...
+</span><span class='line'>There are unsaved changes to the image.
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>fswebcam -r <span class="m">1000</span> ./test.jpg
+</span><span class='line'>--- Opening /dev/video0...
+</span><span class='line'>Trying <span class="nb">source </span>module v4l2...
+</span><span class='line'>/dev/video0 opened.
+</span><span class='line'>No input was specified, using the first.
+</span><span class='line'>Adjusting resolution from 1000x-1 to 960x720.
+</span><span class='line'>--- Capturing frame...
+</span><span class='line'>Captured frame in 0.00 seconds.
+</span><span class='line'>--- Processing captured image...
+</span><span class='line'>Writing JPEG image to <span class="s1">&#39;./test.jpg&#39;</span>.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上の例では解像度1000pxぐらいの絵をとってtest.jpgで保存してもらう例です。実際にはカメラの撮影可能な解像度に適宜調整されるようです。</p>
+
+<p>撮影したのはいいですが、このままでは本当にとれているのか絵を觀ることができないので判りません。scpなどのコマンドで転送してもいいですが、すぐにMQTTで転送することを考えなきゃいけないので、とりあえず手動でmosquittoを使って転送してみます。</p>
+
+<p>プロトコルとしては、どんなファイルでも（中身に関係なく）送れるのですが、mosquittoはコマンドラインということもあり、メッセージをサブスクライブしたときペイロードの内容を出力したあと改行コードを出力してしまいます。文字情報の時は便利なのですが、バイナリのときはちょっと厄介です。<br/>
+それを抑止するために-N オプションがあり、これを使うとバイナリファイルも比較的扱いやすくなるはずです。</p>
+
+<p>これを試してみます。</p>
+
+<figure class='code'><figcaption><span>binary file subscription via MQTT</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#サブスクライブ側を用意</span>
+</span><span class='line'><span class="nv">$ </span>mosquitto_sub -N -h MY.BROKER -t MY/DEVICE/photo &gt; test.jpg
+</span><span class='line'>
+</span><span class='line'><span class="c">#写真をとったエッジデバイス側でファイルまるごとパブリッシュ</span>
+</span><span class='line'><span class="nv">$ </span>mosquitto_pub -h MY.BROKER -t MY/DEVICE/photo -f ./test.jpg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このあと、サブスクライブ側をCtrl−Cで中断して、サブスクライブしたtest.jpgを確認してください。</p>
+
+<p>手動で中断しないといけないのが、イマイチですが一応転送はできます。</p>
+
+<p>スクリプトによる写真データのサブスクリプションは、mosquitto_subでは対処しきれない感じがします。
+ここは、paho版の出番になりそうですね。(もちろん、mosquittoのライブラリをつかってCで書いてもいいのですけど、わたしはCができませんので。。。。)</p>
+
+<h2>おまけ</h2>
+
+<p>このままじゃあまり役立たないので、webサーバを動かして写真を配信する設定を試して見ました。
+こちらの<a href="http://nofx2.txt-nifty.com/it/2013/07/raspberry-pi-ng.html">ページ</a>丸写しです。ありがとうございます。</p>
+
+<p>webサーバにはいまどきの、nginxを選びました。apacheは昔苦労した記憶があり、めんどくさいし時間がかかりそうというイメージでしたので今時流行りを。</p>
+
+<figure class='code'><figcaption><span>install nginx</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Nginxインストール</span>
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install nginx
+</span><span class='line'><span class="c"># 1.2.1-2.2+wheezy3がインストールされました。</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># web page 用ディレクトリの作成</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ~
+</span><span class='line'><span class="nv">$ </span>mkdir www
+</span><span class='line'>
+</span><span class='line'><span class="c"># Nginxの設定の変更</span>
+</span><span class='line'><span class="nv">$ </span>sudo vi /etc/nginx/sites-available/default
+</span><span class='line'><span class="c"># 設定フアイルは/etc/nginx/nginx.confにもありますが、</span>
+</span><span class='line'><span class="c">#　ここらへんの使い分けはよくわかっていません。</span>
+</span><span class='line'><span class="c"># server {　}</span>
+</span><span class='line'><span class="c">#   の中にある公開するweb pageディレクトリを先ほど作ったディレクトリに変更します</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c">#root /usr/share/nginx/www;</span>
+</span><span class='line'>    root /home/pi/www<span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c"># サイトを有効にするため、シンボリックリンクを張る。</span>
+</span><span class='line'><span class="nv">$ </span>sudo ln -s /etc/nginx/sites-available/pi /etc/nginx/sites-enabled/
+</span><span class='line'><span class="c">#  ここらへんは詳細不明です。</span>
+</span><span class='line'><span class="c">#　多分これがなくても先ほどの設定変更はdefaultに対して行ったので、</span>
+</span><span class='line'><span class="c">#　有効になると思います。</span>
+</span><span class='line'><span class="c">#　すでに、/etc/nginx/sites-enabled/には</span>
+</span><span class='line'><span class="c">#  /etc/nginx/sites-available/defaultのリンクが置かれていました。</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Nginxの設定ファイルに問題が無いかチェック</span>
+</span><span class='line'><span class="nv">$ </span>sudo nginx -t
+</span><span class='line'>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+</span><span class='line'>nginx: configuration file /etc/nginx/nginx.conf <span class="nb">test </span>is successful
+</span><span class='line'>
+</span><span class='line'><span class="c"># Nginx再起動</span>
+</span><span class='line'><span class="nv">$ </span>sudo service nginx restart
+</span><span class='line'>
+</span><span class='line'><span class="c"># 自動起動設定</span>
+</span><span class='line'><span class="nv">$ </span>sudo update-rc.d nginx defaults
+</span><span class='line'>
+</span><span class='line'><span class="c"># index.htmlの作成</span>
+</span><span class='line'><span class="c">#　とりあえず、nginxの初期設定のindex.htmlをコピー</span>
+</span><span class='line'>
+</span><span class='line'>cp /usr/share/nginx/www/index.html ~/www/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここまでできたら、webサーバにアクセスしてみてください。
+なにか反応があるはずです。</p>
+
+<p>次に、とった写真を見れるようにします。</p>
+
+<h3>　写真入りindex.htmlを用意</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>vi ~/www/index.html
+</span><span class='line'>&lt;html&gt;
+</span><span class='line'>&lt;head&gt;
+</span><span class='line'>&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+</span><span class='line'>&lt;/head&gt;
+</span><span class='line'>&lt;body <span class="nv">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span> <span class="nv">text</span><span class="o">=</span><span class="s2">&quot;black&quot;</span>&gt;
+</span><span class='line'>&lt;center&gt;&lt;h1&gt;&lt;img <span class="nv">src</span><span class="o">=</span><span class="s2">&quot;./test.jpg&quot;</span> <span class="nv">alt</span><span class="o">=</span><span class="s2">&quot;test picture&quot;</span> &gt;&lt;/h1&gt;&lt;/center&gt;
+</span><span class='line'>&lt;/body&gt;
+</span><span class='line'>&lt;/html&gt;
+</span><span class='line'>
+</span><span class='line'><span class="c"># 写真をとってwwwディレクトリに入れてみます。</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>fswebcam ~/www/test.jpg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここでwebをアクセスすると写真が見えるはずです。</p>
+
+<p>一段落。</p>
+
+<p>さて、このファイルはフラッシュメモリ上に展開されているので、あまり派手に何回もとっては消しをすると、あっという間にフラッシュメモリが使えなくなります。そこで、ramdiskを写真の置き場に使うことにします。
+webサーバは指定したwebページ保存場所以外のファイルは読めないようなので、最初にramdisk上の写真ファイルのリンクをwwwディレクトリ上に作っておきます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ln -s /run/shm/picture.jpg ~/www/test.jpg
+</span><span class='line'><span class="c"># /run/shmのディレクトリはRAM-DISKになっています。</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span>fswebcam /run/shm/picture.jpg
+</span><span class='line'><span class="c">#　これでwebページ上の写真が、今撮ったものに変わるはずです。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ここまで来ると、立派な定点カメラの出来上がり、という感じです。</p>
+
+<p>MQTTのサブスクライバをつければ、シャッタや解像度のコントロールがMQTT経由でできますね。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-25T09:20:05+09:00" pubdate data-updated="true">2015 / 01 / 25</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/raspi/'>raspi</a>, <a class='category' href='/blog/categories/webcam/'>webcam</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/01/25/webcam/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/01/25/webcam/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/21/update-mosquitto/" title="Previous Post: mosquittoをアップデートする">&laquo; mosquittoをアップデートする</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/01/31/shutdown-switch/" title="Next Post: Raspberry Pi にシャットダウンスイッチをつける">Raspberry Pi にシャットダウンスイッチをつける &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
