@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>mosquittoをアップデートする - MQTT and &#8230;</title>
+  <title>Category: ca certificate - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="なんか変だと思っていたら、ubuntuに入れたmosquittoのバージョンが最新ではありませんでした。webにあるmanページとどうも違うなと思っていたら、そんなことが原因でした。
-なので、アップデート。 最初にmosquittoをインストールしたときは、apt-get install &hellip;">
+  <meta name="description" content="Category: ca certificate">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2015/01/21/update-mosquitto/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/categories/ca-certificate/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -50,138 +49,35 @@
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">mosquittoをアップデートする</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-21T20:07:57+09:00" pubdate data-updated="true">2015 / 01 / 21</time>
-        
-      </p>
+    <h1 class="entry-title">Category: ca certificate</h1>
     
   </header>
+  
+  <div id="blog-archives" class="category">
 
 
-<div class="entry-content"><p>なんか変だと思っていたら、ubuntuに入れたmosquittoのバージョンが最新ではありませんでした。webにあるmanページとどうも違うなと思っていたら、そんなことが原因でした。
-なので、アップデート。</p>
 
-<!-- more -->
+  
+  <h2>2015</h2>
 
+<article>
+  
+<h1><a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a></h1>
+<time datetime="2015-02-02T20:41:28+09:00" pubdate><span class='month'>Feb</span> <span class='day'>02</span> <span class='year'>2015</span></time>
 
-<p>最初にmosquittoをインストールしたときは、<code>apt-get install mosquitto-client</code>でやりましたが、普通にアップデートマネージャでアップデートのチェックをしてもmosquittoは引っかかってきません。</p>
-
-<p>本家の<a href="http://mosquitto.org/download/">download page</a>を確認すると、最新版はパーソナルパッケージアーカイブ(PPA)からインストールする必要があるとのことでしたので、指示のとおりインストールします。<br/>
-私、PPAは初耳でした。</p>
-
-<p>こちらも参照。
-<a href="https://launchpad.net/~mosquitto-dev/+archive/ubuntu/mosquitto-ppa">mosquitto PPA team</a></p>
-
-<figure class='code'><figcaption><span>commandlines for upgarde mosquitto and client.</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-add-repository ppa:mosquitto-dev/mosquitto-ppa
-</span><span class='line'><span class="nv">$ </span>sudo apt-get update
-</span><span class='line'><span class="nv">$ </span>sudo apt-get dist-upgrade
-</span><span class='line'><span class="c">#  dist-upgrade は　upgrade するときにコンフリクトする（あるいは不要な）前のパッケージを削除します。</span>
-</span></code></pre></td></tr></table></div></figure>
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/ca-certificate/'>ca certificate</a>, <a class='category' href='/blog/categories/ssl/'>ssl</a>, <a class='category' href='/blog/categories/tls/'>tls</a></span>
+</footer>
 
 
-<p>おっと、 dist-upgarde ではブローカのconfigファイルは<strong>上書きされてしまいます</strong>！
-必要に応じてバックアップを取ってください！！！！！<br/>
-client だけをインストールしている場合は関係ないです。</p>
+</article>
 
-<p>きちんとインストールできたか、<code>mosquitto_sub --help</code>で確認してみます。</p>
-
-<figure class='code'><figcaption><span>commandlines for upgarde mosquitto and client.</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>mosquitto_sub is a simple mqtt client that will subscribe to a single topic and print all messages it receives.
-</span><span class='line'>mosquitto_sub version 1.3.5 running on libmosquitto 1.3.5.
-</span><span class='line'>
-</span><span class='line'>Usage: mosquitto_sub <span class="o">[</span>-c<span class="o">]</span> <span class="o">[</span>-h host<span class="o">]</span> <span class="o">[</span>-k keepalive<span class="o">]</span> <span class="o">[</span>-p port<span class="o">]</span> <span class="o">[</span>-q qos<span class="o">]</span> <span class="o">[</span>-R<span class="o">]</span> -t topic ...
-</span><span class='line'>  :
-</span><span class='line'>  :
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>とでてきましたので、多分大丈夫。</p>
-
-<p>これで、-Nオプションが使えるはず。</p>
-
-<p>ちなみに、Raspberry Pi用のビルドは普通に<code>apt-get install</code> でインストールしても最新版が入るようです。</p>
 </div>
 
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-21T20:07:57+09:00" pubdate data-updated="true">2015 / 01 / 21</time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/ubuntu/'>ubuntu</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/01/21/update-mosquitto/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/01/21/update-mosquitto/" >Tweet</a>
-  
-  
-  
-</div>
-
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2015/01/18/ore-ore-certificate/" title="Previous Post: オレオレ証明書を作ってみようかと　準備">&laquo; オレオレ証明書を作ってみようかと　準備</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2015/01/25/webcam/" title="Next Post: WebCamをつなげてみる">WebCamをつなげてみる &raquo;</a>
-      
-    </p>
-  </footer>
 </article>
 
 </div>

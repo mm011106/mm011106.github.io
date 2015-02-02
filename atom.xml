@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T20:48:42+09:00</updated>
+  <updated>2015-02-02T21:05:01+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践2]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3/"/>
+    <updated>2015-02-02T20:41:28+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3</id>
+    <content type="html"><![CDATA[<p>先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。<br/>
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。</p>
+
+<!-- more -->
+
+
+<p>結局、</p>
+
+<ul>
+<li>認証局(CA)を作る</li>
+<li>その認証局の鍵でサーバの証明書にサインしてもらう</li>
+</ul>
+
+
+<p>と言う手順をとる必要があります。<br/>
+認証局と行っても、自己証明書ということでは先に作ったサーバの証明書と同じです。</p>
+
+<h2>自前のCAを作る</h2>
+
+<p>基本的には、サーバの自己証明書を作るのと同じ手順で認証局の証明書（CA certificate)をつくります。手順としては</p>
+
+<ul>
+<li>CAの鍵を作る　(CA key)</li>
+<li>自己署名の証明書を作る　（これがCAの証明書（CA certificate)になる）</li>
+</ul>
+
+
+<p>となります。 ここでは、CAの鍵をCA_private_key.pem,　CAの証明書をCA_selfsigned_Certificate.pemというファイル名を付けました。</p>
+
+<p>実は、これがいっぺんにできるそうで、これが以下のコマンド。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl req -new -x509 -newkey rsa:2048 -keyout CA_private_key.pem -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このなかで、</p>
+
+<ul>
+<li>鍵を作って</li>
+<li>リクエスト用のファイルを作って</li>
+<li>それに対して自分でサインして</li>
+</ul>
+
+
+<p>という3つのことが行われているようです。</p>
+
+<p>このコマンドでは、キーを暗号化するためのパスフレーズを要求されます。さらに、証明書に記載するための情報（組織名とか所在地とか）を聞かれますので、適宜答えていきます。</p>
+
+<p>最初、以下の様なコマンドでも良いはずですが、パスフレーズを入力するところがでません。確認してみると、鍵は暗号化されていないようです。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>manでしらべてみると、genrsaのオプションで -des3とか暗号化のオプションを付けないためパスフレーズを聞かれないようです。暗号化する指示をすればパスフレーズを聞いてきました。理由が分かれば当たり前の話。<br/>
+なので、最初の鍵を作るコマンドは</p>
+
+<p><code>$ sudo openssl genrsa -des3 2048 &gt; CA_private_key.pem</code></p>
+
+<p>とするのが、安全性の面でも良い感じですかね。</p>
+
+<p>これでCA鍵とCA証明書ができあがりです。「俺様認証局」ですね。この鍵でいくらでも「オレオレ」証明書がつくれます。</p>
+
+<p>会社内、組織内のセキュア接続のためには有効につかえるかな、とおもいます。ただ鍵が流出するといくら社内用といえどもセキュリティ的に問題があるので、きちんと管理しないといけません。鍵には名前も書いてありますしね。</p>
+
+<h2>サーバの証明書にサインする</h2>
+
+<p>それでは、サーバの証明書を作ってみます。</p>
+
+<p>最初にサーバに設置する証明書のための鍵をつくります。さらに、その鍵をもとに証明書署名リクエストファイルを作成します。まあ、申請書みたいな物ですね。これは、前回の<a href="http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>を参考にしてください。この記事の１．２．を実行してもらうといいとおもいます。</p>
+
+<p>ここでは、署名リクエストファイルをmyserver.csr、署名付き証明書をmyserver.crtとします。</p>
+
+<p>サーバの証明書にCAのサインをするので、myserver.csrとCA_selfsigned_Certificate.pem（CA証明書）, CA_private_key.pem（CA鍵）が必要になります。</p>
+
+<p>具体的には、</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -CA CA_selfsigned_Certificate.pem -CAkey CA_private_key.pem -req -days 7300 -CAcreateserial &lt; myserver.csr &gt; myserver.crt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とします。ここで、-daysはサインする証明書の有効日数、-CAcreateserialは最初に署名するときだけ必要なオプション。これをやるとシリアル番号のファイルが出来るそうな。</p>
+
+<p>これだけで、サーバの証明書にCAのサインをしてサーバに設定出来る証明書ができあがりました。</p>
+
+<p>nginxに入れて動作を確認しました。</p>
+
+<p>ブラウザから証明書を確認すると、「発行者名」と「サブジェクト名」がそれぞれ、CA証明書を作るときに入力した情報、myserverの証明書（証明書署名リクエストファイル）作るときに入力した情報になっているはずです。</p>
+
+<p>ここでもう少しきちんとしたい人は、CA証明書をブラウザに読み込むことで、「この証明書は不明な機関によって署名されています」的なメッセージを回避できます。この作業はこの証明書を信じます、と言う宣言ですので、もしこの鍵が悪用されたりすると大変なことになる可能性があります。鍵の管理はしっかりしておきましょう。</p>
+
+<p>信じてもらうためにはしっかりと行動するということですね。人生。</p>
+
+<p>mosquittoではブローカがcertificateを提供してくるので、それが正しいかどうか確認するための認証局の証明書が必要になります。webブラウザなんかだと、パブリックな認証局の情報は一通りはいっていますから普段認証局のcertificateを意識することは無いですよね。</p>
+
+<p>きょうは、ここまでです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践１]]></title>
@@ -2821,116 +2927,6 @@ googleさんに尋ねてみると、解決策が</p>
 
 <p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
 「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[disable-clean-sessionオプション]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/"/>
-    <updated>2014-12-05T21:14:40+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option</id>
-    <content type="html"><![CDATA[<p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
-
-<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub -h HOSTNAME -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id CONNECTION-ID
-</span><span class='line'>
-</span><span class='line'>1417781342, 1691, 0, 0, 0
-</span><span class='line'>1417781402, 1691, 0, 0, 0
-</span><span class='line'>1417781461, 1691, 0, 0, 0
-</span><span class='line'>1417781522, 1691, 0, 0, 0　　&lt;&lt;時刻 21:12:02　で中断
-</span><span class='line'>^C
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>--id</code>オプションはサブスクライバが同一であることを主張するためのもののようですので、これが一致することで「再接続だから配信していないデータを送らなきゃ」と認識してくれます。<code>--id</code>を指定しないとデフォルトのプロセス番号を元にしたものになるので、プロセスを止めて再度起動した場合「再接続」と認識してもらえません。
-また、&ndash;qosが1もしくは2でないとダメみたいです。QoS　0は配信保証がなされないクオリティ指定ですので、当然といえば当然。</p>
-
-<p>データが来たところで、適当に中断します。このトピックではパブリッシャが1分毎に1データを送ってきます。データの最初のフィールドがエポックタイムです。よく見ると60づつ増えていっているのがわかります。</p>
-
-<p>そしてCtrl-Cでプロセスを止めます。</p>
-
-<p>では、ここでしばらく待って。。。。。</p>
-
-<p>わかりやすいように、タイムスタンプを印刷してからサブスクライブを再開します。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>date <span class="p">;</span> mosquitto_sub -h __host-name__ -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id  testclient
-</span><span class='line'>
-</span><span class='line'>Fri Dec  <span class="m">5</span> 21:24:54 JST 2014
-</span><span class='line'>1417781581, 1692, 0, 0, 0　　&lt;&lt;　再開したのは21:24:54だけど、21:13:01のデータから配信されている。
-</span><span class='line'>1417781642, 1691, 0, 0, 0
-</span><span class='line'>1417781701, 1691, 0, 0, 0
-</span><span class='line'>1417781761, 1692, 0, 0, 0
-</span><span class='line'>1417781822, 1691, 0, 0, 0
-</span><span class='line'>1417781881, 1691, 0, 0, 0
-</span><span class='line'>1417781942, 1692, 0, 0, 0
-</span><span class='line'>1417782002, 1692, 0, 0, 0
-</span><span class='line'>1417782061, 1692, 0, 0, 0
-</span><span class='line'>1417782121, 1692, 0, 0, 0
-</span><span class='line'>1417782182, 1692, 0, 0, 0
-</span><span class='line'>1417782241, 1692, 0, 0, 0
-</span><span class='line'>1417782302, 1692, 0, 0, 0
-</span><span class='line'>1417782361, 1692, 0, 0, 0
-</span><span class='line'>   ：
-</span><span class='line'>   :
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>おお、きちんと中断している間のデータも配信されました。</p>
-
-<p><code>--id</code>オプションには次のように書かれています。</p>
-
-<p><strong> -i, - -id </strong></p>
-
-<blockquote><p>The id to use for this client. If not given, defaults to mosquitto_sub_ appended with
-the process id of the client. Cannot be used at the same time as the <strong> <em>&ndash;id-prefix</em> </strong> argument.</p></blockquote>
-
-<p>通常、IDは<code>mosquitto_sub_${PID}</code>になるようです。でもpidは起動するたびに変わってしまうので、同じクライアントとは認識されませんね。物理経路のトラブル等で通信が途絶えた場合は大丈夫でしょうけれど。</p>
-
-<p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
-
-<p>関連するところで<br/>
-ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
-
-<p><strong>clientid_prefixes</strong> <em>prefix</em></p>
-
-<blockquote><p>If defined, only clients that have a clientid with a prefix that matches clientid_prefixes will be
-allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;</em> here would mean a client
-&ldquo;<em>secure-</em>client&rdquo; could connect but another with clientid &ldquo;mqtt&rdquo; couldn&rsquo;t. By default,
-all client ids are valid.</p></blockquote>
-
-<p>となるようです。セキュリティの一助になるかしら？</p>
 ]]></content>
   </entry>
   

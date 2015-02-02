@@ -9,9 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。
-現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。
-手順は、 &hellip;">
+  <meta name="description" content="vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。 paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -52,6 +50,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/29/vim/">paho-mqttで回線を切るとどうなるか</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-29T10:28:40+09:00" pubdate data-updated="true">2014 / 12 / 29</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
+
+<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/29/vim/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -445,50 +487,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
-
-<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/05/mosquitto-sub-c-option/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -536,6 +534,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
       </li>
     
@@ -549,10 +551,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
   </ul>
@@ -595,6 +593,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
       </li>
     
@@ -608,10 +610,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
   </ul>

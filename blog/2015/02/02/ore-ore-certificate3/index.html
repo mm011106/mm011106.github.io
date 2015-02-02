@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>オレオレ証明書を作ってみようかと　実践2 - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。 結局、 認証局(CA)を作る &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">オレオレ証明書を作ってみようかと　実践2</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-02T20:41:28+09:00" pubdate data-updated="true">2015 / 02 / 02</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。<br/>
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。</p>
+
+<!-- more -->
+
+
+<p>結局、</p>
+
+<ul>
+<li>認証局(CA)を作る</li>
+<li>その認証局の鍵でサーバの証明書にサインしてもらう</li>
+</ul>
+
+
+<p>と言う手順をとる必要があります。<br/>
+認証局と行っても、自己証明書ということでは先に作ったサーバの証明書と同じです。</p>
+
+<h2>自前のCAを作る</h2>
+
+<p>基本的には、サーバの自己証明書を作るのと同じ手順で認証局の証明書（CA certificate)をつくります。手順としては</p>
+
+<ul>
+<li>CAの鍵を作る　(CA key)</li>
+<li>自己署名の証明書を作る　（これがCAの証明書（CA certificate)になる）</li>
+</ul>
+
+
+<p>となります。 ここでは、CAの鍵をCA_private_key.pem,　CAの証明書をCA_selfsigned_Certificate.pemというファイル名を付けました。</p>
+
+<p>実は、これがいっぺんにできるそうで、これが以下のコマンド。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl req -new -x509 -newkey rsa:2048 -keyout CA_private_key.pem -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このなかで、</p>
+
+<ul>
+<li>鍵を作って</li>
+<li>リクエスト用のファイルを作って</li>
+<li>それに対して自分でサインして</li>
+</ul>
+
+
+<p>という3つのことが行われているようです。</p>
+
+<p>このコマンドでは、キーを暗号化するためのパスフレーズを要求されます。さらに、証明書に記載するための情報（組織名とか所在地とか）を聞かれますので、適宜答えていきます。</p>
+
+<p>最初、以下の様なコマンドでも良いはずですが、パスフレーズを入力するところがでません。確認してみると、鍵は暗号化されていないようです。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>manでしらべてみると、genrsaのオプションで -des3とか暗号化のオプションを付けないためパスフレーズを聞かれないようです。暗号化する指示をすればパスフレーズを聞いてきました。理由が分かれば当たり前の話。<br/>
+なので、最初の鍵を作るコマンドは</p>
+
+<p><code>$ sudo openssl genrsa -des3 2048 &gt; CA_private_key.pem</code></p>
+
+<p>とするのが、安全性の面でも良い感じですかね。</p>
+
+<p>これでCA鍵とCA証明書ができあがりです。「俺様認証局」ですね。この鍵でいくらでも「オレオレ」証明書がつくれます。</p>
+
+<p>会社内、組織内のセキュア接続のためには有効につかえるかな、とおもいます。ただ鍵が流出するといくら社内用といえどもセキュリティ的に問題があるので、きちんと管理しないといけません。鍵には名前も書いてありますしね。</p>
+
+<h2>サーバの証明書にサインする</h2>
+
+<p>それでは、サーバの証明書を作ってみます。</p>
+
+<p>最初にサーバに設置する証明書のための鍵をつくります。さらに、その鍵をもとに証明書署名リクエストファイルを作成します。まあ、申請書みたいな物ですね。これは、前回の<a href="http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>を参考にしてください。この記事の１．２．を実行してもらうといいとおもいます。</p>
+
+<p>ここでは、署名リクエストファイルをmyserver.csr、署名付き証明書をmyserver.crtとします。</p>
+
+<p>サーバの証明書にCAのサインをするので、myserver.csrとCA_selfsigned_Certificate.pem（CA証明書）, CA_private_key.pem（CA鍵）が必要になります。</p>
+
+<p>具体的には、</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -CA CA_selfsigned_Certificate.pem -CAkey CA_private_key.pem -req -days 7300 -CAcreateserial &lt; myserver.csr &gt; myserver.crt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とします。ここで、-daysはサインする証明書の有効日数、-CAcreateserialは最初に署名するときだけ必要なオプション。これをやるとシリアル番号のファイルが出来るそうな。</p>
+
+<p>これだけで、サーバの証明書にCAのサインをしてサーバに設定出来る証明書ができあがりました。</p>
+
+<p>nginxに入れて動作を確認しました。</p>
+
+<p>ブラウザから証明書を確認すると、「発行者名」と「サブジェクト名」がそれぞれ、CA証明書を作るときに入力した情報、myserverの証明書（証明書署名リクエストファイル）作るときに入力した情報になっているはずです。</p>
+
+<p>ここでもう少しきちんとしたい人は、CA証明書をブラウザに読み込むことで、「この証明書は不明な機関によって署名されています」的なメッセージを回避できます。この作業はこの証明書を信じます、と言う宣言ですので、もしこの鍵が悪用されたりすると大変なことになる可能性があります。鍵の管理はしっかりしておきましょう。</p>
+
+<p>信じてもらうためにはしっかりと行動するということですね。人生。</p>
+
+<p>mosquittoではブローカがcertificateを提供してくるので、それが正しいかどうか確認するための認証局の証明書が必要になります。webブラウザなんかだと、パブリックな認証局の情報は一通りはいっていますから普段認証局のcertificateを意識することは無いですよね。</p>
+
+<p>きょうは、ここまでです。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-02T20:41:28+09:00" pubdate data-updated="true">2015 / 02 / 02</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ca-certificate/'>ca certificate</a>, <a class='category' href='/blog/categories/ssl/'>ssl</a>, <a class='category' href='/blog/categories/tls/'>tls</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/01/31/ore-ore-certificate2/" title="Previous Post: オレオレ証明書を作ってみようかと　実践１">&laquo; オレオレ証明書を作ってみようかと　実践１</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

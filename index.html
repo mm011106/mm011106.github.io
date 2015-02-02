@@ -9,7 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="先に投稿した、オレオレ証明書の続きです。 今回は、実際の証明書を作りwebサーバに導入して動作確認までやって見ました。 ">
+  <meta name="description" content="先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-02T20:41:28+09:00" pubdate data-updated="true">2015 / 02 / 02</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。<br/>
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/02/ore-ore-certificate3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -435,50 +479,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/29/vim/">paho-mqttで回線を切るとどうなるか</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-29T10:28:40+09:00" pubdate data-updated="true">2014 / 12 / 29</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
-
-<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/29/vim/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -524,6 +524,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
       </li>
     
@@ -537,10 +541,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
   </ul>
@@ -583,6 +583,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>
       </li>
     
@@ -596,10 +600,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
       </li>
     
   </ul>
