@@ -9,8 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。
-あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。 ">
+  <meta name="description" content="先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +50,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-03T19:49:16+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/03/ore-ore-certificate4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -437,48 +478,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-31T14:36:58+09:00" pubdate data-updated="true">2014 / 12 / 31</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/31/font-size/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -524,6 +523,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
@@ -537,10 +540,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
       </li>
     
   </ul>
@@ -583,6 +582,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
@@ -596,10 +599,6 @@
     
       <li class="post">
         <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
       </li>
     
   </ul>

@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>awkを使う - MQTT and &#8230;</title>
+  <title>オレオレ証明書を作ってみようかと　実践3 - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
-そこで、awkを使って普通の表示にしてやります。 まずは、最初のフィールドを切り出す必要があります。これは簡単で awk -F &hellip;">
+  <meta name="description" content="先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。 ということで、作り直します。 1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/14/awk-example/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -54,7 +53,7 @@
   
   <header>
     
-      <h1 class="entry-title">awkを使う</h1>
+      <h1 class="entry-title">オレオレ証明書を作ってみようかと　実践3</h1>
     
     
       <p class="meta">
@@ -71,97 +70,54 @@
 
 
 
-<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+<time datetime="2015-02-03T19:49:16+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
-そこで、awkを使って普通の表示にしてやります。</p>
+<div class="entry-content"><p>先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。</p>
 
 <!-- more -->
 
 
-<p>まずは、最初のフィールドを切り出す必要があります。これは簡単で</p>
+<p>ということで、作り直します。</p>
 
-<pre><code>awk -F, '{print $1}'
-</code></pre>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -sha256 -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
 
-<p>です。セパレータがコンマなので、-Fオプションで変更します。セパレータで区切られた最初のフィールドがプリントされます。</p>
 
-<p>これだけだと</p>
+<p>という感じになりますか。</p>
 
-<pre><code>1418394962
-1418395021
-1418395081
-1418395142
-1418395202
-</code></pre>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -text &lt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
 
-<p>なかんじなのでこれをdate コマンドで時刻表示に変換してあげます。
-strftime()なる関数があるawk処理系もあるようですが、ここではシェルコマンドを使ってやってみました。</p>
 
-<p>単純には</p>
+<p>で確認してみると、たしかにSHA256でハッシュが作られている、と書いてありました。</p>
 
-<pre><code>date -d @`cat data.txt|awk -F, '{print $1}'`
-</code></pre>
+<p>これでok。</p>
 
-<p>とやるとよさそうですが、複数行だとエラーします。</p>
+<blockquote><p>SHA-1は2005年に脆弱性が問題になり、2010年までにSHA-2に移行するように要請されていたようです。で、何が問題かというと、webを読みかじったところによると、SHA-1でつくったハッシュは「あるファイルと同じハッシュになるファイルを作れる時間」が当初思っていたよりも速く（短い時間で）できることがわかったそうで、同じハッシュを持った違うファイルを作ることが比較的簡単に可能になります。そうすると、サインした証明書の中身をすげ替えてもわからない、ということが起こるようです。</p>
 
-<p>なので、各行ごとにdateコマンドが発行される必要があります。
-ということはawk中で処理する必要があるということで。。。。</p>
+<p>ここらへんの周辺事情は検索すると山ほど引っかかるので、読み物としては面白いですね。</p></blockquote>
 
-<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd)}'
-</code></pre>
+<p>また、元々の鍵のクオリティを上げる（ランダム性を上げる？）ために、乱数をパラメタとして与える、というのもあるようです。</p>
 
-<p>これで、</p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl md5 /var/log/syslog* &gt; rand.dat
+</span><span class='line'>$ sudo openssl genrsa -rand ./rand.dat -aes256 2048 &gt; CA_private_key.pem  </span></code></pre></td></tr></table></div></figure>
 
-<pre><code>2014年 12月 13日 土曜日 00:02:01 JST
-2014年 12月 13日 土曜日 00:03:02 JST
-2014年 12月 13日 土曜日 00:04:01 JST
-2014年 12月 13日 土曜日 00:05:01 JST
-</code></pre>
 
-<p>こんな感じになります。ひとまずok。</p>
+<p>と言った感じです。syslogのファイルのMD5ハッシュ値を計算してそれを乱数の種にするように指定します。</p>
 
-<p>で、さらに、この日付の後、データを表示しようとおもって、</p>
+<p>さらに、鍵をAES256で暗号化する指定を入れています。</p>
 
-<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; system(cmd); print $2"  "$3}'
-</code></pre>
-
-<p>とすると。。。。</p>
-
-<pre><code>2014年 12月 13日 土曜日 00:05:01 JST
- 1710   2004
-2014年 12月 13日 土曜日 00:06:02 JST
- 1709   2002
-2014年 12月 13日 土曜日 00:07:01 JST
- 1710   2003
-</code></pre>
-
-<p>コマンド実行結果に改行コードが入っているので、こんなになってしまいます。
-これではいけないということで、色々調べてみると</p>
-
-<pre><code>cat data.txt|awk -F, '{cmd="date -d @"$1; cmd | getline result; close(cmd); print result "  " $2"  "$3}'
-</code></pre>
-
-<p>としてやるといいことが分かりました。変数にコマンドを書いて、それを実行して結果を得るために　cmd | getline 変数（結果が入る） というのが想像できませんでした。</p>
-
-<pre><code>2014年 12月 13日 土曜日 00:09:01 JST   1710   2003
-2014年 12月 13日 土曜日 00:10:02 JST   1710   2002
-2014年 12月 13日 土曜日 00:11:02 JST   1709   2003
-</code></pre>
-
-<p>これで、望むフォーマットになりました。</p>
-
-<p>日付と時間だけをプリントするのはdateコマンドにフォーマット指示を追加して</p>
-
-<pre><code>cmd= "date +\"%F %T\" -d @"
-</code></pre>
-
-<p>フォーマット内部にスペースを指定するためにはダブルクオートでフォーマットをくくる必要があります。awkにはバックスラッシュでダブルクオートをエスケープしておきます。</p>
+<p>なんか、この暗号の世界はかなりな勢いで世代替わりがあるようですね。現在「最高性能」といわれているものが５年後には「廃止」になっているかもしれないです。
+そういう意味でも、数年に一度ぐらいの間隔で証明書を作りなおすのもいいかもしれませんね。</p>
 </div>
 
 
@@ -185,12 +141,12 @@ strftime()なる関数があるawk処理系もあるようですが、ここで�
 
 
 
-<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
+<time datetime="2015-02-03T19:49:16+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/awk/'>awk</a>
+    <a class='category' href='/blog/categories/ca-certificate/'>ca certificate</a>, <a class='category' href='/blog/categories/ssl/'>ssl</a>, <a class='category' href='/blog/categories/tls/'>tls</a>
   
 </span>
 
@@ -199,7 +155,7 @@ strftime()なる関数があるawk処理系もあるようですが、ここで�
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/14/awk-example/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/14/awk-example/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/" >Tweet</a>
   
   
   
@@ -208,10 +164,8 @@ strftime()なる関数があるawk処理系もあるようですが、ここで�
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/12/13/restarted/" title="Previous Post: やっと復活。。。">&laquo; やっと復活。。。</a>
+        <a class="basic-alignment left" href="/blog/2015/02/02/ore-ore-certificate3/" title="Previous Post: オレオレ証明書を作ってみようかと　実践2">&laquo; オレオレ証明書を作ってみようかと　実践2</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2014/12/14/ime/" title="Next Post: 日本語入力">日本語入力 &raquo;</a>
       
     </p>
   </footer>

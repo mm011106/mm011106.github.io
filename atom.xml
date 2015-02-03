@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-02T21:05:01+09:00</updated>
+  <updated>2015-02-03T20:52:28+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,55 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践3]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/"/>
+    <updated>2015-02-03T19:49:16+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4</id>
+    <content type="html"><![CDATA[<p>先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。</p>
+
+<!-- more -->
+
+
+<p>ということで、作り直します。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -sha256 -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>という感じになりますか。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -text &lt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で確認してみると、たしかにSHA256でハッシュが作られている、と書いてありました。</p>
+
+<p>これでok。</p>
+
+<blockquote><p>SHA-1は2005年に脆弱性が問題になり、2010年までにSHA-2に移行するように要請されていたようです。で、何が問題かというと、webを読みかじったところによると、SHA-1でつくったハッシュは「あるファイルと同じハッシュになるファイルを作れる時間」が当初思っていたよりも速く（短い時間で）できることがわかったそうで、同じハッシュを持った違うファイルを作ることが比較的簡単に可能になります。そうすると、サインした証明書の中身をすげ替えてもわからない、ということが起こるようです。</p>
+
+<p>ここらへんの周辺事情は検索すると山ほど引っかかるので、読み物としては面白いですね。</p></blockquote>
+
+<p>また、元々の鍵のクオリティを上げる（ランダム性を上げる？）ために、乱数をパラメタとして与える、というのもあるようです。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl md5 /var/log/syslog* &gt; rand.dat
+</span><span class='line'>$ sudo openssl genrsa -rand ./rand.dat -aes256 2048 &gt; CA_private_key.pem  </span></code></pre></td></tr></table></div></figure>
+
+
+<p>と言った感じです。syslogのファイルのMD5ハッシュ値を計算してそれを乱数の種にするように指定します。</p>
+
+<p>さらに、鍵をAES256で暗号化する指定を入れています。</p>
+
+<p>なんか、この暗号の世界はかなりな勢いで世代替わりがあるようですね。現在「最高性能」といわれているものが５年後には「廃止」になっているかもしれないです。
+そういう意味でも、数年に一度ぐらいの間隔で証明書を作りなおすのもいいかもしれませんね。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践2]]></title>
@@ -2812,121 +2861,6 @@ googleさんに尋ねてみると、解決策が</p>
 
 
 <p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
-    <updated>2014-12-06T19:58:41+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/06/again</id>
-    <content type="html"><![CDATA[<p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
-
-<ul>
-<li><strong>max_queued_messages</strong></li>
-</ul>
-
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># The maximum number of QoS 1 and 2 messages to hold in a queue </span>
-</span><span class='line'><span class="c"># above those that are currently in-flight.  Defaults to 100. Set </span>
-</span><span class='line'><span class="c"># to 0 for no maximum (not recommended).</span>
-</span><span class='line'><span class="c"># See also queue_qos0_messages.</span>
-</span><span class='line'><span class="c">#max_queued_messages 100</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
-
-<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
-
-<p>client IDの件に関連するオプションでこんなものもありました。</p>
-
-<ul>
-<li><strong> allow_zero_length_clientid </strong></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option controls whether a client is allowed to connect with a zero</span>
-</span><span class='line'><span class="c"># length client id or not. This option only affects clients using MQTT v3.1.1</span>
-</span><span class='line'><span class="c"># and later. If set to false, clients connecting with a zero length client id</span>
-</span><span class='line'><span class="c"># are disconnected. If set to true, clients will be allocated a client id by</span>
-</span><span class='line'><span class="c"># the broker. This means it is only useful for clients with clean session set</span>
-</span><span class='line'><span class="c"># to true.</span>
-</span><span class='line'><span class="c">#allow_zero_length_clientid true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
-
-<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
-
-<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
-
-<p>などと話していたら、こんなオプションがありました。</p>
-
-<ul>
-<li><strong>persistent_client_expiration</strong></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option allows persistent clients (those with clean session set to false)</span>
-</span><span class='line'><span class="c"># to be removed if they do not reconnect within a certain time frame.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># Badly designed clients may set clean session to false whilst using a randomly</span>
-</span><span class='line'><span class="c"># generated client id. This leads to persistent clients that will never</span>
-</span><span class='line'><span class="c"># reconnect. This option allows these clients to be removed.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># The expiration period should be an integer followed by one of d w m y for</span>
-</span><span class='line'><span class="c"># day, week, month and year respectively. For example</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 2m</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 14d</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 1y</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># The default if not set is to never expire persistent clients.</span>
-</span><span class='line'><span class="c">#persistent_client_expiration</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
-「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
 ]]></content>
   </entry>
   
