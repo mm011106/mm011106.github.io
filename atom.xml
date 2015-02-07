@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-03T20:52:28+09:00</updated>
+  <updated>2015-02-07T12:15:12+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,243 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Raspberry Pi 2　を試して見ました]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/07/raspi2-speed/"/>
+    <updated>2015-02-07T10:58:26+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/07/raspi2-speed</id>
+    <content type="html"><![CDATA[<p>あまり流行りものに飛びつかないんですが、先週何気なくwebを眺めてたら、&#8221;Raspberry Pi 2　発売!&ldquo;という記事があって、「どうせ買うことになるし、在庫あれば買ってみようかな」とおもいまして。</p>
+
+<!-- more -->
+
+
+<p>で、RS componentsに行ってみると「在庫あります」ということでしたので、何も考えず購入。ハッピーなことに金曜日到着しました。</p>
+
+<p>今あるRaspiのSDカード(OS)で動くかな、とおもって試してみたらやっぱりダメで最新版OSをダウンロード。結局このダウンロードが3時間かかってしまい、動かしたのは土曜日の朝になりました。</p>
+
+<p>やっぱり起動はキビキビしていますね。デバグの時の再起動などがやりやすくなります。それとスタートアップ画面左上の「ラズベリーアイコン」が4つになってます。4コアという事でしょうね。</p>
+
+<p>で、気になる速度ですが、RSA鍵を作るopensslコマンドで試して見ました。</p>
+
+<p>結果からいうと、このプロセス自体がシングルコアで動作するので、クロックアップ分の速度アップとなりました。</p>
+
+<p>具体的には、50回　2048bitRSA鍵を作る下記のようなスクリプトを作りこれを更にシェルで10回やって、それぞれの実行時間を測るというものです。</p>
+
+<figure class='code'><figcaption><span>Script for testing computaiton time</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat keygen.sh
+</span><span class='line'><span class="c">#/bin/sh</span>
+</span><span class='line'><span class="k">for</span> i in <span class="o">{</span>1..50<span class="o">}</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>   sudo openssl genrsa -rand ./rand.txt  <span class="m">2048</span> &gt; key.txt
+</span><span class='line'><span class="k">done</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># このスクリプトを10回試行してそれぞれの処理時間を書き出します。</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span><span class="k">for</span> j in <span class="o">{</span>1..10<span class="o">}</span> <span class="p">;</span> <span class="k">do</span> <span class="o">(</span><span class="nb">time</span> -p ./keygen.sh <span class="o">)</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep <span class="s1">&#39;user&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> &gt;&gt; out_raspi2.txt <span class="p">;</span> <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>鍵の乱数の種は同じ物を使用。もともとgenrsaの実行時間は乱数生成に左右されるので、あまり正確ではないかもしれませんが、平均値と分散の変化を見ればいいかなと。</p>
+
+<p>結果</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 1:</strong></p>
+
+<p>310.34,
+299.83,
+285.74,
+261.49,
+342.31,
+353.19,
+340.26,
+318.30,
+367.67,
+322.97</p>
+
+<p>平均：320.21, 標準偏差：32.3</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 2:</strong></p>
+
+<p>204.71,
+208.46,
+214.48,
+197.13,
+229.73,
+222.12,
+207.66,
+226.37,
+194.71,
+244.09</p>
+
+<p>平均：214.95, 標準偏差：15.55</p>
+
+<hr />
+
+<p>平均が0.67倍、標準偏差が0.48倍でした。</p>
+
+<p>クロックの増加分で0.78倍になるはずなので、それよりちょっと速いですね。</p>
+
+<p><code>top</code>でCPUの状態を見てみると。</p>
+
+<figure class='code'><figcaption><span>result of top command</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>top
+</span><span class='line'>
+</span><span class='line'>top - 01:55:44 up <span class="m">20</span> min,  <span class="m">3</span> users,  load average: 1.00, 1.00, 0.65
+</span><span class='line'>Tasks:  <span class="m">90</span> total,   <span class="m">2</span> running,  <span class="m">88</span> sleeping,   <span class="m">0</span> stopped,   <span class="m">0</span> zombie
+</span><span class='line'>%Cpu0  :  0.0 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu1  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu2  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu3  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>KiB Mem:    <span class="m">754256</span> total,   <span class="m">142940</span> used,   <span class="m">611316</span> free,     <span class="m">9484</span> buffers
+</span><span class='line'>KiB Swap:   <span class="m">102396</span> total,        <span class="m">0</span> used,   <span class="m">102396</span> free,    <span class="m">96900</span> cached
+</span><span class='line'>
+</span><span class='line'>  PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND
+</span><span class='line'> <span class="m">2607</span> root      <span class="m">20</span>   <span class="m">0</span>  <span class="m">4220</span> <span class="m">3192</span> <span class="m">2896</span> R 100.0  0.4   0:03.89 openssl           :
+</span><span class='line'>  :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっていて、３コアは遊んでいる状態です。ヘビーなプロセスが動いていてもそれに引っ張られること無く、他のプロセスが動かせるようになります。動画の配信などには最適かもしれませんね。</p>
+
+<p>メモリが増えているのでRAM-DISKのサイズ拡大に期待していましたが、案の定大きくなっています。</p>
+
+<p><code>df</code>で確認してみます。</p>
+
+<figure class='code'><figcaption><span>comparison of the size of RAM-DISK</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Raspberry Pi 1</span>
+</span><span class='line'>tmpfs              <span class="m">76560</span>   <span class="m">41932</span>     <span class="m">34628</span>  55% /run/shm
+</span><span class='line'>
+</span><span class='line'><span class="c"># Raspberry Pi 2</span>
+</span><span class='line'>tmpfs             <span class="m">150840</span>       <span class="m">0</span>    <span class="m">150840</span>   0% /run/shm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>150MBもあります。
+有効に使いたいです。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Paho-mqttでバイナリファイルを受信してみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/03/paho-client/"/>
+    <updated>2015-02-03T21:01:10+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/03/paho-client</id>
+    <content type="html"><![CDATA[<p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
+
+<!-- more -->
+
+
+<p>コードは先の<a href="http://mm011106.github.io/blog/2014/12/29/vim/">投稿</a>で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました。</p>
+
+<figure class='code'><figcaption><span>test code for binary-file subscription</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&quot;topic/binary/jpeg&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># print(msg.topic+&quot; &quot;+str(msg.payload))</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;./test.jpg&#39;</span> <span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;my.broker.jp&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これを実行しておいて、別のコンソール（あるいはPC）から、jpgファイルをパブリッシュしてみます。　　
+こちらは、mosquitto。</p>
+
+<figure class='code'><figcaption><span>publish a binary file as a test data</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_pub -h my.broker.jp -t topic/binary/jpeg -f mypicture.jpg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>とします。</p>
+
+<p>すると、先程のpythonスクリプトからtest.jpgのファイルが出力されました。実際に表示させてみると、問題なく絵を見ることが出来ました。</p>
+
+<p>mosquitto_subのコマンドラインからですと、出力したファイルはコマンドを終了しない限りずっとオープンしっぱなしなので、スクリプトなどで横取りすることできませんでした。今回のこのpaho版では、ファイルを読み込んだら一回クローズしてしまいますので、横取りできます。</p>
+
+<p>ま、きちんとpythonで全部のスクリプトを書く、というのが筋でしょうけど。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践3]]></title>
@@ -2773,94 +3010,6 @@ googleさんに尋ねてみると、解決策が</p>
 <p>_styles.scssをエディットしましたが、どうもこれが有効になったり無効になったり、おかしな感じになります。ちょっとしらべたところ、geditでは編集しているファイルのバックアップファイルを編集しているファイルと同じホルダに作ります。この時のファイル名が　&#8221;オリジナルのファイル名～&#8221;　となるのですが、どうもそれをoctopressが区別できていない、あるいは編集中のものにはアクセスロックがかかる？ようです。</p>
 
 <p>geditを使うときは、保存したファイルを一旦閉じるか、バックアップファイルを作るのをやめるように設定するか、編集後バックアップファイルを消して　generate　なり　preview　なりしたほうがいいようです。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ubuntuのランチャとかが消えてしまう件]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/07/ubuntu-problem/"/>
-    <updated>2014-12-07T13:19:44+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/07/ubuntu-problem</id>
-    <content type="html"><![CDATA[<p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
-
-<!-- more -->
-
-
-<p>検索してみたところ、<a href="http://m12i.hatenablog.com/entry/2014/05/24/100539">この</a>ページにあるような症状にぴったりだったので、書かれている復活手順を踏んでみました。以下はその引用です。　<strong>　<em>mizukyfさん、ありがとうございます。</em> </strong></p>
-
-<ul>
-<li><p>ログイン後 Ctrl＋Alt＋F1キー入力 でコンソール画面に遷移。</p></li>
-<li><p>「（マシン名） login:_」という表示されるのでログイン。</p></li>
-<li><p>「DISPLAY=:0.0 gnome-terminal」と入力しEnter。gnomeの上のターミナルを起動</p></li>
-<li><p>Alt＋F7キーを押下するとデスクトップ画面に復帰するが端末ウィンドウが新たに表示されている。</p></li>
-<li><p>このターミナル上で「dconf reset -f /org/compiz/」と入力してEnter。</p></li>
-<li><p>「sudo shutdown -r now」と入力してEnter。OSが再起動する。</p></li>
-</ul>
-
-
-<p>多分、<code>dconf reset -f /org/compiz/</code>が重要なので、コンソールでログインしたあとにこれを実行すればいい、という気もします。
-今度不具合になったら試してみましょう。</p>
-
-<p>PS:<br/>
-<a href="http://ja.wikipedia.org/wiki/Compiz">compiz</a>を調べてみたところ、ウインドーマネージャなのですねえ。<br/>
-<a href="http://en.wikipedia.org/wiki/Dconf">dconf</a>はいろいろな設定を一気に引き受けるユーティリティ。あるwebの解説によれば「Windowsのレジストリシステムのようなもの」とのこと。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
-    <updated>2014-12-07T10:14:05+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
-    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
-
-<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
-
-<!-- more -->
-
-
-<p>確認手順：</p>
-
-<ul>
-<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
-これで、30個のデータが保持されるはず。</p></li>
-<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
-<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
-<li><p>適当に中断</p></li>
-<li><p>適当に再開<br/>
-今回は寝る前に止めて朝起きて再接続してみました。<br/>
-あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
-</ul>
-
-
-<p>で、送られたデータを確認してみると。。。。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat reconnect.txt <span class="p">|</span> awk -F , <span class="s1">&#39;{ command = &quot;date -d @&quot; $1 ; printf NR&quot;   &quot; ; system(command) }&#39;</span>
-</span><span class='line'><span class="m">1</span>   Sat Dec  <span class="m">6</span> 21:33:01 JST 2014
-</span><span class='line'><span class="m">2</span>   Sat Dec  <span class="m">6</span> 21:34:02 JST 2014
-</span><span class='line'><span class="m">3</span>   Sat Dec  <span class="m">6</span> 21:35:01 JST 2014
-</span><span class='line'>  <span class="o">(</span>...snip..<span class="o">)</span>
-</span><span class='line'><span class="m">27</span>   Sat Dec  <span class="m">6</span> 21:59:01 JST 2014
-</span><span class='line'><span class="m">28</span>   Sat Dec  <span class="m">6</span> 22:00:01 JST 2014
-</span><span class='line'><span class="m">29</span>   Sat Dec  <span class="m">6</span> 22:01:01 JST 2014
-</span><span class='line'><span class="m">30</span>   Sat Dec  <span class="m">6</span> 22:02:02 JST <span class="m">2014</span> &lt;指定した数だけ古いデータがあって
-</span><span class='line'><span class="m">31</span>   Sun Dec  <span class="m">7</span> 09:57:01 JST <span class="m">2014</span> &lt;そのあと最新の配信データが届く
-</span><span class='line'><span class="m">32</span>   Sun Dec  <span class="m">7</span> 09:58:02 JST 2014
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
 ]]></content>
   </entry>
   

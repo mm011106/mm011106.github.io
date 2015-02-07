@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>2つのトピックが。。。 - MQTT and &#8230;</title>
+  <title>Paho-mqttでバイナリファイルを受信してみる - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、 &hellip;">
+  <meta name="description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。 コードは先の投稿で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/03/paho-client/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -53,7 +53,7 @@
   
   <header>
     
-      <h1 class="entry-title">2つのトピックが。。。</h1>
+      <h1 class="entry-title">Paho-mqttでバイナリファイルを受信してみる</h1>
     
     
       <p class="meta">
@@ -70,31 +70,21 @@
 
 
 
-<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
+<time datetime="2015-02-03T21:01:10+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
+<div class="entry-content"><p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
 
 <!-- more -->
 
 
-<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
+<p>コードは先の<a href="http://mm011106.github.io/blog/2014/12/29/vim/">投稿</a>で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました。</p>
 
-<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
-
-<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
-
-<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
-
-<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
-
-<p>具体的には、</p>
-
-<figure class='code'><figcaption><span>Why Two topics comes up??</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span>test code for binary-file subscription</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -122,40 +112,54 @@
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
-</span><span class='line'><span class="o">(</span>古いRaspiからのデータ）
-</span><span class='line'>^c
-</span><span class='line'>　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
 </span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-</span><span class='line'>（古いRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>^C
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&quot;topic/binary/jpeg&quot;</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'>　　？？なぜ2つから？？
-</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、
-</span><span class='line'>  IDに張り付いているのでは？？？
-</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、
-</span><span class='line'>  前のセッションも復活する？
-</span><span class='line'>  ならば、昔のセッションをクリアにしてあげればいいはず。
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># print(msg.topic+&quot; &quot;+str(msg.payload))</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;./test.jpg&#39;</span> <span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">close</span>
 </span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --id abcd -t data/OLD_pi -q 1
-</span><span class='line'>^c
-</span><span class='line'>  clean sessionで接続してすぐに切断。
-</span><span class='line'>  これで、古いサブスクライブのセッションが切れたはず。
 </span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
 </span><span class='line'>
-</span><span class='line'>　　思ったとおり
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;my.broker.jp&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>という感じです。</p>
+<p>これを実行しておいて、別のコンソール（あるいはPC）から、jpgファイルをパブリッシュしてみます。　　
+こちらは、mosquitto。</p>
 
-<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
+<figure class='code'><figcaption><span>publish a binary file as a test data</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_pub -h my.broker.jp -t topic/binary/jpeg -f mypicture.jpg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>とします。</p>
+
+<p>すると、先程のpythonスクリプトからtest.jpgのファイルが出力されました。実際に表示させてみると、問題なく絵を見ることが出来ました。</p>
+
+<p>mosquitto_subのコマンドラインからですと、出力したファイルはコマンドを終了しない限りずっとオープンしっぱなしなので、スクリプトなどで横取りすることできませんでした。今回のこのpaho版では、ファイルを読み込んだら一回クローズしてしまいますので、横取りできます。</p>
+
+<p>ま、きちんとpythonで全部のスクリプトを書く、というのが筋でしょうけど。</p>
 </div>
 
 
@@ -179,12 +183,12 @@
 
 
 
-<time datetime="2014-12-19T20:45:30+09:00" pubdate data-updated="true">2014 / 12 / 19</time>
+<time datetime="2015-02-03T21:01:10+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>, <a class='category' href='/blog/categories/raspi/'>raspi</a>
+    <a class='category' href='/blog/categories/phao-mqtt/'>phao-mqtt</a>
   
 </span>
 
@@ -193,7 +197,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/" data-via="" data-counturl="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/03/paho-client/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/03/paho-client/" >Tweet</a>
   
   
   
@@ -202,10 +206,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/12/14/ime/" title="Previous Post: 日本語入力">&laquo; 日本語入力</a>
+        <a class="basic-alignment left" href="/blog/2015/02/03/ore-ore-certificate4/" title="Previous Post: オレオレ証明書を作ってみようかと　実践3">&laquo; オレオレ証明書を作ってみようかと　実践3</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/12/20/mqtt-packets/" title="Next Post: MQTTのパケットを覗いてみた(1)">MQTTのパケットを覗いてみた(1) &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2015/02/07/raspi2-speed/" title="Next Post: Raspberry Pi 2　を試して見ました">Raspberry Pi 2　を試して見ました &raquo;</a>
       
     </p>
   </footer>

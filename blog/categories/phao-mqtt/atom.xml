@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: phao-mqtt | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/phao-mqtt/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-02-07T12:15:12+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Paho-mqttでバイナリファイルを受信してみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/03/paho-client/"/>
+    <updated>2015-02-03T21:01:10+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/03/paho-client</id>
+    <content type="html"><![CDATA[<p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
+
+<!-- more -->
+
+
+<p>コードは先の<a href="http://mm011106.github.io/blog/2014/12/29/vim/">投稿</a>で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました。</p>
+
+<pre><code class="python test code for binary-file subscription">
+import paho.mqtt.client as mqtt
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("topic/binary/jpeg")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    # print(msg.topic+" "+str(msg.payload))
+    outfile=open('./test.jpg' , 'w')
+    outfile.write(msg.payload)
+    outfile.close
+
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
+</code></pre>
+
+<p>これを実行しておいて、別のコンソール（あるいはPC）から、jpgファイルをパブリッシュしてみます。　　
+こちらは、mosquitto。
+<code>sh publish a binary file as a test data
+$ mosquitto_pub -h my.broker.jp -t topic/binary/jpeg -f mypicture.jpg
+</code></p>
+
+<p>とします。</p>
+
+<p>すると、先程のpythonスクリプトからtest.jpgのファイルが出力されました。実際に表示させてみると、問題なく絵を見ることが出来ました。</p>
+
+<p>mosquitto_subのコマンドラインからですと、出力したファイルはコマンドを終了しない限りずっとオープンしっぱなしなので、スクリプトなどで横取りすることできませんでした。今回のこのpaho版では、ファイルを読み込んだら一回クローズしてしまいますので、横取りできます。</p>
+
+<p>ま、きちんとpythonで全部のスクリプトを書く、というのが筋でしょうけど。</p>
+]]></content>
+  </entry>
+  
+</feed>

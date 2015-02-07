@@ -5,11 +5,14 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>オレオレ証明書を作ってみようかと　実践3 - MQTT and &#8230;</title>
+  <title>MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。 ということで、作り直します。 1 &hellip;">
+  <meta name="description" content="シェルコマンドの表示例です。 1
+2
+echo ${test}
+cat /var/log/syslog | grep &#39;test_log&#39; &gt; temp.txt ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/">
+  <link rel="canonical" href="http://mm011106.github.io/posts/4/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -48,12 +51,15 @@
 </header>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
     
-      <h1 class="entry-title">オレオレ証明書を作ってみようかと　実践3</h1>
+      <h1 class="entry-title"><a href="/blog/2014/11/29/first-step/">手始めに、色々と試してみます</a></h1>
     
     
       <p class="meta">
@@ -70,111 +76,41 @@
 
 
 
-<time datetime="2015-02-03T19:49:16+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
+<time datetime="2014-11-29T14:52:11+09:00" pubdate data-updated="true">2014 / 11 / 29</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。</p>
+  <div class="entry-content"><p>シェルコマンドの表示例です。</p>
 
-<!-- more -->
-
-
-<p>ということで、作り直します。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
-</span><span class='line'>$ sudo openssl req -new -sha256 -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">echo</span> <span class="k">${</span><span class="nv">test</span><span class="k">}</span>
+</span><span class='line'>cat /var/log/syslog <span class="p">|</span> grep <span class="s1">&#39;test_log&#39;</span> &gt; temp.txt
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>という感じになりますか。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -text &lt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
-
-
-<p>で確認してみると、たしかにSHA256でハッシュが作られている、と書いてありました。</p>
-
-<p>これでok。</p>
-
-<blockquote><p>SHA-1は2005年に脆弱性が問題になり、2010年までにSHA-2に移行するように要請されていたようです。で、何が問題かというと、webを読みかじったところによると、SHA-1でつくったハッシュは「あるファイルと同じハッシュになるファイルを作れる時間」が当初思っていたよりも速く（短い時間で）できることがわかったそうで、同じハッシュを持った違うファイルを作ることが比較的簡単に可能になります。そうすると、サインした証明書の中身をすげ替えてもわからない、ということが起こるようです。</p>
-
-<p>ここらへんの周辺事情は検索すると山ほど引っかかるので、読み物としては面白いですね。</p></blockquote>
-
-<p>また、元々の鍵のクオリティを上げる（ランダム性を上げる？）ために、乱数をパラメタとして与える、というのもあるようです。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl md5 /var/log/syslog* &gt; rand.dat
-</span><span class='line'>$ sudo openssl genrsa -rand ./rand.dat -aes256 2048 &gt; CA_private_key.pem  </span></code></pre></td></tr></table></div></figure>
-
-
-<p>と言った感じです。syslogのファイルのMD5ハッシュ値を計算してそれを乱数の種にするように指定します。</p>
-
-<p>さらに、鍵をAES256で暗号化する指定を入れています。</p>
-
-<p>なんか、この暗号の世界はかなりな勢いで世代替わりがあるようですね。現在「最高性能」といわれているものが５年後には「廃止」になっているかもしれないです。
-そういう意味でも、数年に一度ぐらいの間隔で証明書を作りなおすのもいいかもしれませんね。</p>
 </div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
-
-      
-
-
-
-
-
-
-
-
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/11/29/first-step/">Read on &rarr;</a>
+    </footer>
   
 
 
-
-<time datetime="2015-02-03T19:49:16+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
-      
-
-<span class="categories">
+    </article>
   
-    <a class='category' href='/blog/categories/ca-certificate/'>ca certificate</a>, <a class='category' href='/blog/categories/ssl/'>ssl</a>, <a class='category' href='/blog/categories/tls/'>tls</a>
-  
-</span>
-
-
-    </p>
+  <div class="pagination">
     
-      <div class="sharing">
-  
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/" >Tweet</a>
-  
-  
-  
-</div>
-
+    <a href="/blog/archives/"> Archives </a>
     
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2015/02/02/ore-ore-certificate3/" title="Previous Post: オレオレ証明書を作ってみようかと　実践2">&laquo; オレオレ証明書を作ってみようかと　実践2</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2015/02/03/paho-client/" title="Next Post: Paho-mqttでバイナリファイルを受信してみる">Paho-mqttでバイナリファイルを受信してみる &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
+    <a class="next" href="3">Newer &rarr;</a>
+    
+  </div>
 </div>
-
 <aside class="sidebar">
   
     <section id="titles">
@@ -301,7 +237,6 @@
 
   
 </aside>
-
 
     </div>
   </div>
