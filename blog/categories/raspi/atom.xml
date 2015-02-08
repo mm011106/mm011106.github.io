@@ -4,7 +4,7 @@
   <title><![CDATA[Category: raspi | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-07T12:15:12+09:00</updated>
+  <updated>2015-02-08T10:57:54+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Paho mqttでリモートカメラ]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/08/remote-stillcam/"/>
+    <updated>2015-02-08T09:49:46+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/08/remote-stillcam</id>
+    <content type="html"><![CDATA[<p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
+
+<!-- more -->
+
+
+<h2>カメラ側の設定</h2>
+
+<p>まずは、デバイス（カメラ）側のスクリプト</p>
+
+<p>ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。</p>
+
+<pre><code class="python remotecam.py ">#!/usr/bin/env python
+#
+#
+
+import paho.mqtt.client as mqtt
+import os
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam/command")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    cmd = str(msg.payload)
+    print(msg.topic+" "+str(msg.payload))
+    if cmd == "shoot":
+        print "Say cheeees!"
+
+        dummy = os.system("raspistill -w 1024 -h 768 -t 10 -o /run/shm/temp.jpg")
+        dummy = os.system("mosquitto_pub -h my.broker.jp -t my/device/stillcam -f /run/shm/temp.jpg")
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
+</code></pre>
+
+<p>パブリッシュ設定したメッセージが来ると、on_messageがコールされます。<br/>
+メッセージが&#8221;shoot&#8221;だったら、osコマンド&#8221;raspistill&#8221;を実行して写真を撮ります。<br/>
+さらにそのデータをosコマンド&#8221;mosquitto_pub&#8221;でパブリッシュします。</p>
+
+<p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</p>
+
+<p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
+
+<p>このスクリプトを実行可能に設定して、実行させます。これで待ち受け状態。</p>
+
+<h2>コントローラ側</h2>
+
+<p>別のPCでは、</p>
+
+<ul>
+<li>シャッターを切るコマンドを発行する</li>
+<li>送られてきた写真のデータを保管する</li>
+</ul>
+
+
+<p>という作業があります。</p>
+
+<p>まずは、送られてきたデータを保管するスクリプトを作ります。</p>
+
+<pre><code class="python photo_sub.py">#!/usr/bin/env python
+#
+#
+#
+
+import paho.mqtt.client as mqtt
+import datetime
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+
+    # print(msg.topic+" "+str(msg.payload))
+    filename = "./image/" + datetime.datetime.today().strftime("%H%M%S%f") + ".jpg"
+    outfile=open( filename , 'w')
+    outfile.write(msg.payload)
+    print "subscribe: " + filename
+    outfile.close
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
+</code></pre>
+
+<p>このスクリプトでは、my/device/stillcamというトピックにパブリッシュされたデータを取り込んでファイル名（タイムスタンプ）をつけて保存します。</p>
+
+<p>このスクリプトを実行して、データを待ち受けます。</p>
+
+<p>最後にシャッタを切るコマンドを送ります。<br/>
+とりあえずは、コマンドラインからです。</p>
+
+<pre><code class="sh ">$ mosquitto_pub -h my.broker.jp -t my/device/stillcam/command -m "shoot"
+</code></pre>
+
+<p>これで、メッセージ&#8221;shoot&#8221;をトリガにして、写真を撮影し、それを転送して保存するまでの一連の作業が行われます。</p>
+
+<p>デバイス側の処理負荷を確認するため1秒に1回シャッターを切る動作を続けて見ました。
+結果的には、カメラと転送の処理で数%程度の負荷のようです。<br/>
+ちなみにこのカメラ、この設定では1秒間隔以上のスピードで連続して撮影することはできませんでした。</p>
+
+<p>カメラがRaspi用のモジュールですので、かなりオーバーヘッドが小さい感じもします。
+CPU的には処理が軽くていいのですが、ハードウエア的には取り回しが悪く、ちょっといまいちな感じもします。<br/>
+応用のシーンによりますが、今回私が想定しているケースでは使いにくいです。</p>
+
+<p>あとで、USBcamでやってみようと思います。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Raspberry Pi 2　を試して見ました]]></title>
@@ -604,64 +743,6 @@ eth0      Link encap:Ethernet  HWaddr b8:27:eb:29:61:2d
 <p>ということで、ifconfigコマンドを絶対パスで指定して事なきを得ました。</p>
 
 <p><strong>「CRONのコマンドは絶対パス指定」</strong>　勉強しました。。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
-    <updated>2014-12-19T20:45:30+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
-    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
-
-<!-- more -->
-
-
-<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
-
-<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
-
-<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
-
-<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
-
-<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
-
-<p>具体的には、</p>
-
-<pre><code class="sh Why Two topics comes up??">$ mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
-(古いRaspiからのデータ）
-^c
-　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
-
-$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-（古いRaspiからのデータ）
-（新しいRaspiからのデータ）
-^C
-
-　　？？なぜ2つから？？
-    --disable-clean-sessionがあると一度サブスクライブしたセッションは、
-    IDに張り付いているのでは？？？
-    だから、同じIDで違うトピックをサブスクライブしようとしても、
-    前のセッションも復活する？
-    ならば、昔のセッションをクリアにしてあげればいいはず。
-
-$ mosquitto_sub --id abcd -t data/OLD_pi -q 1
-^c
-    clean sessionで接続してすぐに切断。
-    これで、古いサブスクライブのセッションが切れたはず。
-
-$ mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-（新しいRaspiからのデータ）
-（新しいRaspiからのデータ）
-（新しいRaspiからのデータ）
-
-　　思ったとおり
-</code></pre>
-
-<p>という感じです。</p>
-
-<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
 ]]></content>
   </entry>
   
