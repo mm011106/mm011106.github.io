@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: webcam | MQTT and ...]]></title>
+  <title><![CDATA[Category: webcam, | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/webcam/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T15:07:43+09:00</updated>
+  <updated>2015-02-08T10:57:54+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -14,218 +14,141 @@
 
   
   <entry>
-    <title type="html"><![CDATA[WebCamをつなげてみる]]></title>
-    <link href="http://mm011106.github.io/blog/2015/01/25/webcam/"/>
-    <updated>2015-01-25T09:20:05+09:00</updated>
-    <id>http://mm011106.github.io/blog/2015/01/25/webcam</id>
-    <content type="html"><![CDATA[<p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
+    <title type="html"><![CDATA[Paho mqttでリモートカメラ]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/08/remote-stillcam/"/>
+    <updated>2015-02-08T09:49:46+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/08/remote-stillcam</id>
+    <content type="html"><![CDATA[<p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
 
 <!-- more -->
 
 
-<p>webカムはRaspberry Piに接続できるのかどうか調べてみると、意外と簡単に接続できそうです。一昔前は結構苦労していたように感じたので、時代は進んだなあと。</p>
+<h2>カメラ側の設定</h2>
 
-<p>で、キャプチャするソフトをリストアップしてみると。</p>
+<p>まずは、デバイス（カメラ）側のスクリプト</p>
+
+<p>ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。</p>
+
+<pre><code class="python remotecam.py ">#!/usr/bin/env python
+#
+#
+
+import paho.mqtt.client as mqtt
+import os
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam/command")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    cmd = str(msg.payload)
+    print(msg.topic+" "+str(msg.payload))
+    if cmd == "shoot":
+        print "Say cheeees!"
+
+        dummy = os.system("raspistill -w 1024 -h 768 -t 10 -o /run/shm/temp.jpg")
+        dummy = os.system("mosquitto_pub -h my.broker.jp -t my/device/stillcam -f /run/shm/temp.jpg")
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
+</code></pre>
+
+<p>パブリッシュ設定したメッセージが来ると、on_messageがコールされます。<br/>
+メッセージが&#8221;shoot&#8221;だったら、osコマンド&#8221;raspistill&#8221;を実行して写真を撮ります。<br/>
+さらにそのデータをosコマンド&#8221;mosquitto_pub&#8221;でパブリッシュします。</p>
+
+<p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</p>
+
+<p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
+
+<p>このスクリプトを実行可能に設定して、実行させます。これで待ち受け状態。</p>
+
+<h2>コントローラ側</h2>
+
+<p>別のPCでは、</p>
 
 <ul>
-<li>fswebcam　スチル撮影</li>
-<li>motion　画像の変化を検出して記録</li>
-<li>guvcview 動画のキャプチャ（GUI必要？）</li>
+<li>シャッターを切るコマンドを発行する</li>
+<li>送られてきた写真のデータを保管する</li>
 </ul>
 
 
-<p>と言ったところが皆さんに使われているようです。特に監視カメラ用途ではmotionが便利そうです。</p>
+<p>という作業があります。</p>
 
-<p>今回は、能動的にシャッターを切って記録する用途ですので、fswebcamを使うことにしました。</p>
+<p>まずは、送られてきたデータを保管するスクリプトを作ります。</p>
 
-<hr />
+<pre><code class="python photo_sub.py">#!/usr/bin/env python
+#
+#
+#
 
-<h3>USBカメラを接続してみる</h3>
+import paho.mqtt.client as mqtt
+import datetime
 
-<p>とりあえずUSBカメラを何も考えずRaspberry Piにつないでみます。</p>
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam")
 
-<p>認識されているか確認してみると</p>
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
 
-<pre><code class="sh UBS device list">$ lsusb
-Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. 
-Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. 
-Bus 001 Device 006: ID 046d:080a Logitech, Inc. Portable Webcam C905
+    # print(msg.topic+" "+str(msg.payload))
+    filename = "./image/" + datetime.datetime.today().strftime("%H%M%S%f") + ".jpg"
+    outfile=open( filename , 'w')
+    outfile.write(msg.payload)
+    print "subscribe: " + filename
+    outfile.close
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
 </code></pre>
 
-<p>こんなかんじで認識されています。</p>
+<p>このスクリプトでは、my/device/stillcamというトピックにパブリッシュされたデータを取り込んでファイル名（タイムスタンプ）をつけて保存します。</p>
 
-<p>次に、fswebcamをインストール。参考にしたのは<a href="http://www.raspberrypi.org/documentation/usage/webcams/">こちら</a></p>
+<p>このスクリプトを実行して、データを待ち受けます。</p>
 
-<p>続けて試し撮りなどしてみます。</p>
+<p>最後にシャッタを切るコマンドを送ります。<br/>
+とりあえずは、コマンドラインからです。</p>
 
-<pre><code class="sh install fswebcam">$ sudo apt-get install fswebcam
-
-$ fswebcam -v   #こうすると色々教えてくれます。
---- Opening /dev/video0...
-Trying source module v4l2...
-/dev/video0 opened.
-src_v4l2_get_capability,87: /dev/video0 information:
-src_v4l2_get_capability,88: cap.driver: "uvcvideo"
-src_v4l2_get_capability,89: cap.card: "UVC Camera (046d:080a)"
-src_v4l2_get_capability,90: cap.bus_info: "usb-bcm2708_usb-1.4"
-src_v4l2_get_capability,91: cap.capabilities=0x84000001
-src_v4l2_get_capability,92: - VIDEO_CAPTURE
-src_v4l2_get_capability,103: - STREAMING
-No input was specified, using the first.
-src_v4l2_set_input,181: /dev/video0: Input 0 information:
-src_v4l2_set_input,182: name = "Camera 1"
-src_v4l2_set_input,183: type = 00000002
-src_v4l2_set_input,185: - CAMERA
-src_v4l2_set_input,186: audioset = 00000000
-src_v4l2_set_input,187: tuner = 00000000
-src_v4l2_set_input,188: status = 00000000
-src_v4l2_set_pix_format,541: Device offers the following V4L2 pixel formats:
-src_v4l2_set_pix_format,554: 0: [0x56595559] 'YUYV' (YUV 4:2:2 (YUYV))
-src_v4l2_set_pix_format,554: 1: [0x47504A4D] 'MJPG' (MJPEG)
-Using palette MJPEG
-Adjusting resolution from 384x288 to 352x288.
-src_v4l2_set_mmap,693: mmap information:
-src_v4l2_set_mmap,694: frames=4
-src_v4l2_set_mmap,741: 0 length=102400
-src_v4l2_set_mmap,741: 1 length=102400
-src_v4l2_set_mmap,741: 2 length=102400
-src_v4l2_set_mmap,741: 3 length=102400
---- Capturing frame...
-verify_jpeg_dht,94: Inserting DHT segment into JPEG frame.
-Captured frame in 0.00 seconds.
---- Processing captured image...
-There are unsaved changes to the image.
-
-$ fswebcam -r 1000 ./test.jpg
---- Opening /dev/video0...
-Trying source module v4l2...
-/dev/video0 opened.
-No input was specified, using the first.
-Adjusting resolution from 1000x-1 to 960x720.
---- Capturing frame...
-Captured frame in 0.00 seconds.
---- Processing captured image...
-Writing JPEG image to './test.jpg'.
+<pre><code class="sh ">$ mosquitto_pub -h my.broker.jp -t my/device/stillcam/command -m "shoot"
 </code></pre>
 
-<p>上の例では解像度1000pxぐらいの絵をとってtest.jpgで保存してもらう例です。実際にはカメラの撮影可能な解像度に適宜調整されるようです。</p>
+<p>これで、メッセージ&#8221;shoot&#8221;をトリガにして、写真を撮影し、それを転送して保存するまでの一連の作業が行われます。</p>
 
-<p>撮影したのはいいですが、このままでは本当にとれているのか絵を觀ることができないので判りません。scpなどのコマンドで転送してもいいですが、すぐにMQTTで転送することを考えなきゃいけないので、とりあえず手動でmosquittoを使って転送してみます。</p>
+<p>デバイス側の処理負荷を確認するため1秒に1回シャッターを切る動作を続けて見ました。
+結果的には、カメラと転送の処理で数%程度の負荷のようです。<br/>
+ちなみにこのカメラ、この設定では1秒間隔以上のスピードで連続して撮影することはできませんでした。</p>
 
-<p>プロトコルとしては、どんなファイルでも（中身に関係なく）送れるのですが、mosquittoはコマンドラインということもあり、メッセージをサブスクライブしたときペイロードの内容を出力したあと改行コードを出力してしまいます。文字情報の時は便利なのですが、バイナリのときはちょっと厄介です。<br/>
-それを抑止するために-N オプションがあり、これを使うとバイナリファイルも比較的扱いやすくなるはずです。</p>
+<p>カメラがRaspi用のモジュールですので、かなりオーバーヘッドが小さい感じもします。
+CPU的には処理が軽くていいのですが、ハードウエア的には取り回しが悪く、ちょっといまいちな感じもします。<br/>
+応用のシーンによりますが、今回私が想定しているケースでは使いにくいです。</p>
 
-<p>これを試してみます。</p>
-
-<pre><code class="sh binary file subscription via MQTT">#サブスクライブ側を用意
-$ mosquitto_sub -N -h MY.BROKER -t MY/DEVICE/photo &gt; test.jpg
-
-#写真をとったエッジデバイス側でファイルまるごとパブリッシュ
-$ mosquitto_pub -h MY.BROKER -t MY/DEVICE/photo -f ./test.jpg
-</code></pre>
-
-<p>このあと、サブスクライブ側をCtrl−Cで中断して、サブスクライブしたtest.jpgを確認してください。</p>
-
-<p>手動で中断しないといけないのが、イマイチですが一応転送はできます。</p>
-
-<p>スクリプトによる写真データのサブスクリプションは、mosquitto_subでは対処しきれない感じがします。
-ここは、paho版の出番になりそうですね。(もちろん、mosquittoのライブラリをつかってCで書いてもいいのですけど、わたしはCができませんので。。。。)</p>
-
-<h2>おまけ</h2>
-
-<p>このままじゃあまり役立たないので、webサーバを動かして写真を配信する設定を試して見ました。
-こちらの<a href="http://nofx2.txt-nifty.com/it/2013/07/raspberry-pi-ng.html">ページ</a>丸写しです。ありがとうございます。</p>
-
-<p>webサーバにはいまどきの、nginxを選びました。apacheは昔苦労した記憶があり、めんどくさいし時間がかかりそうというイメージでしたので今時流行りを。</p>
-
-<pre><code class="sh install nginx"># Nginxインストール
-$ sudo apt-get install nginx
-# 1.2.1-2.2+wheezy3がインストールされました。
-
-# web page 用ディレクトリの作成
-$ cd ~
-$ mkdir www
-
-# Nginxの設定の変更
-$ sudo vi /etc/nginx/sites-available/default
-# 設定フアイルは/etc/nginx/nginx.confにもありますが、
-#　ここらへんの使い分けはよくわかっていません。
-# server {　}
-#   の中にある公開するweb pageディレクトリを先ほど作ったディレクトリに変更します
-
-    #root /usr/share/nginx/www;
-    root /home/pi/www;
-
-
-# サイトを有効にするため、シンボリックリンクを張る。
-$ sudo ln -s /etc/nginx/sites-available/pi /etc/nginx/sites-enabled/
-#  ここらへんは詳細不明です。
-#　多分これがなくても先ほどの設定変更はdefaultに対して行ったので、
-#　有効になると思います。
-#　すでに、/etc/nginx/sites-enabled/には
-#  /etc/nginx/sites-available/defaultのリンクが置かれていました。
-
-# Nginxの設定ファイルに問題が無いかチェック
-$ sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-
-# Nginx再起動
-$ sudo service nginx restart
-
-# 自動起動設定
-$ sudo update-rc.d nginx defaults
-
-# index.htmlの作成
-#　とりあえず、nginxの初期設定のindex.htmlをコピー
-
-cp /usr/share/nginx/www/index.html ~/www/
-</code></pre>
-
-<p>ここまでできたら、webサーバにアクセスしてみてください。
-なにか反応があるはずです。</p>
-
-<p>次に、とった写真を見れるようにします。</p>
-
-<h3>　写真入りindex.htmlを用意</h3>
-
-<p>&#8220;`sh
-$ vi ~/www/index.html
-<html>
-<head>
-<title>Welcome to nginx!</title>
-</head>
-<body bgcolor="white" text="black"></p>
-
-<center><h1><img src="./test.jpg" alt="test picture" ></h1></center>
-
-
-<p></body>
-</html></p>
-
-<h1>写真をとってwwwディレクトリに入れてみます。</h1>
-
-<p>$ fswebcam ~/www/test.jpg
-&#8220;`</p>
-
-<p>ここでwebをアクセスすると写真が見えるはずです。</p>
-
-<p>一段落。</p>
-
-<p>さて、このファイルはフラッシュメモリ上に展開されているので、あまり派手に何回もとっては消しをすると、あっという間にフラッシュメモリが使えなくなります。そこで、ramdiskを写真の置き場に使うことにします。
-webサーバは指定したwebページ保存場所以外のファイルは読めないようなので、最初にramdisk上の写真ファイルのリンクをwwwディレクトリ上に作っておきます。</p>
-
-<pre><code>$ ln -s /run/shm/picture.jpg ~/www/test.jpg 
-# /run/shmのディレクトリはRAM-DISKになっています。
-
-$ fswebcam /run/shm/picture.jpg
-#　これでwebページ上の写真が、今撮ったものに変わるはずです。
-</code></pre>
-
-<p>ここまで来ると、立派な定点カメラの出来上がり、という感じです。</p>
-
-<p>MQTTのサブスクライバをつければ、シャッタや解像度のコントロールがMQTT経由でできますね。</p>
+<p>あとで、USBcamでやってみようと思います。</p>
 ]]></content>
   </entry>
   

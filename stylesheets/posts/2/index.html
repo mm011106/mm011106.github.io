@@ -9,8 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
-ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、 &hellip;">
+  <meta name="description" content="自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +50,263 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-13T20:43:51+09:00" pubdate data-updated="true">2015 / 01 / 13</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/13/ipaddress/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/12/autossh/">autossh</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-12T08:53:44+09:00" pubdate data-updated="true">2015 / 01 / 12</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>sshのコネクションはどうしても切れてしまうことがあるので、それを阻止するためにautosshを使ってみました。<br/>
+まず、sshのコマンドラインを簡素にするため、MQTTブローカへの接続設定を書いたconfigファイルを用意します。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/12/autossh/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-11T11:05:38+09:00" pubdate data-updated="true">2015 / 01 / 11</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/11/secure-connection/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/31/font-size/">引用のフォントサイズ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-31T14:36:58+09:00" pubdate data-updated="true">2014 / 12 / 31</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/31/font-size/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/29/vim/">paho-mqttで回線を切るとどうなるか</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-29T10:28:40+09:00" pubdate data-updated="true">2014 / 12 / 29</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
+
+<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/29/vim/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/21/paho-mqtt/">Paho MQTT のインストール</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/21/paho-mqtt/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -224,271 +480,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/13/restarted/">やっと復活。。。</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-13T16:23:35+09:00" pubdate data-updated="true">2014 / 12 / 13</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。<br/>
-今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。メニューも一応見えていますが、クリックすると茶色いプルダウンらしきものが広がるだけで何も見えません。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/13/restarted/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/07/ubuntu-problem/">ubuntuのランチャとかが消えてしまう件</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-07T13:19:44+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/07/ubuntu-problem/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/07/max-quieued-messages/">max_queued_messagesオプションの動作</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-07T10:14:05+09:00" pubdate data-updated="true">2014 / 12 / 07</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
-
-<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/07/max-quieued-messages/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/06/again/">mosquitto.conf 再び</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-06T19:58:41+09:00" pubdate data-updated="true">2014 / 12 / 06</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
-
-<ul>
-<li><strong>max_queued_messages</strong></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/06/again/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/05/mosquitto-sub-c-option/">disable-clean-sessionオプション</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-05T21:14:40+09:00" pubdate data-updated="true">2014 / 12 / 05</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
-
-<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/05/mosquitto-sub-c-option/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">2014 / 12 / 04</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
-原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
-
-<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/04/mosquitto-dot-conf/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -536,23 +527,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+        <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
   </ul>
@@ -595,23 +586,23 @@
   <ul id="references">
     
       <li class="post">
-        <a href="/blog/2015/01/31/shutdown-switch/">Raspberry Pi にシャットダウンスイッチをつける</a>
+        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a>
+        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a>
+        <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a>
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
   </ul>

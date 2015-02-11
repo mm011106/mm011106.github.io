@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Raspberry Pi 2　を試して見ました - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="あまり流行りものに飛びつかないんですが、先週何気なくwebを眺めてたら、"Raspberry Pi 2　発売!&ldquo;という記事があって、「どうせ買うことになるし、在庫あれば買ってみようかな」とおもいまして。 で、RS componentsに行ってみると「在庫あります」ということでしたので、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/07/raspi2-speed/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Raspberry Pi 2　を試して見ました</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-07T10:58:26+09:00" pubdate data-updated="true">2015 / 02 / 07</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>あまり流行りものに飛びつかないんですが、先週何気なくwebを眺めてたら、&#8221;Raspberry Pi 2　発売!&ldquo;という記事があって、「どうせ買うことになるし、在庫あれば買ってみようかな」とおもいまして。</p>
+
+<!-- more -->
+
+
+<p>で、RS componentsに行ってみると「在庫あります」ということでしたので、何も考えず購入。ハッピーなことに金曜日到着しました。</p>
+
+<p>今あるRaspiのSDカード(OS)で動くかな、とおもって試してみたらやっぱりダメで最新版OSをダウンロード。結局このダウンロードが3時間かかってしまい、動かしたのは土曜日の朝になりました。</p>
+
+<p>やっぱり起動はキビキビしていますね。デバグの時の再起動などがやりやすくなります。それとスタートアップ画面左上の「ラズベリーアイコン」が4つになってます。4コアという事でしょうね。</p>
+
+<p>で、気になる速度ですが、RSA鍵を作るopensslコマンドで試して見ました。</p>
+
+<p>結果からいうと、このプロセス自体がシングルコアで動作するので、クロックアップ分の速度アップとなりました。</p>
+
+<p>具体的には、50回　2048bitRSA鍵を作る下記のようなスクリプトを作りこれを更にシェルで10回やって、それぞれの実行時間を測るというものです。</p>
+
+<figure class='code'><figcaption><span>Script for testing computaiton time</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat keygen.sh
+</span><span class='line'><span class="c">#/bin/sh</span>
+</span><span class='line'><span class="k">for</span> i in <span class="o">{</span>1..50<span class="o">}</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>   sudo openssl genrsa -rand ./rand.txt  <span class="m">2048</span> &gt; key.txt
+</span><span class='line'><span class="k">done</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># このスクリプトを10回試行してそれぞれの処理時間を書き出します。</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span><span class="k">for</span> j in <span class="o">{</span>1..10<span class="o">}</span> <span class="p">;</span> <span class="k">do</span> <span class="o">(</span><span class="nb">time</span> -p ./keygen.sh <span class="o">)</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep <span class="s1">&#39;user&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> &gt;&gt; out_raspi2.txt <span class="p">;</span> <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>鍵の乱数の種は同じ物を使用。もともとgenrsaの実行時間は乱数生成に左右されるので、あまり正確ではないかもしれませんが、平均値と分散の変化を見ればいいかなと。</p>
+
+<p>結果</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 1:</strong></p>
+
+<p>310.34,
+299.83,
+285.74,
+261.49,
+342.31,
+353.19,
+340.26,
+318.30,
+367.67,
+322.97</p>
+
+<p>平均：320.21, 標準偏差：32.3</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 2:</strong></p>
+
+<p>204.71,
+208.46,
+214.48,
+197.13,
+229.73,
+222.12,
+207.66,
+226.37,
+194.71,
+244.09</p>
+
+<p>平均：214.95, 標準偏差：15.55</p>
+
+<hr />
+
+<p>平均が0.67倍、標準偏差が0.48倍でした。</p>
+
+<p>クロックの増加分で0.78倍になるはずなので、それよりちょっと速いですね。</p>
+
+<p><code>top</code>でCPUの状態を見てみると。</p>
+
+<figure class='code'><figcaption><span>result of top command</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>top
+</span><span class='line'>
+</span><span class='line'>top - 01:55:44 up <span class="m">20</span> min,  <span class="m">3</span> users,  load average: 1.00, 1.00, 0.65
+</span><span class='line'>Tasks:  <span class="m">90</span> total,   <span class="m">2</span> running,  <span class="m">88</span> sleeping,   <span class="m">0</span> stopped,   <span class="m">0</span> zombie
+</span><span class='line'>%Cpu0  :  0.0 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu1  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu2  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu3  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>KiB Mem:    <span class="m">754256</span> total,   <span class="m">142940</span> used,   <span class="m">611316</span> free,     <span class="m">9484</span> buffers
+</span><span class='line'>KiB Swap:   <span class="m">102396</span> total,        <span class="m">0</span> used,   <span class="m">102396</span> free,    <span class="m">96900</span> cached
+</span><span class='line'>
+</span><span class='line'>  PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND
+</span><span class='line'> <span class="m">2607</span> root      <span class="m">20</span>   <span class="m">0</span>  <span class="m">4220</span> <span class="m">3192</span> <span class="m">2896</span> R 100.0  0.4   0:03.89 openssl           :
+</span><span class='line'>  :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっていて、３コアは遊んでいる状態です。ヘビーなプロセスが動いていてもそれに引っ張られること無く、他のプロセスが動かせるようになります。動画の配信などには最適かもしれませんね。</p>
+
+<p>メモリが増えているのでRAM-DISKのサイズ拡大に期待していましたが、案の定大きくなっています。</p>
+
+<p><code>df</code>で確認してみます。</p>
+
+<figure class='code'><figcaption><span>comparison of the size of RAM-DISK</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Raspberry Pi 1</span>
+</span><span class='line'>tmpfs              <span class="m">76560</span>   <span class="m">41932</span>     <span class="m">34628</span>  55% /run/shm
+</span><span class='line'>
+</span><span class='line'><span class="c"># Raspberry Pi 2</span>
+</span><span class='line'>tmpfs             <span class="m">150840</span>       <span class="m">0</span>    <span class="m">150840</span>   0% /run/shm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>150MBもあります。
+有効に使いたいです。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-07T10:58:26+09:00" pubdate data-updated="true">2015 / 02 / 07</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/raspi/'>raspi</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/07/raspi2-speed/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/07/raspi2-speed/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/02/03/paho-client/" title="Previous Post: Paho-mqttでバイナリファイルを受信してみる">&laquo; Paho-mqttでバイナリファイルを受信してみる</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/02/08/remote-stillcam/" title="Next Post: Paho mqttでリモートカメラ">Paho mqttでリモートカメラ &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

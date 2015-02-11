@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T20:48:42+09:00</updated>
+  <updated>2015-02-11T21:13:59+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,616 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Paho mqttでリモートカメラ]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/08/remote-stillcam/"/>
+    <updated>2015-02-08T09:49:46+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/08/remote-stillcam</id>
+    <content type="html"><![CDATA[<p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
+
+<!-- more -->
+
+
+<h2>カメラ側の設定</h2>
+
+<p>まずは、デバイス（カメラ）側のスクリプト</p>
+
+<p>ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。</p>
+
+<figure class='code'><figcaption><span>remotecam.py </span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">os</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&quot;my/device/stillcam/command&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">cmd</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&quot;shoot&quot;</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">print</span> <span class="s">&quot;Say cheeees!&quot;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">dummy</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;raspistill -w 1024 -h 768 -t 10 -o /run/shm/temp.jpg&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">dummy</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;mosquitto_pub -h my.broker.jp -t my/device/stillcam -f /run/shm/temp.jpg&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;my.broker.jp&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>パブリッシュ設定したメッセージが来ると、on_messageがコールされます。<br/>
+メッセージが&#8221;shoot&#8221;だったら、osコマンド&#8221;raspistill&#8221;を実行して写真を撮ります。<br/>
+さらにそのデータをosコマンド&#8221;mosquitto_pub&#8221;でパブリッシュします。</p>
+
+<p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。<del>ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</del></p>
+
+<h5>2015/2/11追記：</h5>
+
+<h5>上記のバイナリデータのハンドリングの件ですが、うまく行かない理由は私のスキル不足です。多分python内部での変数のデータ扱いをうまく変換してやる必要が有りそうです。  只今勉強中。</h5>
+
+<p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
+
+<p>このスクリプトを実行可能に設定して、実行させます。これで待ち受け状態。</p>
+
+<h2>コントローラ側</h2>
+
+<p>別のPCでは、</p>
+
+<ul>
+<li>シャッターを切るコマンドを発行する</li>
+<li>送られてきた写真のデータを保管する</li>
+</ul>
+
+
+<p>という作業があります。</p>
+
+<p>まずは、送られてきたデータを保管するスクリプトを作ります。</p>
+
+<figure class='code'><figcaption><span>photo_sub.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">datetime</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&quot;my/device/stillcam&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c"># print(msg.topic+&quot; &quot;+str(msg.payload))</span>
+</span><span class='line'>    <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;./image/&quot;</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%H%M%S</span><span class="si">%f</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.jpg&quot;</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span> <span class="n">filename</span> <span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;subscribe: &quot;</span> <span class="o">+</span> <span class="n">filename</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;my.broker.jp&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このスクリプトでは、my/device/stillcamというトピックにパブリッシュされたデータを取り込んでファイル名（タイムスタンプ）をつけて保存します。</p>
+
+<p>このスクリプトを実行して、データを待ち受けます。</p>
+
+<p>最後にシャッタを切るコマンドを送ります。<br/>
+とりあえずは、コマンドラインからです。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_pub -h my.broker.jp -t my/device/stillcam/command -m <span class="s2">&quot;shoot&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これで、メッセージ&#8221;shoot&#8221;をトリガにして、写真を撮影し、それを転送して保存するまでの一連の作業が行われます。</p>
+
+<p>デバイス側の処理負荷を確認するため1秒に1回シャッターを切る動作を続けて見ました。
+結果的には、カメラと転送の処理で数%程度の負荷のようです。<br/>
+ちなみにこのカメラ、この設定では1秒間隔以上のスピードで連続して撮影することはできませんでした。</p>
+
+<p>カメラがRaspi用のモジュールですので、かなりオーバーヘッドが小さい感じもします。
+CPU的には処理が軽くていいのですが、ハードウエア的には取り回しが悪く、ちょっといまいちな感じもします。<br/>
+応用のシーンによりますが、今回私が想定しているケースでは使いにくいです。</p>
+
+<p>あとで、USBcamでやってみようと思います。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Raspberry Pi 2　を試して見ました]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/07/raspi2-speed/"/>
+    <updated>2015-02-07T10:58:26+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/07/raspi2-speed</id>
+    <content type="html"><![CDATA[<p>あまり流行りものに飛びつかないんですが、先週何気なくwebを眺めてたら、&#8221;Raspberry Pi 2　発売!&ldquo;という記事があって、「どうせ買うことになるし、在庫あれば買ってみようかな」とおもいまして。</p>
+
+<!-- more -->
+
+
+<p>で、RS componentsに行ってみると「在庫あります」ということでしたので、何も考えず購入。ハッピーなことに金曜日到着しました。</p>
+
+<p>今あるRaspiのSDカード(OS)で動くかな、とおもって試してみたらやっぱりダメで最新版OSをダウンロード。結局このダウンロードが3時間かかってしまい、動かしたのは土曜日の朝になりました。</p>
+
+<p>やっぱり起動はキビキビしていますね。デバグの時の再起動などがやりやすくなります。それとスタートアップ画面左上の「ラズベリーアイコン」が4つになってます。4コアという事でしょうね。</p>
+
+<p>で、気になる速度ですが、RSA鍵を作るopensslコマンドで試して見ました。</p>
+
+<p>結果からいうと、このプロセス自体がシングルコアで動作するので、クロックアップ分の速度アップとなりました。</p>
+
+<p>具体的には、50回　2048bitRSA鍵を作る下記のようなスクリプトを作りこれを更にシェルで10回やって、それぞれの実行時間を測るというものです。</p>
+
+<figure class='code'><figcaption><span>Script for testing computaiton time</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat keygen.sh
+</span><span class='line'><span class="c">#/bin/sh</span>
+</span><span class='line'><span class="k">for</span> i in <span class="o">{</span>1..50<span class="o">}</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>   sudo openssl genrsa -rand ./rand.txt  <span class="m">2048</span> &gt; key.txt
+</span><span class='line'><span class="k">done</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># このスクリプトを10回試行してそれぞれの処理時間を書き出します。</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">$ </span><span class="k">for</span> j in <span class="o">{</span>1..10<span class="o">}</span> <span class="p">;</span> <span class="k">do</span> <span class="o">(</span><span class="nb">time</span> -p ./keygen.sh <span class="o">)</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep <span class="s1">&#39;user&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> &gt;&gt; out_raspi2.txt <span class="p">;</span> <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>鍵の乱数の種は同じ物を使用。もともとgenrsaの実行時間は乱数生成に左右されるので、あまり正確ではないかもしれませんが、平均値と分散の変化を見ればいいかなと。</p>
+
+<p>結果</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 1:</strong></p>
+
+<p>310.34,
+299.83,
+285.74,
+261.49,
+342.31,
+353.19,
+340.26,
+318.30,
+367.67,
+322.97</p>
+
+<p>平均：320.21, 標準偏差：32.3</p>
+
+<hr />
+
+<p><strong>Raspberry Pi 2:</strong></p>
+
+<p>204.71,
+208.46,
+214.48,
+197.13,
+229.73,
+222.12,
+207.66,
+226.37,
+194.71,
+244.09</p>
+
+<p>平均：214.95, 標準偏差：15.55</p>
+
+<hr />
+
+<p>平均が0.67倍、標準偏差が0.48倍でした。</p>
+
+<p>クロックの増加分で0.78倍になるはずなので、それよりちょっと速いですね。</p>
+
+<p><code>top</code>でCPUの状態を見てみると。</p>
+
+<figure class='code'><figcaption><span>result of top command</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>top
+</span><span class='line'>
+</span><span class='line'>top - 01:55:44 up <span class="m">20</span> min,  <span class="m">3</span> users,  load average: 1.00, 1.00, 0.65
+</span><span class='line'>Tasks:  <span class="m">90</span> total,   <span class="m">2</span> running,  <span class="m">88</span> sleeping,   <span class="m">0</span> stopped,   <span class="m">0</span> zombie
+</span><span class='line'>%Cpu0  :  0.0 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu1  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu2  :  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>%Cpu3  :100.0 us,  0.0 sy,  0.0 ni,  0.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+</span><span class='line'>KiB Mem:    <span class="m">754256</span> total,   <span class="m">142940</span> used,   <span class="m">611316</span> free,     <span class="m">9484</span> buffers
+</span><span class='line'>KiB Swap:   <span class="m">102396</span> total,        <span class="m">0</span> used,   <span class="m">102396</span> free,    <span class="m">96900</span> cached
+</span><span class='line'>
+</span><span class='line'>  PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND
+</span><span class='line'> <span class="m">2607</span> root      <span class="m">20</span>   <span class="m">0</span>  <span class="m">4220</span> <span class="m">3192</span> <span class="m">2896</span> R 100.0  0.4   0:03.89 openssl           :
+</span><span class='line'>  :
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となっていて、３コアは遊んでいる状態です。ヘビーなプロセスが動いていてもそれに引っ張られること無く、他のプロセスが動かせるようになります。動画の配信などには最適かもしれませんね。</p>
+
+<p>メモリが増えているのでRAM-DISKのサイズ拡大に期待していましたが、案の定大きくなっています。</p>
+
+<p><code>df</code>で確認してみます。</p>
+
+<figure class='code'><figcaption><span>comparison of the size of RAM-DISK</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Raspberry Pi 1</span>
+</span><span class='line'>tmpfs              <span class="m">76560</span>   <span class="m">41932</span>     <span class="m">34628</span>  55% /run/shm
+</span><span class='line'>
+</span><span class='line'><span class="c"># Raspberry Pi 2</span>
+</span><span class='line'>tmpfs             <span class="m">150840</span>       <span class="m">0</span>    <span class="m">150840</span>   0% /run/shm
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>150MBもあります。
+有効に使いたいです。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Paho-mqttでバイナリファイルを受信してみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/03/paho-client/"/>
+    <updated>2015-02-03T21:01:10+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/03/paho-client</id>
+    <content type="html"><![CDATA[<p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
+
+<!-- more -->
+
+
+<p>コードは先の<a href="http://mm011106.github.io/blog/2014/12/29/vim/">投稿</a>で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました。</p>
+
+<figure class='code'><figcaption><span>test code for binary-file subscription</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
+</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
+</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&quot;topic/binary/jpeg&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>    <span class="c"># print(msg.topic+&quot; &quot;+str(msg.payload))</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;./test.jpg&#39;</span> <span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">outfile</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;my.broker.jp&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
+</span><span class='line'><span class="c"># handles reconnecting.</span>
+</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
+</span><span class='line'><span class="c"># manual interface.</span>
+</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これを実行しておいて、別のコンソール（あるいはPC）から、jpgファイルをパブリッシュしてみます。　　
+こちらは、mosquitto。</p>
+
+<figure class='code'><figcaption><span>publish a binary file as a test data</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_pub -h my.broker.jp -t topic/binary/jpeg -f mypicture.jpg
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>とします。</p>
+
+<p>すると、先程のpythonスクリプトからtest.jpgのファイルが出力されました。実際に表示させてみると、問題なく絵を見ることが出来ました。</p>
+
+<p>mosquitto_subのコマンドラインからですと、出力したファイルはコマンドを終了しない限りずっとオープンしっぱなしなので、スクリプトなどで横取りすることできませんでした。今回のこのpaho版では、ファイルを読み込んだら一回クローズしてしまいますので、横取りできます。</p>
+
+<p>ま、きちんとpythonで全部のスクリプトを書く、というのが筋でしょうけど。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践3]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4/"/>
+    <updated>2015-02-03T19:49:16+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/03/ore-ore-certificate4</id>
+    <content type="html"><![CDATA[<p>先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。</p>
+
+<!-- more -->
+
+
+<p>ということで、作り直します。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -sha256 -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>という感じになりますか。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -text &lt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>で確認してみると、たしかにSHA256でハッシュが作られている、と書いてありました。</p>
+
+<p>これでok。</p>
+
+<blockquote><p>SHA-1は2005年に脆弱性が問題になり、2010年までにSHA-2に移行するように要請されていたようです。で、何が問題かというと、webを読みかじったところによると、SHA-1でつくったハッシュは「あるファイルと同じハッシュになるファイルを作れる時間」が当初思っていたよりも速く（短い時間で）できることがわかったそうで、同じハッシュを持った違うファイルを作ることが比較的簡単に可能になります。そうすると、サインした証明書の中身をすげ替えてもわからない、ということが起こるようです。</p>
+
+<p>ここらへんの周辺事情は検索すると山ほど引っかかるので、読み物としては面白いですね。</p></blockquote>
+
+<p>また、元々の鍵のクオリティを上げる（ランダム性を上げる？）ために、乱数をパラメタとして与える、というのもあるようです。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl md5 /var/log/syslog* &gt; rand.dat
+</span><span class='line'>$ sudo openssl genrsa -rand ./rand.dat -aes256 2048 &gt; CA_private_key.pem  </span></code></pre></td></tr></table></div></figure>
+
+
+<p>と言った感じです。syslogのファイルのMD5ハッシュ値を計算してそれを乱数の種にするように指定します。</p>
+
+<p>さらに、鍵をAES256で暗号化する指定を入れています。</p>
+
+<p>なんか、この暗号の世界はかなりな勢いで世代替わりがあるようですね。現在「最高性能」といわれているものが５年後には「廃止」になっているかもしれないです。
+そういう意味でも、数年に一度ぐらいの間隔で証明書を作りなおすのもいいかもしれませんね。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践2]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3/"/>
+    <updated>2015-02-02T20:41:28+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/02/ore-ore-certificate3</id>
+    <content type="html"><![CDATA[<p>先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。<br/>
+あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。</p>
+
+<!-- more -->
+
+
+<p>結局、</p>
+
+<ul>
+<li>認証局(CA)を作る</li>
+<li>その認証局の鍵でサーバの証明書にサインしてもらう</li>
+</ul>
+
+
+<p>と言う手順をとる必要があります。<br/>
+認証局と行っても、自己証明書ということでは先に作ったサーバの証明書と同じです。</p>
+
+<h2>自前のCAを作る</h2>
+
+<p>基本的には、サーバの自己証明書を作るのと同じ手順で認証局の証明書（CA certificate)をつくります。手順としては</p>
+
+<ul>
+<li>CAの鍵を作る　(CA key)</li>
+<li>自己署名の証明書を作る　（これがCAの証明書（CA certificate)になる）</li>
+</ul>
+
+
+<p>となります。 ここでは、CAの鍵をCA_private_key.pem,　CAの証明書をCA_selfsigned_Certificate.pemというファイル名を付けました。</p>
+
+<p>実は、これがいっぺんにできるそうで、これが以下のコマンド。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl req -new -x509 -newkey rsa:2048 -keyout CA_private_key.pem -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>このなかで、</p>
+
+<ul>
+<li>鍵を作って</li>
+<li>リクエスト用のファイルを作って</li>
+<li>それに対して自分でサインして</li>
+</ul>
+
+
+<p>という3つのことが行われているようです。</p>
+
+<p>このコマンドでは、キーを暗号化するためのパスフレーズを要求されます。さらに、証明書に記載するための情報（組織名とか所在地とか）を聞かれますので、適宜答えていきます。</p>
+
+<p>最初、以下の様なコマンドでも良いはずですが、パスフレーズを入力するところがでません。確認してみると、鍵は暗号化されていないようです。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl genrsa 2048 &gt; CA_private_key.pem
+</span><span class='line'>$ sudo openssl req -new -key ./CA_private_key.pem -x509 -days 7300 &gt; CA_selfsigned_Certificate.pem</span></code></pre></td></tr></table></div></figure>
+
+
+<p>manでしらべてみると、genrsaのオプションで -des3とか暗号化のオプションを付けないためパスフレーズを聞かれないようです。暗号化する指示をすればパスフレーズを聞いてきました。理由が分かれば当たり前の話。<br/>
+なので、最初の鍵を作るコマンドは</p>
+
+<p><code>$ sudo openssl genrsa -des3 2048 &gt; CA_private_key.pem</code></p>
+
+<p>とするのが、安全性の面でも良い感じですかね。</p>
+
+<p>これでCA鍵とCA証明書ができあがりです。「俺様認証局」ですね。この鍵でいくらでも「オレオレ」証明書がつくれます。</p>
+
+<p>会社内、組織内のセキュア接続のためには有効につかえるかな、とおもいます。ただ鍵が流出するといくら社内用といえどもセキュリティ的に問題があるので、きちんと管理しないといけません。鍵には名前も書いてありますしね。</p>
+
+<h2>サーバの証明書にサインする</h2>
+
+<p>それでは、サーバの証明書を作ってみます。</p>
+
+<p>最初にサーバに設置する証明書のための鍵をつくります。さらに、その鍵をもとに証明書署名リクエストファイルを作成します。まあ、申請書みたいな物ですね。これは、前回の<a href="http://mm011106.github.io/blog/2015/01/31/ore-ore-certificate2/">オレオレ証明書を作ってみようかと　実践１</a>を参考にしてください。この記事の１．２．を実行してもらうといいとおもいます。</p>
+
+<p>ここでは、署名リクエストファイルをmyserver.csr、署名付き証明書をmyserver.crtとします。</p>
+
+<p>サーバの証明書にCAのサインをするので、myserver.csrとCA_selfsigned_Certificate.pem（CA証明書）, CA_private_key.pem（CA鍵）が必要になります。</p>
+
+<p>具体的には、</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo openssl x509 -CA CA_selfsigned_Certificate.pem -CAkey CA_private_key.pem -req -days 7300 -CAcreateserial &lt; myserver.csr &gt; myserver.crt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とします。ここで、-daysはサインする証明書の有効日数、-CAcreateserialは最初に署名するときだけ必要なオプション。これをやるとシリアル番号のファイルが出来るそうな。</p>
+
+<p>これだけで、サーバの証明書にCAのサインをしてサーバに設定出来る証明書ができあがりました。</p>
+
+<p>nginxに入れて動作を確認しました。</p>
+
+<p>ブラウザから証明書を確認すると、「発行者名」と「サブジェクト名」がそれぞれ、CA証明書を作るときに入力した情報、myserverの証明書（証明書署名リクエストファイル）作るときに入力した情報になっているはずです。</p>
+
+<p>ここでもう少しきちんとしたい人は、CA証明書をブラウザに読み込むことで、「この証明書は不明な機関によって署名されています」的なメッセージを回避できます。この作業はこの証明書を信じます、と言う宣言ですので、もしこの鍵が悪用されたりすると大変なことになる可能性があります。鍵の管理はしっかりしておきましょう。</p>
+
+<p>信じてもらうためにはしっかりと行動するということですね。人生。</p>
+
+<p>mosquittoではブローカがcertificateを提供してくるので、それが正しいかどうか確認するための認証局の証明書が必要になります。webブラウザなんかだと、パブリックな認証局の情報は一通りはいっていますから普段認証局のcertificateを意識することは無いですよね。</p>
+
+<p>きょうは、ここまでです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　実践１]]></title>
@@ -342,15 +952,14 @@
 
 <p><code>chmod +x shutdown-btn.py</code>して、実行してみます。</p>
 
-<p>うまく動いたら、/usr/local/sbin/あたりにコピーして、最終行のコメントを外します。</p>
-
-<pre><code>    Dave... Dave, I don't understand why you are doing this to me...
+<pre><code>Dave... Dave, I don't understand why you are doing this to me...
 </code></pre>
 
 <p>と悲痛な叫びがコンソールに出てくればokです。</p>
 
-<p>ここまで来たら、シャットダウンコマンドのコメントアウトを外して、できあがりです。
-一度、実際にシャットダウンできるか確かめました。そして次に。</p>
+<p>うまく動いたら、/usr/local/sbin/あたりにコピーして、最終行のコメントを外します。</p>
+
+<p>一度、実際にシャットダウンできるか確かめました。そして次に。</p>
 
 <h2>システム起動時にスイッチ監視を始めるようにする</h2>
 
@@ -507,6 +1116,12 @@ init.dのスクリプトの書き方は、<a href="https://wiki.debian.org/LSBIn
 <p>めでたし。</p>
 
 <p>今回、init.dの使い方もちょっぴり勉強出来ました。</p>
+
+<h5>2015/2/11 追記：</h5>
+
+<h5>システム組み込み用としては、シャットダウンしたあとに自動で電源を切るような回路がほしいところです。</h5>
+
+<h5>このとき問題なのは、どの時点で電源を切ればいいかということです。システムはダウンしてしまっているので、ソフトウエアは関与できません。システムが終了したら状態が変化するどこかの端子の電圧をモニタして、そこが変化したら切る、というような事をしないといけません。さてどこを見ればいいか。</h5>
 ]]></content>
   </entry>
   
@@ -2309,628 +2924,6 @@ strftime()なる関数があるawk処理系もあるようですが、ここで�
 </code></pre>
 
 <p>フォーマット内部にスペースを指定するためにはダブルクオートでフォーマットをくくる必要があります。awkにはバックスラッシュでダブルクオートをエスケープしておきます。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[やっと復活。。。]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/13/restarted/"/>
-    <updated>2014-12-13T16:23:35+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/13/restarted</id>
-    <content type="html"><![CDATA[<p>前のブログで「ランチャが消えちゃう」なんていう話をしていたらもっと深刻な状況に。<br/>
-今度は、ランチャやメニューは表示されるのですが、デスクトップ自体が真っ黒のままで何も表示されず。ターミナルのアイコンをランチャ上でクリックすると、ターミナルは立ち上がっているようなのですが、見えません。メニューも一応見えていますが、クリックすると茶色いプルダウンらしきものが広がるだけで何も見えません。</p>
-
-<!-- more -->
-
-
-<p>ブログに書いた手順を試してみるも、ターミナルが見えないのでいかんともし難く。。。。<br/>
-ブラインド状態でコマンド入力してみても、うまく入力できているようですが、効果なし。</p>
-
-<hr />
-
-<h2>新しいubuntuを立ち上げ</h2>
-
-<p>webでいろいろ調べましたが、結局解決には至らず。新しいubuntuをインストールするのが早いのじゃないか、ということで再インストールに。</p>
-
-<p>幸い、MacOSのParallelsの上の仮想PCだったので、トラブった環境はそのままにしてすすめました。こういうとき仮想環境は楽ですね。</p>
-
-<p>まずは、大事なブログのソースファイルをまるごと救出。<br/>
-Ctrl-Alt-F1でCUIベースのターミナルを開いて、</p>
-
-<pre><code>tar czf octopress.tar.gz octopress
-</code></pre>
-
-<p>のような感じで。</p>
-
-<p>さて、これをscpでコピーしようとしたら、どうもうまくいかず。。。</p>
-
-<p>きちんとsshの設定をしていなかったからか。。。反省。</p>
-
-<p>ですが、これまたラッキーなことにParallelsにはホストOSとのファイル共有が標準で用意されていて、これがubuntuでも有効です。</p>
-
-<pre><code>cp ./octopress.tar.gz ~/Desktop/Parallels\ Shared\ Folders/
-</code></pre>
-
-<p>とするだけです。
-これで大事な原稿と環境はホストOSにコピーされました。</p>
-
-<p>肝心のインストールは、ubuntu のインストール用ディスクイメージを持ってきて、Parallelsに教えてあげるだけであとは勝手にインストールして完了。</p>
-
-<hr />
-
-<h2>git インストール</h2>
-
-<p>さてここから環境の構築です。</p>
-
-<p>まず、SSH関係をしっかりと構築したあと、</p>
-
-<p><a href="http://octopress.org/docs/setup/">octopressのセットアップ手順</a>にしたがって、</p>
-
-<pre><code>sudo apt-get install git
-</code></pre>
-
-<p>としてインストール。簡単。問題無し。</p>
-
-<p>一応、動作を確認。gitで使うディレクトリに移動して</p>
-
-<pre><code>git init
-</code></pre>
-
-<p>エラーなし。okです。</p>
-
-<h2>ruby インストール</h2>
-
-<p>これまた、手順にしたがって、rbenvでRubyを<a href="http://octopress.org/docs/setup/rbenv/">インストール</a>することにします。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nb">cd</span>
-</span><span class='line'>git clone git://github.com/sstephenson/rbenv.git .rbenv
-</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;export PATH=&quot;$HOME/.rbenv/bin:$PATH&quot;&#39;</span> &gt;&gt; ~/.bash_profile
-</span><span class='line'><span class="nb">echo</span> <span class="s1">&#39;eval &quot;$(rbenv init -)&quot;&#39;</span> &gt;&gt; ~/.bash_profile
-</span><span class='line'>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-</span><span class='line'><span class="nb">source</span> ~/.bash_profile
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ubuntuでは、<code>.bash_profile</code>をログイン時に実行するために</p>
-
-<pre><code>echo 'source ~/.bash_profile' &gt;&gt; .bashrc
-</code></pre>
-
-<p>としました。</p>
-
-<p>インストールの結果を確認します。
-新しいターミナルを開いて、</p>
-
-<pre><code>echo $PATH
-</code></pre>
-
-<p>の結果に<code>~/.rbenv/bin</code>などが入って入ればいいかと思います。</p>
-
-<p>これでrbenvツールが設定できたので、ここからRubyのインストールです。</p>
-
-<p>私の環境では<code>zlib1g-dev</code>と<code>libssl-dev</code>が入っていなかったので、あとあとエラーしました。</p>
-
-<p>念のため前もって</p>
-
-<pre><code>sudo apt-get install zlib1g-dev libssl-dev
-</code></pre>
-
-<p>などとして、インストールするか確認しておいたほうがいいかもしれません。
-そうでないと何回もRubyをインストールすることになります。</p>
-
-<ul>
-<li>octopressのセットアップではRubyのモジュールをダウンロードしますが、このときサーバにSSLで接続します。そのためにSSLのライブラリが必要なようです。</li>
-</ul>
-
-
-<p>では、インストール。解説にしたがい</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rbenv install 1.9.3-p0
-</span><span class='line'><span class="nv">$ </span>rbenv <span class="nb">local </span>1.9.3-p0
-</span><span class='line'><span class="nv">$ </span>rbenv rehash
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>と、しました。</p>
-
-<p>実は、<code>rbenv install 1.9.3-p0</code>で<code>installなんてコマンドないよ！</code>と起こられましたが、<code>ruby-build</code>が正しい位置に持ってこれていなかったのが原因でした。</p>
-
-<pre><code>git clone git://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-</code></pre>
-
-<p>を正しく実行し直して事なきを得ます。</p>
-
-<ul>
-<li>webの解説によれば、<code>rbenv local ruby 1.9.3-p0</code>は、その他のディレクトリにあるRuby環境を変更することなく、octopressをインストールするために使われるそうです。もし、どこでもこのバージョンを使いたいなら、local を grobal に変更するといい、と書かれています。</li>
-</ul>
-
-
-<p>インストールができたら、<code>Ruby --version</code>でバージョンを確認。OK。</p>
-
-<hr />
-
-<h2>Octopress</h2>
-
-<p><a href="">こちらの手順</a>にしたがってインストール。</p>
-
-<p>まず</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone git://github.com/imathis/octopress.git octopress
-</span><span class='line'><span class="nb">cd </span>octopress
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>としてoctopress自身を持ってきます。</p>
-
-<p>さらに、gemで必要なRubyモジュールをインストール</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>gem install bundler
-</span><span class='line'>rbenv rehash <span class="c"># If you use rbenv, rehash to be able to run the bundle command</span>
-</span><span class='line'>bundle install
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ここで、ちゃんと動くかどうか</p>
-
-<pre><code>rake generate
-</code></pre>
-
-<p>でためしてみたところ。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>rake generate
-</span><span class='line'><span class="c">## Generating Site with Jekyll</span>
-</span><span class='line'>identical <span class="nb">source</span>/stylesheets/screen.css
-</span><span class='line'>/home/masa/.rbenv/versions/1.9.3-p0/lib/ruby/gems/1.9.1/gems/
-</span><span class='line'>execjs-2.2.2/lib/execjs/runtimes.rb:51:in <span class="sb">`</span>autodetect<span class="err">&#39;</span>: Could not find
-</span><span class='line'>a JavaScript runtime. See https://github.com/sstephenson/execjs <span class="k">for</span> a
-</span><span class='line'>list of available runtimes. <span class="o">(</span>ExecJS::RuntimeUnavailable<span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>と言われてしまいました。
-&ldquo;octopress Could not find a JavaScript runtime&#8221;をキーワードに
-googleさんに尋ねてみると、解決策が</p>
-
-<pre><code>sudo apt-get install nodejs
-</code></pre>
-
-<p>を実行しろ、ということだったので、さっそくインストールし、無事<code>rake generate</code>できることを確認。</p>
-
-<p>さらに<code>rake preview</code>で出来栄えも確認し、インストール完了。</p>
-
-<p>やっと環境が整いました。</p>
-
-<hr />
-
-<h2>昔の機械から原稿を持ってくる</h2>
-
-<p>さて、昔の機械からデータを持ってこなきゃいけませんが、オリジナルのoctopress からテーマを更新(oct2を使用)しているので、もしかしたらコピーだけではだめかもしれないという危惧もあり、厄介かなあとおもいつつも、ダメモトということで、octopressディレクトリをまるごとコピー。</p>
-
-<p>オリジナルをキープしておいて、持ってきたものをコピーしましたが、<code>rake generate</code>では<code>「バージョンが違いますけど！」</code>と注意されてしまいます。しかたがないので、オリジナルに戻して、今度はsourceフォルダだけを昔のものに入れ替えて試してみました。</p>
-
-<p>すると、何事もなくgenerateが可能に。さらにpreviewして元のBlogページが戻ることを確認！！ああ、素晴らしい。</p>
-
-<p>ということで、記事を書き始めるとまたまたトラブル。。。。</p>
-
-<p>どうも文字が大きい。さらに、バックグラウンドの絵がページの頭の部分で黒くなる。。。。</p>
-
-<p>「うむ、やはりコピーだけではダメかああああ。」
-しかたなく、もう一度octopressの環境から作り直し。さらにoct2も素直にインストールし直し。</p>
-
-<p>まず、octopressのディレクトリをまるごと削除。もう一度インストールし直します。</p>
-
-<p>さらにoct2を以下のようにしてインストール</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>git clone https://github.com/bijumon/oct2.git .themes/oct2
-</span><span class='line'>rake install<span class="o">[</span><span class="s2">&quot;oct2&quot;</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="https://github.com/bijumon/oct2">oct2のページ</a>によるインストール方法ではcloneの保存先が<code>.themes/</code>ですが、これではエラーしてしまうので、<code>.themes/oct2</code>としてみました。</p>
-
-<p>これで一応環境は整っているはずなので、このまま何もせず</p>
-
-<pre><code>rake preview
-</code></pre>
-
-<p>としてfirefoxなどで<a href="http://localhost:4000">localhost:4000</a>をアクセス。oct2が有効になっていることを確認します。</p>
-
-<p>いよいよblogのソースをコピーします。といっても、.mdの原稿を<code>_post</code>ディレクトリにコピーするだけです。</p>
-
-<p>さらに、以下のファイルをコピーしました。</p>
-
-<pre><code>./_config.yml
-./public/image/background.png  (自分で作ったバックグラウンドカラー）
-./public/image/logo.png
-./public/image/(その他必要な画像）
-./source/includes/post/date.html（日付表示がうまくいくように変更したもの）
-./source/(その他、自分で作ったディレクトリ）
-</code></pre>
-
-<p>これで、再び<code>rake preview</code>を実行。</p>
-
-<p>！！！やっとこれで元通り！！！とおもったところが、まだ文字が異常に大きい。。。</p>
-
-<p>これまた、googleにたずねると、「<a href="http://blog.nambo.jp/2013/07/26/change-octopress-font-size/">ここをご覧なさい</a>」といわれたので、そのまま追加して、納得できる出来栄えに。。。。</p>
-
-<figure class='code'><figcaption><span>./sass/custom/_stypes.scss　に追加</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">h1</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">h2</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.1em</span><span class="p">;}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">h3</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nf">#content</span> <span class="nc">.blog-index</span> <span class="p">{</span>
-</span><span class='line'>  <span class="n">article</span> <span class="n">h1</span> <span class="err">{</span>
-</span><span class='line'>    <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="err">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これもちょっと腑に落ちない妙な動作をするのですが、まあ、とりあえず吉としておきます。とおもいましたが、やはり気になるので<a href="http://yuyunko.github.io/blog/2013/03/04/octopress-%E3%83%86%E3%83%BC%E3%83%9E%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%9E%E3%82%A4%E3%82%B9%E3%82%99/">他の方法</a>も試してみるとこちらの方がいい感じなので、こうしました。</p>
-
-<figure class='code'><figcaption><span>./sass/custom/_styles.scss　を変更</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span> <span class="k">font-size</span><span class="o">:</span> <span class="m">0.8em</span><span class="p">;</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>お疲れさまでした。
-ほぼ1日消費です。</p>
-
-<p>そうそう、Parallelsでスナップショットをとっておこう。</p>
-
-<h3>2014/12/14 update</h3>
-
-<p>_styles.scssをエディットしましたが、どうもこれが有効になったり無効になったり、おかしな感じになります。ちょっとしらべたところ、geditでは編集しているファイルのバックアップファイルを編集しているファイルと同じホルダに作ります。この時のファイル名が　&#8221;オリジナルのファイル名～&#8221;　となるのですが、どうもそれをoctopressが区別できていない、あるいは編集中のものにはアクセスロックがかかる？ようです。</p>
-
-<p>geditを使うときは、保存したファイルを一旦閉じるか、バックアップファイルを作るのをやめるように設定するか、編集後バックアップファイルを消して　generate　なり　preview　なりしたほうがいいようです。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ubuntuのランチャとかが消えてしまう件]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/07/ubuntu-problem/"/>
-    <updated>2014-12-07T13:19:44+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/07/ubuntu-problem</id>
-    <content type="html"><![CDATA[<p>apt-get upgradeとかコマンドラインから実行するとubuntuのランチャなどが消えてしまうという状態に時々なります。ランチャだけならいいのですが、メニューが表示されるところまで消えてしまうし、文字入力もできなくなります（つまり、見えはするけど手が出せない状態）</p>
-
-<!-- more -->
-
-
-<p>検索してみたところ、<a href="http://m12i.hatenablog.com/entry/2014/05/24/100539">この</a>ページにあるような症状にぴったりだったので、書かれている復活手順を踏んでみました。以下はその引用です。　<strong>　<em>mizukyfさん、ありがとうございます。</em> </strong></p>
-
-<ul>
-<li><p>ログイン後 Ctrl＋Alt＋F1キー入力 でコンソール画面に遷移。</p></li>
-<li><p>「（マシン名） login:_」という表示されるのでログイン。</p></li>
-<li><p>「DISPLAY=:0.0 gnome-terminal」と入力しEnter。gnomeの上のターミナルを起動</p></li>
-<li><p>Alt＋F7キーを押下するとデスクトップ画面に復帰するが端末ウィンドウが新たに表示されている。</p></li>
-<li><p>このターミナル上で「dconf reset -f /org/compiz/」と入力してEnter。</p></li>
-<li><p>「sudo shutdown -r now」と入力してEnter。OSが再起動する。</p></li>
-</ul>
-
-
-<p>多分、<code>dconf reset -f /org/compiz/</code>が重要なので、コンソールでログインしたあとにこれを実行すればいい、という気もします。
-今度不具合になったら試してみましょう。</p>
-
-<p>PS:<br/>
-<a href="http://ja.wikipedia.org/wiki/Compiz">compiz</a>を調べてみたところ、ウインドーマネージャなのですねえ。<br/>
-<a href="http://en.wikipedia.org/wiki/Dconf">dconf</a>はいろいろな設定を一気に引き受けるユーティリティ。あるwebの解説によれば「Windowsのレジストリシステムのようなもの」とのこと。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[max_queued_messagesオプションの動作]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/07/max-quieued-messages/"/>
-    <updated>2014-12-07T10:14:05+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/07/max-quieued-messages</id>
-    <content type="html"><![CDATA[<p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
-
-<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
-
-<!-- more -->
-
-
-<p>確認手順：</p>
-
-<ul>
-<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br/>
-これで、30個のデータが保持されるはず。</p></li>
-<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p></li>
-<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p></li>
-<li><p>適当に中断</p></li>
-<li><p>適当に再開<br/>
-今回は寝る前に止めて朝起きて再接続してみました。<br/>
-あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p></li>
-</ul>
-
-
-<p>で、送られたデータを確認してみると。。。。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>cat reconnect.txt <span class="p">|</span> awk -F , <span class="s1">&#39;{ command = &quot;date -d @&quot; $1 ; printf NR&quot;   &quot; ; system(command) }&#39;</span>
-</span><span class='line'><span class="m">1</span>   Sat Dec  <span class="m">6</span> 21:33:01 JST 2014
-</span><span class='line'><span class="m">2</span>   Sat Dec  <span class="m">6</span> 21:34:02 JST 2014
-</span><span class='line'><span class="m">3</span>   Sat Dec  <span class="m">6</span> 21:35:01 JST 2014
-</span><span class='line'>  <span class="o">(</span>...snip..<span class="o">)</span>
-</span><span class='line'><span class="m">27</span>   Sat Dec  <span class="m">6</span> 21:59:01 JST 2014
-</span><span class='line'><span class="m">28</span>   Sat Dec  <span class="m">6</span> 22:00:01 JST 2014
-</span><span class='line'><span class="m">29</span>   Sat Dec  <span class="m">6</span> 22:01:01 JST 2014
-</span><span class='line'><span class="m">30</span>   Sat Dec  <span class="m">6</span> 22:02:02 JST <span class="m">2014</span> &lt;指定した数だけ古いデータがあって
-</span><span class='line'><span class="m">31</span>   Sun Dec  <span class="m">7</span> 09:57:01 JST <span class="m">2014</span> &lt;そのあと最新の配信データが届く
-</span><span class='line'><span class="m">32</span>   Sun Dec  <span class="m">7</span> 09:58:02 JST 2014
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[mosquitto.conf 再び]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/06/again/"/>
-    <updated>2014-12-06T19:58:41+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/06/again</id>
-    <content type="html"><![CDATA[<p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
-
-<ul>
-<li><strong>max_queued_messages</strong></li>
-</ul>
-
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># The maximum number of QoS 1 and 2 messages to hold in a queue </span>
-</span><span class='line'><span class="c"># above those that are currently in-flight.  Defaults to 100. Set </span>
-</span><span class='line'><span class="c"># to 0 for no maximum (not recommended).</span>
-</span><span class='line'><span class="c"># See also queue_qos0_messages.</span>
-</span><span class='line'><span class="c">#max_queued_messages 100</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
-
-<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
-
-<p>client IDの件に関連するオプションでこんなものもありました。</p>
-
-<ul>
-<li><strong> allow_zero_length_clientid </strong></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option controls whether a client is allowed to connect with a zero</span>
-</span><span class='line'><span class="c"># length client id or not. This option only affects clients using MQTT v3.1.1</span>
-</span><span class='line'><span class="c"># and later. If set to false, clients connecting with a zero length client id</span>
-</span><span class='line'><span class="c"># are disconnected. If set to true, clients will be allocated a client id by</span>
-</span><span class='line'><span class="c"># the broker. This means it is only useful for clients with clean session set</span>
-</span><span class='line'><span class="c"># to true.</span>
-</span><span class='line'><span class="c">#allow_zero_length_clientid true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
-
-<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
-
-<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
-
-<p>などと話していたら、こんなオプションがありました。</p>
-
-<ul>
-<li><strong>persistent_client_expiration</strong></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># This option allows persistent clients (those with clean session set to false)</span>
-</span><span class='line'><span class="c"># to be removed if they do not reconnect within a certain time frame.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># Badly designed clients may set clean session to false whilst using a randomly</span>
-</span><span class='line'><span class="c"># generated client id. This leads to persistent clients that will never</span>
-</span><span class='line'><span class="c"># reconnect. This option allows these clients to be removed.</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># The expiration period should be an integer followed by one of d w m y for</span>
-</span><span class='line'><span class="c"># day, week, month and year respectively. For example</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 2m</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 14d</span>
-</span><span class='line'><span class="c"># persistent_client_expiration 1y</span>
-</span><span class='line'><span class="c">#</span>
-</span><span class='line'><span class="c"># The default if not set is to never expire persistent clients.</span>
-</span><span class='line'><span class="c">#persistent_client_expiration</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。
-「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[disable-clean-sessionオプション]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option/"/>
-    <updated>2014-12-05T21:14:40+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/05/mosquitto-sub-c-option</id>
-    <content type="html"><![CDATA[<p>一昨日から気になっていた<a href="http://mosquitto.org/man/mosquitto_sub-1.html"><code>mosquitto_sub --disable-clean-session</code></a>オプションですが、試してみました。</p>
-
-<p>ブローカに向かって<code>--desiable-clean-session</code>と<code>--id</code>の2つのオプションをつけてサブスクライブを要求します。</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub -h HOSTNAME -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id CONNECTION-ID
-</span><span class='line'>
-</span><span class='line'>1417781342, 1691, 0, 0, 0
-</span><span class='line'>1417781402, 1691, 0, 0, 0
-</span><span class='line'>1417781461, 1691, 0, 0, 0
-</span><span class='line'>1417781522, 1691, 0, 0, 0　　&lt;&lt;時刻 21:12:02　で中断
-</span><span class='line'>^C
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>--id</code>オプションはサブスクライバが同一であることを主張するためのもののようですので、これが一致することで「再接続だから配信していないデータを送らなきゃ」と認識してくれます。<code>--id</code>を指定しないとデフォルトのプロセス番号を元にしたものになるので、プロセスを止めて再度起動した場合「再接続」と認識してもらえません。
-また、&ndash;qosが1もしくは2でないとダメみたいです。QoS　0は配信保証がなされないクオリティ指定ですので、当然といえば当然。</p>
-
-<p>データが来たところで、適当に中断します。このトピックではパブリッシャが1分毎に1データを送ってきます。データの最初のフィールドがエポックタイムです。よく見ると60づつ増えていっているのがわかります。</p>
-
-<p>そしてCtrl-Cでプロセスを止めます。</p>
-
-<p>では、ここでしばらく待って。。。。。</p>
-
-<p>わかりやすいように、タイムスタンプを印刷してからサブスクライブを再開します。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>date <span class="p">;</span> mosquitto_sub -h __host-name__ -t YOUR/TOPIC/NAME --qos <span class="m">1</span> --disable-clean-session --id  testclient
-</span><span class='line'>
-</span><span class='line'>Fri Dec  <span class="m">5</span> 21:24:54 JST 2014
-</span><span class='line'>1417781581, 1692, 0, 0, 0　　&lt;&lt;　再開したのは21:24:54だけど、21:13:01のデータから配信されている。
-</span><span class='line'>1417781642, 1691, 0, 0, 0
-</span><span class='line'>1417781701, 1691, 0, 0, 0
-</span><span class='line'>1417781761, 1692, 0, 0, 0
-</span><span class='line'>1417781822, 1691, 0, 0, 0
-</span><span class='line'>1417781881, 1691, 0, 0, 0
-</span><span class='line'>1417781942, 1692, 0, 0, 0
-</span><span class='line'>1417782002, 1692, 0, 0, 0
-</span><span class='line'>1417782061, 1692, 0, 0, 0
-</span><span class='line'>1417782121, 1692, 0, 0, 0
-</span><span class='line'>1417782182, 1692, 0, 0, 0
-</span><span class='line'>1417782241, 1692, 0, 0, 0
-</span><span class='line'>1417782302, 1692, 0, 0, 0
-</span><span class='line'>1417782361, 1692, 0, 0, 0
-</span><span class='line'>   ：
-</span><span class='line'>   :
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>おお、きちんと中断している間のデータも配信されました。</p>
-
-<p><code>--id</code>オプションには次のように書かれています。</p>
-
-<p><strong> -i, - -id </strong></p>
-
-<blockquote><p>The id to use for this client. If not given, defaults to mosquitto_sub_ appended with
-the process id of the client. Cannot be used at the same time as the <strong> <em>&ndash;id-prefix</em> </strong> argument.</p></blockquote>
-
-<p>通常、IDは<code>mosquitto_sub_${PID}</code>になるようです。でもpidは起動するたびに変わってしまうので、同じクライアントとは認識されませんね。物理経路のトラブル等で通信が途絶えた場合は大丈夫でしょうけれど。</p>
-
-<p><code>--id-prefix</code>はプリフィックスを固定してしまうオプションなので、<code>--id</code>とは共存できないということですね。</p>
-
-<p>関連するところで<br/>
-ブローカの方の設定で<code>clientid_prefixe</code>というのがあるのですが、これを設定（mosquitto.conf内）すると、指定したプリフィックスのついたクライアントしか接続出来ないようにできるようです。</p>
-
-<p><strong>clientid_prefixes</strong> <em>prefix</em></p>
-
-<blockquote><p>If defined, only clients that have a clientid with a prefix that matches clientid_prefixes will be
-allowed to connect to the broker. For example, setting <em>&ldquo;secure-&rdquo;</em> here would mean a client
-&ldquo;<em>secure-</em>client&rdquo; could connect but another with clientid &ldquo;mqtt&rdquo; couldn&rsquo;t. By default,
-all client ids are valid.</p></blockquote>
-
-<p>となるようです。セキュリティの一助になるかしら？</p>
 ]]></content>
   </entry>
   

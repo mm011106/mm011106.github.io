@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: certificate, | MQTT and ...]]></title>
+  <title><![CDATA[Category: certificate | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/certificate/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T15:07:43+09:00</updated>
+  <updated>2015-02-02T21:05:01+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>

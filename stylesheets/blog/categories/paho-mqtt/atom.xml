@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: paho-mqtt | MQTT and ...]]></title>
+  <title><![CDATA[Category: paho-mqtt, | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/paho-mqtt/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-01-31T15:07:43+09:00</updated>
+  <updated>2015-02-08T10:57:54+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -14,43 +14,50 @@
 
   
   <entry>
-    <title type="html"><![CDATA[paho-mqttで回線を切るとどうなるか]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/29/vim/"/>
-    <updated>2014-12-29T10:28:40+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/29/vim</id>
-    <content type="html"><![CDATA[<p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
-
-<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
+    <title type="html"><![CDATA[Paho mqttでリモートカメラ]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/08/remote-stillcam/"/>
+    <updated>2015-02-08T09:49:46+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/08/remote-stillcam</id>
+    <content type="html"><![CDATA[<p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
 
 <!-- more -->
 
 
-<p>サブスクライバは下記のようなものです。これはpaho-mqttのページにあったテスト用のスクリプトです。</p>
+<h2>カメラ側の設定</h2>
 
-<pre><code class="python test_subscriber.py">topic = "TOPIC/YOU/WANTS/SEE"
-broker = "192.168.0.xxx"
-portNo = 1883
+<p>まずは、デバイス（カメラ）側のスクリプト</p>
 
+<p>ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。</p>
+
+<pre><code class="python remotecam.py ">#!/usr/bin/env python
+#
+#
 
 import paho.mqtt.client as mqtt
+import os
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, rc):
     print("Connected with result code "+str(rc))
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-#    client.subscribe("$SYS/broker/messages/#")
-    client.subscribe(topic)
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam/command")
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
+    cmd = str(msg.payload)
     print(msg.topic+" "+str(msg.payload))
+    if cmd == "shoot":
+        print "Say cheeees!"
+
+        dummy = os.system("raspistill -w 1024 -h 768 -t 10 -o /run/shm/temp.jpg")
+        dummy = os.system("mosquitto_pub -h my.broker.jp -t my/device/stillcam -f /run/shm/temp.jpg")
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(broker, portNo, 60)
+client.connect("my.broker.jp", 1883, 60)
 
 # Blocking call that processes network traffic, dispatches callbacks and
 # handles reconnecting.
@@ -59,103 +66,89 @@ client.connect(broker, portNo, 60)
 client.loop_forever()
 </code></pre>
 
-<p>で、これを実行して、途中でネットワークを切って見ました。</p>
+<p>パブリッシュ設定したメッセージが来ると、on_messageがコールされます。<br/>
+メッセージが&#8221;shoot&#8221;だったら、osコマンド&#8221;raspistill&#8221;を実行して写真を撮ります。<br/>
+さらにそのデータをosコマンド&#8221;mosquitto_pub&#8221;でパブリッシュします。</p>
 
-<p>端末上ではこんな感じ。</p>
+<p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</p>
 
-<pre><code class="sh In case of transmission line failure..">
-1419926642, 1767, 1433, 2513, 0
-Connected with result code 0
-1419926762, 1767, 1434, 2514, 0
-1419926821, 1767, 1432, 2513, 0
-  :
+<p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
+
+<p>このスクリプトを実行可能に設定して、実行させます。これで待ち受け状態。</p>
+
+<h2>コントローラ側</h2>
+
+<p>別のPCでは、</p>
+
+<ul>
+<li>シャッターを切るコマンドを発行する</li>
+<li>送られてきた写真のデータを保管する</li>
+</ul>
+
+
+<p>という作業があります。</p>
+
+<p>まずは、送られてきたデータを保管するスクリプトを作ります。</p>
+
+<pre><code class="python photo_sub.py">#!/usr/bin/env python
+#
+#
+#
+
+import paho.mqtt.client as mqtt
+import datetime
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, rc):
+    print("Connected with result code "+str(rc))
+  # Subscribing in on_connect() means that if we lose the connection and
+  # reconnect then subscriptions will be renewed.
+    client.subscribe("my/device/stillcam")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+
+    # print(msg.topic+" "+str(msg.payload))
+    filename = "./image/" + datetime.datetime.today().strftime("%H%M%S%f") + ".jpg"
+    outfile=open( filename , 'w')
+    outfile.write(msg.payload)
+    print "subscribe: " + filename
+    outfile.close
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect("my.broker.jp", 1883, 60)
+
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()
 </code></pre>
 
-<p>最初のサブスクライブを確認してから、接続を60秒以上切断し、元に戻します。</p>
+<p>このスクリプトでは、my/device/stillcamというトピックにパブリッシュされたデータを取り込んでファイル名（タイムスタンプ）をつけて保存します。</p>
 
-<p>データの最初のフィールドはタイムスタンプなので、120秒のデータ欠損があることがわかります。
-その後経路が回復した時点で、再接続されていることがわかります。</p>
+<p>このスクリプトを実行して、データを待ち受けます。</p>
 
-<p>スクリプトでは<code>client.connect(broker, portNo, 60)</code>として60秒以上交信しないとpingでMQTT接続をキープするように設定しています。この実験では、60秒以上コネクションを切っていますのでpingが発行され、その答えは帰ってこない状況に有ります。さらにブローカはmosquittoをデフォルトで動かしているので、ブローカがMQTTのコネクションを切ることはありません。（persistent_client_expirationを設定していない）</p>
+<p>最後にシャッタを切るコマンドを送ります。<br/>
+とりあえずは、コマンドラインからです。</p>
 
-<p>スクリプトを実行した時のパケットの様子を見てみると。。。。</p>
+<pre><code class="sh ">$ mosquitto_pub -h my.broker.jp -t my/device/stillcam/command -m "shoot"
+</code></pre>
 
-<ul>
-<li><p>TCP でのネゴシエーションがあったあと、MQTTでの接続リクエストがなされます。</p></li>
-<li><p>続いてMQTTの接続許可がブローカから来ます。
-そしてサブスクライブ要求としてトピックの指定をブローカに送ります。</p></li>
-<li><p>この返事として、TCPのACKがあり、サブスクライブの準備が整います。指定したトピックにパブリッシュがあると、サブスクライブされるようになります。</p></li>
-</ul>
+<p>これで、メッセージ&#8221;shoot&#8221;をトリガにして、写真を撮影し、それを転送して保存するまでの一連の作業が行われます。</p>
 
+<p>デバイス側の処理負荷を確認するため1秒に1回シャッターを切る動作を続けて見ました。
+結果的には、カメラと転送の処理で数%程度の負荷のようです。<br/>
+ちなみにこのカメラ、この設定では1秒間隔以上のスピードで連続して撮影することはできませんでした。</p>
 
-<p>そして、スクリプト開始から66.9秒後に最初のデータがきました。その後、接続を切ります。</p>
+<p>カメラがRaspi用のモジュールですので、かなりオーバーヘッドが小さい感じもします。
+CPU的には処理が軽くていいのですが、ハードウエア的には取り回しが悪く、ちょっといまいちな感じもします。<br/>
+応用のシーンによりますが、今回私が想定しているケースでは使いにくいです。</p>
 
-<p>183秒のときに接続を再開。</p>
-
-<p>このとき起こったことは。。。。</p>
-
-<ul>
-<li><p>まず、TCPでの接続のために、クライアントからブローカに向かってSYN,ACK、SYNが取り交わされます。</p></li>
-<li><p>その後、最初の接続と同じように、MQTTのコネクションが最初の接続と同じIDで開始され、次にサブスクライブ要求が発行されています。</p></li>
-<li><p>サブスクライブ要求後、サブスクライブ確認のメッセージがブローカから帰ってきます。</p></li>
-<li><p>その3秒後、ブローカからFINパケットとともにデータが送られてきて、クライアントがRSTパケットを返してTCP接続が切られます。</p>
-
-<ul>
-<li>このFIN-RST応答は、そのシーケンス番号から、回線を切る前のコネクションの異常終了のためのやり取りだという事がわかりました。ですので、このパケットに乗っていたデータは以前のコネクションのデータだということで破棄されているはずです。スクリプトの出力を見るとこのデータは出力されていませんので、これは正しい理解だという事にします。</li>
-</ul>
-</li>
-</ul>
-
-
-<!--
-このタイミングはパブリッシュのタイミングなので、サブスクライブデータが送られてくるタイミングでもあります。
-ブローカ側としては、TCPコネクションが再開したのでデータを送るけれど、すでに同じIDでコネクション要求が入っているので、これは最後のデータね。ということでFINパケットと共に送られたものと思います。
-一方のクライアント側は、再接続しているので、このパケットを受け取るソケットが無く、RSTパケットで強制終了のお願いをして終わりにしたのだと考えられます。
--->
-
-
-<ul>
-<li>そのあと、最新のデータが配信されてきました。このデータのタイムスタンプは<code>1419926762</code>で、スクリプトの出力からこのタイムスタンプのデータの受信は確認出来ました。</li>
-</ul>
-
-
-<p>以上が、回線を切断された時のこのスクリプトの動作です。</p>
-
-<p>ここで疑問は、「なぜ、コネクション要求がクライアントから出されるのか」という点です。
-スクリプトでは、接続がロストした時の内容は記述していません。ということは、ライブラリ側の判断で再接続がなされているという事になります。</p>
-
-<p>で、よく<a href="https://pypi.python.org/pypi/paho-mqtt#network-loop">マニュアル</a>を読むと、loop_forever()ファンクションがこれを管理しているようです。</p>
-
-<h3>Network loop</h3>
-
-<blockquote><p>These functions are the driving force behind the client. If they are not called, incoming network data will not be processed and outgoing network data may not be sent in a timely fashion.</p>
-
-<p>これらのファンクションはクライアントの裏で駆動力となるものです。これらが呼ばれなければ入力されたデータは処理されず、出力されるべきデータは時間通りに送られないでしょう。</p></blockquote>
-
-<h3>loop_forever()</h3>
-
-<blockquote><p>This is a blocking form of the network loop and will not return until the client calls disconnect(). It automatically handles reconnecting.</p>
-
-<p>これはネットワークループのブロッキングフォームで（私には意味不明）、クライアントがdisconnect()関数を呼び出すまでは帰って来ません。自動的に再接続を管理します。</p></blockquote>
-
-<p>ということなので、（予想では）loop_forever()が再接続を発行して、その結果、スクリプトの処理で再度サブスクライブ要求が出される。ということなのでしょう。</p>
-
-<p>今回、断線後の再接続では切断前と同じIDを使っていましたので、MQTTプロトコル的には再度サブスクライブ要求を出さずとも、以前に指定したトピックをサブスクライブできたはずです。 <br/>
-ただ、一体何が起こっているのか判断がつかない状況では、再接続後に再度サブスクライブ要求を出すというのは妥当な処理なのかなとも思います。</p>
-
-<p> ここでのもうひとつの疑問は、「回線が切れた、と判断する基準は何？」ということです。</p>
-
-<p>これについて、<code>connect()</code>のkeepaliveだけ切断する状況と、充分短い時間（ほんの数秒）切断する状況で確認してみたところ、短い時間では再接続が起こらなかったことから、keepaliveの時間以上接続が切れていると(pingに応答がないと)切断されたと判断して「再接続」を行うようです。</p>
-
-<p>マニュアル上では</p>
-
-<h3>keepalive</h3>
-
-<blockquote><p>maximum period in seconds allowed between communications with the broker. If no other messages are being exchanged, this controls the rate at which the client will send ping messages to the broker</p>
-
-<p>ブローカとの最大許されるコミュニケーション間の時間（秒）。他のメッセージが交換されなければ、この数値に基づいてクライアントがpingメッセージをブローカに送るレートをコントロールします。</p></blockquote>
-
-<p>ということで、pingに応答がなければ再接続のトリガになるとは書かれていません。</p>
+<p>あとで、USBcamでやってみようと思います。</p>
 ]]></content>
   </entry>
   
