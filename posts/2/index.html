@@ -9,7 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。 ">
+  <meta name="description" content="現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。
+ここでは、まず勉強。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-01-18T11:28:32+09:00" pubdate data-updated="true">2015 / 01 / 18</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。
+ここでは、まず勉強。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/01/18/ore-ore-certificate/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -437,49 +481,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/14/awk-example/">awkを使う</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-14T09:04:24+09:00" pubdate data-updated="true">2014 / 12 / 14</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>いま、MQTTでデータを送っていますが、データの最初のフィールドがエポックタイムになっています。なので、データをパッと見たところでは何時のデータなのか分かりません。
-そこで、awkを使って普通の表示にしてやります。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/14/awk-example/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -527,6 +528,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
       </li>
     
@@ -540,10 +545,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
   </ul>
@@ -586,6 +587,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
       </li>
     
@@ -599,10 +604,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a>
       </li>
     
   </ul>
