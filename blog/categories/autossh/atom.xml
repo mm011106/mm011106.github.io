@@ -4,7 +4,7 @@
   <title><![CDATA[Category: autossh | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/autossh/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-21T23:02:50+09:00</updated>
+  <updated>2015-02-22T11:15:27+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -102,7 +102,7 @@ $ ssh-keygen -f mqttclient_key
 
 <pre><code class="sh">$ scp -P sshport ./mqttclient_key.pub pipipi@mybroker:~/.ssh/
 $ ssh pipipi@mybroker
-mybroker $ echo 'no-pty,permitopen="localhost:1883",command="/bin/false" ' &gt;&gt; authorized_keys
+mybroker $ echo -n 'no-pty,permitopen="localhost:1883",command="/bin/false" ' &gt;&gt; authorized_keys
 # これは、パスフレーズなしの鍵でログインした場合の動作を制限するおまじないです。
 mybroker $ cat .ssh/mqttclient_key.pub &gt;&gt; authorized_keys 
 # 鍵を登録します

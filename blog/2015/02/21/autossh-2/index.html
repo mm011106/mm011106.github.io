@@ -182,7 +182,7 @@
 <span class='line-number'>7</span>
 </pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>scp -P sshport ./mqttclient_key.pub pipipi@mybroker:~/.ssh/
 </span><span class='line'><span class="nv">$ </span>ssh pipipi@mybroker
-</span><span class='line'>mybroker <span class="nv">$ </span><span class="nb">echo</span> <span class="s1">&#39;no-pty,permitopen=&quot;localhost:1883&quot;,command=&quot;/bin/false&quot; &#39;</span> &gt;&gt; authorized_keys
+</span><span class='line'>mybroker <span class="nv">$ </span><span class="nb">echo</span> -n <span class="s1">&#39;no-pty,permitopen=&quot;localhost:1883&quot;,command=&quot;/bin/false&quot; &#39;</span> &gt;&gt; authorized_keys
 </span><span class='line'><span class="c"># これは、パスフレーズなしの鍵でログインした場合の動作を制限するおまじないです。</span>
 </span><span class='line'>mybroker <span class="nv">$ </span>cat .ssh/mqttclient_key.pub &gt;&gt; authorized_keys
 </span><span class='line'><span class="c"># 鍵を登録します</span>
