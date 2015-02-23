@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: raspi, | MQTT and ...]]></title>
-  <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
+  <title><![CDATA[Category: init.d | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/init-dot-d/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
   <updated>2015-02-23T22:42:31+09:00</updated>
   <id>http://mm011106.github.io/</id>

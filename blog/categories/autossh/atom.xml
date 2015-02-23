@@ -4,7 +4,7 @@
   <title><![CDATA[Category: autossh | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/autossh/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-22T11:15:27+09:00</updated>
+  <updated>2015-02-23T22:42:31+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -70,7 +70,14 @@
 ユーザ設定のデフォルト値は<code>useradd -D</code>で表示できるようですので、確認しておきましょ。</p>
 
 <p>このユーザにはログインできない状態のはずです。一応、外からsshで接続してみます。。。。<br/>
-やはりできませんね。ok</p>
+やはりできませんね。ok<br/>
+さらに、コマンドからユーザの設定を確認しておきます。</p>
+
+<pre><code class="sh"> $ passwd -S pfuser
+pfuser L 02/21/2015 0 99999 7 -1
+</code></pre>
+
+<p>2番目にLとありますが、これがロックされているアカウント、という意味のようです。</p>
 
 <p>次に、作ったユーザのホームディレクトリに以下のものを作ります。</p>
 
@@ -82,7 +89,7 @@
 
 <h2>パスフレーズなしの鍵を作る</h2>
 
-<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけないので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
+<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけない(<code>chown usr:grp</code>)ので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
 
 <pre><code class="sh">$ sudo su - pfuser
 # 今のユーザからpfuser（今作ったポートフォワード用ユーザ）に移動

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://mm011106.github.io/blog/2015/02/23/init-dot-d-script/</loc>
+    <lastmod>2015-02-23T21:20:50+09:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>http://mm011106.github.io/blog/2015/02/21/autossh-2/</loc>
     <lastmod>2015-02-21T18:16:46+09:00</lastmod>
     <priority>0.8</priority>
@@ -167,37 +172,37 @@
   </url>
   <url>
     <loc>http://mm011106.github.io/</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>http://mm011106.github.io/blog/archives/</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>http://mm011106.github.io/about/</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>http://mm011106.github.io/reference/man_mosquitto_conf.html</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>http://mm011106.github.io/reference/man_mosquitto_sub.html</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>http://mm011106.github.io/reference/mosquitto_conf.html</loc>
-    <lastmod>2015-02-22T11:15:27+09:00</lastmod>
+    <lastmod>2015-02-23T22:42:31+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

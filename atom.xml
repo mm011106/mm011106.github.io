@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-22T11:15:27+09:00</updated>
+  <updated>2015-02-23T22:42:31+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,365 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[init.dスクリプトを書いてみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/23/init-dot-d-script/"/>
+    <updated>2015-02-23T21:20:50+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/23/init-dot-d-script</id>
+    <content type="html"><![CDATA[<p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するためシステム起動時にデーモンを動かすことを試しました。
+今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。</p>
+
+<!-- more -->
+
+
+<p>当初の設計では、MQTTでのパブリッシュの時にSSHのポートフォワードを実行するようにしていましたが、外部から操作を可能に出来るようなファンクションも入れておこうということになり、コマンド用のトピックを定義、そこへのメッセージを監視する常駐プロセスを起動する運びとなりました。</p>
+
+<p>そのためデバイスとしては、常にブローカと暗号化経路を維持するのがリーズナブルという判断で、システム起動時に暗号化経路を作るスクリプトをinit.dで作成します。</p>
+
+<h2>init.d用スクリプトを見てみる</h2>
+
+<p>いろいろとwebを検索しましたが、なかなか「これだ」という回答を得られないままでしたが、<a href="https://gist.github.com/atr000/643783">ここで</a>わかりやすいスクリプトを見つけたので、これを元に動作を検証していきます。<br/>
+このスクリプトはautosshを起動時に動かすためのinit.d用スクリプトです。
+autosshはsshの動作を監視して、止まったら起動させる仕事をします。そのため、設定それ自身はsshのものと同じ（というかsshにそのまま渡す）になります。<br/>
+このスクリプトでは、コマンドオプションで全ての指定をしていますが、
+今回の様なポートフォワードではパラメタが多くなり、間違えやすくなるのでconfigファイルを作って指定してあげます。<br/>
+また、ポートフォワード用のユーザを作ってそのユーザでsshを起動します。</p>
+
+<p>まず、INIT INFO部分について記述がなかったので足しておきます。
+INIT INFOが無いと登録したときにいろいろと文句を言われますし、そもそもきちんとしたランレベルで実行されないので、やっておいた方が良いかなと。</p>
+
+<p>完成したスクリプトを最後の方に書いておきます。この内容を順番みていきます。</p>
+
+<p>まずはコメントに見えますが、重要なINIT INFO。</p>
+
+<ul>
+<li>Provides:
+
+<ul>
+<li>このスクリプトが提供する「ファシリティ名」を定義します。このスクリプトを必要とするその他のスクリプトに、このスクリプトの状態を判断できるように名前を付けておきます。<br/>
+他のinitdスクリプトでこのスクリプトの必要性をこの名前（ファシリティ名）で指定しておけば、お互いの必要性を考慮して正しい順序でデーモンが起動するようになります。とのことです。</li>
+</ul>
+</li>
+<li>Required-Start:, Required-Stop:
+
+<ul>
+<li>このスクリプトの起動・停止に必要な「ファシリティ」を記載します。<br/>
+この例では、「メタファシリティ」という物が使われていて、具体的なスクリプトの名前じゃ無く「こういう状態」というような指示です。この定義については<a href="https://wiki.debian.org/LSBInitScripts">debianのwiki</a>をご覧頂いた方が良いかと思います。</li>
+</ul>
+</li>
+<li>Default-Start:, Default-Stop:
+
+<ul>
+<li>このスクリプトを起動する／停止するランレベルの条件を設定します。通常、OSが動作状態の時は2のようです。</li>
+</ul>
+</li>
+</ul>
+
+
+<p>次に定義されている変数です。</p>
+
+<ul>
+<li>TUNNEL変数
+
+<ul>
+<li>ssh用のconfigの中で設定されているポートフォワード設定のhost名を指定します。実際の接続はポートフォワード用のユーザで実行されるので、 configファイルはポートフォワード用のユーザの中におきます。具体的には<code>~/.ssh/config</code>になります。<br/>
+さらに、この設定ファイルの中で「パスワード無し接続」をするために鍵を指定する必要がありますが、この鍵も同じ場所に入れるようにします。<br/>
+鍵へのパスはフルパスで指定した方が無難かと思ったので、そうしてあります。</li>
+</ul>
+</li>
+<li>USER変数
+
+<ul>
+<li>ポートフォワード用のユーザ名を指定します。start-stop-daemonでユーザを指定してコマンドを起動するのに必要となります。</li>
+</ul>
+</li>
+<li>DAEMON変数
+
+<ul>
+<li>起動するautosshを指定します。コメントにもありますように、リンクとかじゃなく実態を指定する必要があるようです。ここを変更すれば他のコマンド・スクリプトも起動できると思いますが、PIDが出来るとか出来ないとかコマンドによって違うようなので、そこら辺は試しながらstart-stop-daemonのオプションを調整する必要があるようです。</li>
+</ul>
+</li>
+<li>PIFLILE変数
+
+<ul>
+<li>pidを保存するファイルを指定します。stopするときpidが必要ですのでpidファイルには正しい値が入っている必要があります。ファイル名そのものは<code>basename $0</code>(このスクリプト自身のパスを含まないファイル名)になります。スクリプト名に拡張子が入っていると、拡張子を含んだ形のpidファイル名になってしまいます。（例えばhogehoge.sh.pid）</li>
+</ul>
+</li>
+<li>SCRIPTNAME変数
+
+<ul>
+<li>usageを表示するときに使います。daemonの起動に直接関係ありません。</li>
+</ul>
+</li>
+<li>DESC変数
+
+<ul>
+<li>起動スクリプト実行時に何が起動されているのか、を表示しますが、そのときのメッセージです。短めが（4wordぐらい）が良いかもしれません。daemonの起動に直接関係ありません。</li>
+</ul>
+</li>
+<li>ASOPT変数
+
+<ul>
+<li>起動するコマンドにオプションを与えるための変数です。今回の例では<code>-M 0 -N host名指定</code>だけです。</li>
+</ul>
+</li>
+</ul>
+
+
+<p>これらの変数を適宜設定すればokかと思います。</p>
+
+<h2>ポイントは。。。</h2>
+
+<p>実は、autosshの起動の前にssh単体での起動を試しました。そのときの問題はpidの取得で、起動したsshのpidを上手く取得できませんでした。色々調べてみると、実行をバックグラウンドに移行するときの指定にコツが必要でした。</p>
+
+<ul>
+<li>ssh にもバックグラウンドに移行するオプション(-f)があるが、それを使うと上手くpidを取得できない</li>
+<li>そのため、start-stop-daemonコマンドの「起動したプロセスをバックグラウンドに移行する」オプションである<code>--background</code>指定する</li>
+<li>さらに、このオプションを指定した場合 <code>--make-pidfile</code>を付ける。</li>
+</ul>
+
+
+<p>これらをきちんとやると、PIDファイルが出来て上手く行きました。ですので、これをそのままautosshに適用しました。</p>
+
+<p>結果的に、コマンドラインは</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>start-stop-daemon --start --quiet --background \
+</span><span class='line'>--chuid $USER --user $USER --pidfile $PIDFILE  \
+</span><span class='line'>--make-pidfile --exec $DAEMON -- $ASOPT</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となりました。他のコマンド／スクリプトのデーモン化では<code>--make-pidfile</code> <code>--background</code>は不要かもしれません。</p>
+
+<ul>
+<li><code>--chuid</code> はdaemonを起動するときのユーザ名を指定します。</li>
+<li><code>--user</code> はプロセスをチェック（起動しているかどうか）の時のユーザ指定のようです。</li>
+</ul>
+
+
+<p>シンプルなスクリプトになりましたので、他の用途にも使っていこうと思います。</p>
+
+<p>これを起動時に動かすためには、</p>
+
+<p><code>
+sudo update-rc.d SCRIPTNAME defaults
+</code></p>
+
+<p>としましょう。これ以前に周到に動作チェックをしたほうがいいですけど。</p>
+
+<figure class='code'><figcaption><span>mqtt-pf</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c">#! /bin/sh</span>
+</span><span class='line'><span class="c">### BEGIN INIT INFO</span>
+</span><span class='line'><span class="c"># Provides:          mqtt-pf</span>
+</span><span class='line'><span class="c"># Required-Start:    $syslog $network sshd</span>
+</span><span class='line'><span class="c"># Required-Stop:     $syslog $network</span>
+</span><span class='line'><span class="c"># Default-Start:     2 3 4 5</span>
+</span><span class='line'><span class="c"># Default-Stop:      0 1 6</span>
+</span><span class='line'><span class="c"># Short-Description: Port forward for MQTT protocol</span>
+</span><span class='line'><span class="c">### END INIT INFO</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># Author: Andreas Olsson &lt;andreas@arrakis.se&gt;</span>
+</span><span class='line'><span class="c"># Version:    @(#)autossh_tunnel.foo  0.1  27-Aug-2008  andreas@arrakis.se</span>
+</span><span class='line'><span class="c"># modified : 13-Feb-2015 mqtt.and@gmail.com #     </span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># For each tunnel; make a uniquely named copy of this template.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">## SETTINGS</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># specify a host name descibed in /home/${USER}/.ssh/ssh_config</span>
+</span><span class='line'><span class="nv">TUNNEL</span><span class="o">=</span><span class="s2">&quot;MY_Broker&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#  user name for port forwading</span>
+</span><span class='line'><span class="nv">USER</span><span class="o">=</span><span class="s2">&quot;pfuser&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c"># You must use the real autossh binary, not a wrapper.</span>
+</span><span class='line'><span class="nv">DAEMON</span><span class="o">=</span>/usr/lib/autossh/autossh
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">## END SETTINGS</span>
+</span><span class='line'>
+</span><span class='line'><span class="nv">PATH</span><span class="o">=</span>/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+</span><span class='line'>
+</span><span class='line'><span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span>basename <span class="nv">$0</span><span class="sb">`</span>
+</span><span class='line'><span class="c"># NAME is always including the extension of $0</span>
+</span><span class='line'><span class="c"># the script should be named without extension for good looking</span>
+</span><span class='line'><span class="nv">PIDFILE</span><span class="o">=</span>/var/run/<span class="k">${</span><span class="nv">NAME</span><span class="k">}</span>.pid
+</span><span class='line'><span class="nv">SCRIPTNAME</span><span class="o">=</span>/etc/init.d/<span class="k">${</span><span class="nv">NAME</span><span class="k">}</span>
+</span><span class='line'><span class="nv">DESC</span><span class="o">=</span><span class="s2">&quot;SSH Tunnel for MQTT protocol&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># exit when test result = false</span>
+</span><span class='line'><span class="nb">test</span> -x <span class="nv">$DAEMON</span> <span class="o">||</span> <span class="nb">exit </span>0
+</span><span class='line'>
+</span><span class='line'><span class="nb">export </span><span class="nv">MQTT_PF_PIDFILE</span><span class="o">=</span><span class="k">${</span><span class="nv">PIDFILE</span><span class="k">}</span>
+</span><span class='line'><span class="nv">ASOPT</span><span class="o">=</span><span class="s2">&quot; -M 0 -N &quot;</span><span class="k">${</span><span class="nv">TUNNEL</span><span class="k">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Function that starts the daemon/service.</span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#  ssh command is not able to make a pid file with -f (force background) option.</span>
+</span><span class='line'><span class="c">#  To obtain pid file properly, put --background, --make-pidfile option on the start-stop-deamon command</span>
+</span><span class='line'><span class="c">#    and force forground to ssh command.</span>
+</span><span class='line'>
+</span><span class='line'>d_start<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  start-stop-daemon --start --quiet --chuid <span class="nv">$USER</span> --user <span class="nv">$USER</span> <span class="se">\</span>
+</span><span class='line'>      --background --pidfile <span class="nv">$PIDFILE</span> --make-pidfile <span class="se">\</span>
+</span><span class='line'>      --exec <span class="nv">$DAEMON</span> -- <span class="nv">$ASOPT</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -gt <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>      <span class="nb">echo</span> -n <span class="s2">&quot; not started (or already running)&quot;</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>      sleep 1
+</span><span class='line'>      start-stop-daemon --stop --quiet --pidfile <span class="nv">$PIDFILE</span> <span class="se">\</span>
+</span><span class='line'>      --test --exec <span class="nv">$DAEMON</span> &gt; /dev/null <span class="o">||</span> <span class="nb">echo</span> -n <span class="s2">&quot; not started&quot;</span>
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># Function that stops the daemon/service.</span>
+</span><span class='line'>d_stop<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  start-stop-daemon --stop --quiet --pidfile <span class="nv">$PIDFILE</span> <span class="se">\</span>
+</span><span class='line'>      --exec <span class="nv">$DAEMON</span> <span class="se">\</span>
+</span><span class='line'>      <span class="o">||</span> <span class="nb">echo</span> -n <span class="s2">&quot; not running&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="s2">&quot;$1&quot;</span> in
+</span><span class='line'>  start<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> -n <span class="s2">&quot;Starting $DESC: $NAME&quot;</span>
+</span><span class='line'>  d_start
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;.&quot;</span>
+</span><span class='line'>  <span class="p">;;</span>
+</span><span class='line'>  stop<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> -n <span class="s2">&quot;Stopping $DESC: $NAME&quot;</span>
+</span><span class='line'>  d_stop
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;.&quot;</span>
+</span><span class='line'>  <span class="p">;;</span>
+</span><span class='line'>
+</span><span class='line'>  restart<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> -n <span class="s2">&quot;Restarting $DESC: $NAME&quot;</span>
+</span><span class='line'>  d_stop
+</span><span class='line'>  sleep 1
+</span><span class='line'>  d_start
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;.&quot;</span>
+</span><span class='line'>  <span class="p">;;</span>
+</span><span class='line'>  *<span class="o">)</span>
+</span><span class='line'>  <span class="nb">echo</span> <span class="s2">&quot;Usage: $SCRIPTNAME {start|stop|restart}&quot;</span> &gt;<span class="p">&amp;</span>2
+</span><span class='line'>  <span class="nb">exit </span>3
+</span><span class='line'>  <span class="p">;;</span>
+</span><span class='line'><span class="k">esac</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">exit </span>0
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[autosshでポートフォワード]]></title>
@@ -72,7 +431,17 @@
 ユーザ設定のデフォルト値は<code>useradd -D</code>で表示できるようですので、確認しておきましょ。</p>
 
 <p>このユーザにはログインできない状態のはずです。一応、外からsshで接続してみます。。。。<br/>
-やはりできませんね。ok</p>
+やはりできませんね。ok<br/>
+さらに、コマンドからユーザの設定を確認しておきます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> <span class="nv">$ </span>passwd -S pfuser
+</span><span class='line'>pfuser L 02/21/2015 <span class="m">0</span> <span class="m">99999</span> <span class="m">7</span> -1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2番目にLとありますが、これがロックされているアカウント、という意味のようです。</p>
 
 <p>次に、作ったユーザのホームディレクトリに以下のものを作ります。</p>
 
@@ -84,7 +453,7 @@
 
 <h2>パスフレーズなしの鍵を作る</h2>
 
-<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけないので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
+<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけない(<code>chown usr:grp</code>)ので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -3391,34 +3760,6 @@ clean sessionをDisable していたセッションも、あらたに発行し�
 <p>という感じです。</p>
 
 <p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[日本語入力]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/14/ime/"/>
-    <updated>2014-12-14T20:07:28+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/14/ime</id>
-    <content type="html"><![CDATA[<p>日本語入力を変更しました。Mozcです。</p>
-
-<p>なかなかいい感じで変換してくれます。キーバインドをATOK風にしていますが、比較的思ったとおりに使えます。</p>
-
-<!-- more -->
-
-
-<p>インストールメモ、といってもapt-getだけですが。。。</p>
-
-<pre><code>sudo apt-get install ibus-mozc
-</code></pre>
-
-<p>だけです。
-あとは、一旦ログアウトしてログインするとibusの「インプットメソッドの選択」の日本語入力メニューにmozcが見えてえいるはず。それを選択して、「設定」を押して適当な設定変更をして、おしまい。</p>
-
-<p>日本語入力はキーボードに次いで重要な部分なので、思ったとおりに動いてくれるのは大変ありがたいです。</p>
-
-<p>1つ気になるのが、変換中でのキャレット表示がわかりづらい。これはシステムの問題かと思いますが、たとえば、「ひとつきになるのが」と打って変換した時に、「ひと月になるのが」と表示されてるのですが、変換がどこで区切られて変換されているのかがわかりにくいです。普通のIMEだと変換しているところまでが太いアンダーラインがついたりしますが、ubuntu12.04では全部同じ太さのアンダーラインになってしまいます。14以降だと改善されているのですけど。。。。</p>
-
-<p>ちなみに、今、キーボードはFILCOのMajestouch 黒軸　です。いいキーボードなのですが、キーのタッチが私の癖に合わないみたいで、ミスタイプがちょっと多いです。もう少しクリックのある感じで、奥まで押した時に打鍵が確定するのがいいような感じです。</p>
 ]]></content>
   </entry>
   

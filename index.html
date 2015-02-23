@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="以前、ポーフォワードをautosshで設定するというのをやりましたが、今回はそれをもう少しまとめてみました。
-起動スクリプトの理解を少し深めて、さらにポートフォワード用のユーザを作ってそこで実行するようにして見ました。 ">
+  <meta name="description" content="以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するためシステム起動時にデーモンを動かすことを試しました。
+今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-23T21:20:50+09:00" pubdate data-updated="true">2015 / 02 / 23</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するためシステム起動時にデーモンを動かすことを試しました。
+今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/23/init-dot-d-script/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -435,49 +478,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-21T20:07:57+09:00" pubdate data-updated="true">2015 / 01 / 21</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>なんか変だと思っていたら、ubuntuに入れたmosquittoのバージョンが最新ではありませんでした。webにあるmanページとどうも違うなと思っていたら、そんなことが原因でした。
-なので、アップデート。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/21/update-mosquitto/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -523,6 +523,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
@@ -536,10 +540,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
   </ul>
@@ -582,6 +582,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
@@ -595,10 +599,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
   </ul>

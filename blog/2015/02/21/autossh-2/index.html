@@ -132,7 +132,17 @@
 ユーザ設定のデフォルト値は<code>useradd -D</code>で表示できるようですので、確認しておきましょ。</p>
 
 <p>このユーザにはログインできない状態のはずです。一応、外からsshで接続してみます。。。。<br/>
-やはりできませんね。ok</p>
+やはりできませんね。ok<br/>
+さらに、コマンドからユーザの設定を確認しておきます。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'> <span class="nv">$ </span>passwd -S pfuser
+</span><span class='line'>pfuser L 02/21/2015 <span class="m">0</span> <span class="m">99999</span> <span class="m">7</span> -1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2番目にLとありますが、これがロックされているアカウント、という意味のようです。</p>
 
 <p>次に、作ったユーザのホームディレクトリに以下のものを作ります。</p>
 
@@ -144,7 +154,7 @@
 
 <h2>パスフレーズなしの鍵を作る</h2>
 
-<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけないので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
+<p>他のユーザで鍵を作ってコピーしてもいいですが、ユーザ名の変更とかしなきゃいけない(<code>chown usr:grp</code>)ので、素直にポートフォワード用ユーザ(pfuser)に移動して鍵を作ります。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -694,6 +704,8 @@
         <a class="basic-alignment left" href="/blog/2015/02/08/remote-stillcam/" title="Previous Post: Paho mqttでリモートカメラ">&laquo; Paho mqttでリモートカメラ</a>
       
       
+        <a class="basic-alignment right" href="/blog/2015/02/23/init-dot-d-script/" title="Next Post: init.dスクリプトを書いてみる">init.dスクリプトを書いてみる &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -737,6 +749,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
@@ -750,10 +766,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
   </ul>
@@ -796,6 +808,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
@@ -809,10 +825,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/03/ore-ore-certificate4/">オレオレ証明書を作ってみようかと　実践3</a>
       </li>
     
   </ul>
