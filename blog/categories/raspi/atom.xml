@@ -4,7 +4,7 @@
   <title><![CDATA[Category: raspi, | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/raspi/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-23T22:42:31+09:00</updated>
+  <updated>2015-02-23T22:49:59+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -18,7 +18,7 @@
     <link href="http://mm011106.github.io/blog/2015/02/23/init-dot-d-script/"/>
     <updated>2015-02-23T21:20:50+09:00</updated>
     <id>http://mm011106.github.io/blog/2015/02/23/init-dot-d-script</id>
-    <content type="html"><![CDATA[<p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するためシステム起動時にデーモンを動かすことを試しました。
+    <content type="html"><![CDATA[<p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するデーモンをシステム起動時に動かすことを試しました。
 今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。</p>
 
 <!-- more -->
