@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-23T22:49:59+09:00</updated>
+  <updated>2015-02-25T21:17:26+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,95 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[起動スクリプトで環境変数を読み込む]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/25/read-env-in-init-dot-d/"/>
+    <updated>2015-02-25T21:03:27+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/25/read-env-in-init-dot-d</id>
+    <content type="html"><![CDATA[<p>環境変数でデバイスのパラメタを指定することを考えてみました。<br/>
+システムワイドの環境変数設定は<code>/etc/environment</code>に入れるようですが、実際にこれを使いたいと思うのは起動時、という場合が多いのでちょっと困りものです。</p>
+
+<!-- more -->
+
+
+<p>というのも、起動時の環境変数はユーザ環境での環境変数とは違う設定になっているからです。
+試してみましたが、やはり/etc/environmentでの設定は起動時には有効になっていません。なので、必要なスクリプトでこれを読み込むことを考えてみました。</p>
+
+<p>最初、</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>cat /etc/environment <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> -r env<span class="p">;</span> <span class="k">do</span> <span class="nb">export</span> <span class="s2">&quot;$env&quot;</span><span class="p">;</span> <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とやってみたのですが、全くだめ。<br/>
+環境変数がプロセスの中だけで有効なのかなと思い、ループの中で環境変数を表示してみてもだめ。<br/>
+その後、いろいろ検索してみると</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="k">for</span> line in <span class="k">$(</span> cat /etc/environment <span class="k">)</span>
+</span><span class='line'>  <span class="k">do</span>
+</span><span class='line'>    <span class="nb">export</span> <span class="nv">$line</span>
+</span><span class='line'>  <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>というスクリプトを見つけました。</p>
+
+<p>こちらを試してみました。このシェルスクリプト内のループの後で環境変数を表示させてみるとうまく設定できています。<br/>
+ただ、このシェルスクリプトをコマンドラインから実行して、帰ってくると設定した環境変数は無くなっています。</p>
+
+<p>スクリプト内では環境変数を維持できそうなので、早速init.dの起動スクリプトで試してみました。</p>
+
+<p>結果は、良好！。無事、設定された環境変数を読み出すことが出来ました。</p>
+
+<p>さらにもう一つ、大事なことを勉強しました。環境変数の設定は、</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">VAR</span><span class="o">=</span>hogehoge
+</span><span class='line'><span class="c"># これが正しい</span>
+</span><span class='line'><span class="nv">VAR</span><span class="o">=</span><span class="s2">&quot;hogehoge&quot;</span>
+</span><span class='line'><span class="c"># とすると、&quot;&quot;も変数に入ってしまう</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>結果、init.dの起動スクリプトでは、必要最低限のPATH指定もやってあげてから、/etc/environmentの内容を読み込むようにしました。<br/>
+環境変数の読み出し時に、空行とコメントを取り外すためのgrepコマンドを入れています。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">PATH</span><span class="o">=</span>/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+</span><span class='line'>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="c">#  Read environment </span>
+</span><span class='line'><span class="c">#</span>
+</span><span class='line'><span class="k">for</span> line in <span class="k">$(</span> cat /etc/environment <span class="p">|</span> grep -v <span class="s1">&#39;^\s*#&#39;</span> <span class="p">|</span> grep -v <span class="s1">&#39;^\s*$&#39;</span><span class="k">)</span>
+</span><span class='line'>  <span class="k">do</span>
+</span><span class='line'>    <span class="nb">export</span> <span class="nv">$line</span>
+</span><span class='line'>  <span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>また一歩進みました。<br/>
+これで、init.d用のスクリプトの中でも不自由することが少なくなるように思います。</p>
+
+<p>それにしても、本題と関係ないところで結構時間をとってるなあ。。。。。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[init.dスクリプトを書いてみる]]></title>
@@ -3673,93 +3762,6 @@ clean sessionをDisable していたセッションも、あらたに発行し�
 
 <p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
 デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[2つのトピックが。。。]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/19/disable-clean-session/"/>
-    <updated>2014-12-19T20:45:30+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/19/disable-clean-session</id>
-    <content type="html"><![CDATA[<p>現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、もう一つ新しいRaspiを用意して移行する手順を進めていました。</p>
-
-<!-- more -->
-
-
-<p>そして、テストとして新しいRaspiからのデータを手元の計算機（Ubuntu)でサブスクライブしてみたところ、新しいRaspiからのトピックだけを受信しているはず（と思っている）なのに、古いサブスクライブのトピックも同時に受信されてしまいます。</p>
-
-<p>よく見てみると、古いRaspiからのデータをサブスクライブする時にオ、プションとして<code>--disable-clean-session</code>と<code>--id</code>を指定していました。新しいRaspiには、同じオプション（idも同じ）で違うトピック（新しいRaspiがパブリッシュするトピック）をサブスクライブするようにブローカにお願いしています。</p>
-
-<p>ここでハタと気づいたのが、「もしかしたら、同じIDだし、クリーンセッションをオフにしてサブスクライブ要求しているから、一度サブスクライブかけたトピック（セッション）はクリーンにならず、他のトピックをサブスクライブしてもついてくるのでは・・・」という点でした。</p>
-
-<p>これを確認するため、<code>--disable-clean-session</code>をとって、ほかのパラメタは同じで、古いRaspiがパブリッシュしているトピックをサブスクライブ要求してすぐに切断し（これで、セッションが切れるはず）、さらに新しいRaspiがパブリッシュしているトピックのみをサブスクライブ要求してみました。これで昔のトピックサブスライブセッションはクリアされ、新しいトピックのみが受信されることになるはずです。</p>
-
-<p>結果、新しいサブスクライブだけを入手することが出来ました。</p>
-
-<p>具体的には、</p>
-
-<figure class='code'><figcaption><span>Why Two topics comes up??</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/OLD_pi -q 1
-</span><span class='line'><span class="o">(</span>古いRaspiからのデータ）
-</span><span class='line'>^c
-</span><span class='line'>　　これで、このサブスクライブはおしまいにした、と思っていたが。。。。
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-</span><span class='line'>（古いRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>^C
-</span><span class='line'>
-</span><span class='line'>　　？？なぜ2つから？？
-</span><span class='line'>  --disable-clean-sessionがあると一度サブスクライブしたセッションは、
-</span><span class='line'>  IDに張り付いているのでは？？？
-</span><span class='line'>  だから、同じIDで違うトピックをサブスクライブしようとしても、
-</span><span class='line'>  前のセッションも復活する？
-</span><span class='line'>  ならば、昔のセッションをクリアにしてあげればいいはず。
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --id abcd -t data/OLD_pi -q 1
-</span><span class='line'>^c
-</span><span class='line'>  clean sessionで接続してすぐに切断。
-</span><span class='line'>  これで、古いサブスクライブのセッションが切れたはず。
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>mosquitto_sub --disable-clean-session --id abcd -t data/NEW_pi -q 1
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>（新しいRaspiからのデータ）
-</span><span class='line'>
-</span><span class='line'>　　思ったとおり
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>という感じです。</p>
-
-<p>ということで、スクリプトで Clean Session を設定していないサブスクライブを切り替えるときは、プロセスをkillするだけではだめで、 Clean Sessionで一度接続して切断することで、セッションを切る必要があるという事でした。さもないと、同じIDで再接続した時に前にサブスクライブしていたトピックも送られてきてしまう、のでは？ということした。</p>
 ]]></content>
   </entry>
   
