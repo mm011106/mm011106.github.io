@@ -94,8 +94,14 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>とやってみたのですが、全くだめ。<br/>
-環境変数がプロセスの中だけで有効なのかなと思い、ループの中で環境変数を表示してみてもだめ。<br/>
+<p>とやってみたのですが、全くだめ。</p>
+
+<blockquote><p><strong>2014/2/26</strong> 追記<br/>
+これはパイプじゃダメで、リダイレクトがいいみたいです。
+<code>while read -r env; do export "$env"; done &lt; /etc/environment</code><br/>
+とするとうまく行きました。</p></blockquote>
+
+<p>環境変数がプロセスの中だけで有効なのかなと思い、ループの中で環境変数を表示してみてもだめ。<br/>
 その後、いろいろ検索してみると</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -112,7 +118,8 @@
 <p>というスクリプトを見つけました。</p>
 
 <p>こちらを試してみました。このシェルスクリプト内のループの後で環境変数を表示させてみるとうまく設定できています。<br/>
-ただ、このシェルスクリプトをコマンドラインから実行して、帰ってくると設定した環境変数は無くなっています。</p>
+<del>ただ、このシェルスクリプトをコマンドラインから実行して、帰ってくると設定した環境変数は無くなっています。</del>
+これは間違いでした。きちんと読み込めて、使えます。</p>
 
 <p>スクリプト内では環境変数を維持できそうなので、早速init.dの起動スクリプトで試してみました。</p>
 
