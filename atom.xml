@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-26T20:15:20+09:00</updated>
+  <updated>2015-02-28T14:34:09+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,75 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[autosshが起動スクリプトでうまく動かない訳]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/28/autossh-failure-to-connect/"/>
+    <updated>2015-02-28T14:10:43+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/28/autossh-failure-to-connect</id>
+    <content type="html"><![CDATA[<p>エラーする原因をつかみました。
+初めてのホストに接続するとき良く目にする以下のメッセージ。</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>The authenticity of host 'mybroker.ABC_corp.jp (xxx.xxx.xxx.xxx)' can't be established.
+</span><span class='line'>ECDSA key fingerprint is xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx.
+</span><span class='line'>Are you sure you want to continue connecting (yes/no)? </span></code></pre></td></tr></table></div></figure>
+
+
+<p>というのが、曲者でした。<br/>
+接続しようとしているユーザの~/.ssh/known_hostsに接続先の「ホストキー」がないと「本当に接続していいのか？」と聞かれます。<br/>
+これは、ssh で接続するときに、先方のホストが本当に正しい（自分の知っている）物かどうかを確認するために、自分が持っている接続先の鍵と送られてきた鍵が等しいかどうかを確認しますが、その結果「違う」と判断された場合出るようです。なので通常、そのホストに初めて接続する場合に出てきます。</p>
+
+<p>インタラクティブにやっているときはyesでいいのですが、スクリプトで実行されているときにこのような質問が来るとスクリプトが止まってしまいます。
+本来的には、きちんとKnown_hostsに接続先を登録するべきだと思いますが、どうも「ちゃんとやってるのに聞かれる」という場合があるように見て取れます。私の設定が悪いんでしょうけれど。。。</p>
+
+<p>ちなみに、ホストキーは/etc/ssh/ssh_host_ecdsa_key.pubです。</p>
+
+<p>今回は、このメッセージが出ないように設定することで回避します。</p>
+
+<p>基本的には、known_hostsに接続しようとするホストの鍵があれば良いので、一度手動で接続するというのも一つの手です。ただ、自分の場合、hostkeyがあるはずなのにうまく行かない、という事があります。</p>
+
+<p>具体的には、StrictHostKeyChecking をno に設定します。ですが、/etc/ssh/ssh_config で設定変更してしまうと全ユーザが影響を受けてしまうので、ローカルの設定を変更します。</p>
+
+<p>~/.ssh/configを開いて、最初の方に <code>StrictHostKeyChecking no</code>　を追加します。</p>
+
+<p>これでok。</p>
+
+<p>configを使ったautosshもこれで安定したような気がします。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[mdファイルのプレビュー]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/28/preview-md/"/>
+    <updated>2015-02-28T13:23:14+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/28/preview-md</id>
+    <content type="html"><![CDATA[<p>FireFoxとかChromeでmarkdownのプレビューが出来るようなので、設定してみました。 <br/>
+おかげでだいぶ文章書きがはかどるようになりました。</p>
+
+<!-- more -->
+
+
+<p>FireFoxで使ったアドオンは、<a href="https://addons.mozilla.org/ja/firefox/addon/markdown-viewer/">markdown-viewe</a>というものです。特に設定など必要なく簡単に使えます。</p>
+
+<p>Chromeで使ったのは<a href="https://github.com/volca/markdown-preview">Markdown Preview Plus</a>です。</p>
+
+<p>こちらはちょっと設定が必要で、chrome側がプラグインに与えるファイルの読み書きをして良いかどうかのパーミッションがあって、それがデフォルトでは「禁止」になっています。これを「許可」にしてあげます。</p>
+
+<p>chromeの設定ー拡張機能を開くと拡張機能の一覧が出てきます。当該拡張機能のところ、名前の下あたりに出てくる、「ファイルのURLへのアクセスを許可する」というのをチェックします。</p>
+
+<p>これでOK。</p>
+
+<p>chromeの拡張機能のほうが綺麗に（それっぽく）表示してくれる感じです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[起動スクリプトで環境変数を読み込む]]></title>
@@ -3349,425 +3418,6 @@ trueの場合、クライアントは有効な証明書を接続するために�
 <p>ブローカとの最大許されるコミュニケーション間の時間（秒）。他のメッセージが交換されなければ、この数値に基づいてクライアントがpingメッセージをブローカに送るレートをコントロールします。</p></blockquote>
 
 <p>ということで、pingに応答がなければ再接続のトリガになるとは書かれていません。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Paho MQTT のインストール]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/21/paho-mqtt/"/>
-    <updated>2014-12-21T11:25:59+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/21/paho-mqtt</id>
-    <content type="html"><![CDATA[<p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
-現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
-手順は、Pahoのページにも出ていますので、とても簡単。</p>
-
-<!-- more -->
-
-
-<p>インストールする前に、簡単にお勉強。</p>
-
-<p>Phao Projectとは一体何者？
-<a href="http://www.eclipse.org/paho/">Paho project</a></p>
-
-<blockquote><p>The Paho project provides scalable open-source client implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine‑to‑Machine (M2M) and Internet of Things (IoT).</p>
-
-<p>M2M、IoTへのアプリケーションに向けた、オープンで標準なメッセージングプロトコルの、スケーラブルでオープンソースのクライアント実装を提供するプロジェクトです。</p></blockquote>
-
-<p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
-
-<ul>
-<li><h2>MQTT Clients</h2></li>
-<li><h3>C/C++</h3>
-
-<p>  Posix C / Windows C<br/>
-  embedded systems<br/>
-  Posix C++ / Windows C++<br/>
-  embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p></li>
-<li><h3>Java</h3>
-
-<p>  J2SE<br/>
-  Android Service</p></li>
-<li><h3>JavaScript</h3></li>
-<li><h3>Python</h3></li>
-<li><h3>Go Client</h3></li>
-<li><h3>C# .Net and WinRT</h3></li>
-<li><h3>Utilities</h3>
-
-<p>  MQTT Conformance/Interoperability Testing</p></li>
-</ul>
-
-
-<p>で、目的のPython向けのクライアントモジュールは、</p>
-
-<p><a href="http://www.eclipse.org/paho/clients/python/">Python support:</a></p>
-
-<blockquote><p>The Paho Python Client provides a client class with support for both MQTT v3.1 and v3.1.1 on Python 2.7 or 3.x.</p></blockquote>
-
-<p>ということで、2.7と3.xの両方をサポートしているようです。</p>
-
-<p>ここまで確認した所で、インストールを始めました。</p>
-
-<figure class='code'><figcaption><span>steps installing Paho-mqtt for Python</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>python --version
-</span><span class='line'>Python 2.7.3
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>sudo apt-get install python-pip
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>sudo pip install paho-mqtt
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>cat paho-mqtt-test.py
-</span><span class='line'>
-</span><span class='line'>import paho.mqtt.client as mqtt
-</span><span class='line'>
-</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
-</span><span class='line'>def on_connect<span class="o">(</span>client, userdata, rc<span class="o">)</span>:
-</span><span class='line'>    print<span class="o">(</span><span class="s2">&quot;Connected with result code &quot;</span>+str<span class="o">(</span>rc<span class="o">))</span>
-</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
-</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
-</span><span class='line'>    client.subscribe<span class="o">(</span><span class="s2">&quot;$SYS/#&quot;</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
-</span><span class='line'>def on_message<span class="o">(</span>client, userdata, msg<span class="o">)</span>:
-</span><span class='line'>    print<span class="o">(</span>msg.topic+<span class="s2">&quot; &quot;</span>+str<span class="o">(</span>msg.payload<span class="o">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="nv">client</span> <span class="o">=</span> mqtt.Client<span class="o">()</span>
-</span><span class='line'>client.on_connect <span class="o">=</span> on_connect
-</span><span class='line'>client.on_message <span class="o">=</span> on_message
-</span><span class='line'>
-</span><span class='line'>client.connect<span class="o">(</span><span class="s2">&quot;iot.eclipse.org&quot;</span>, 1883, 60<span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
-</span><span class='line'><span class="c"># handles reconnecting.</span>
-</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
-</span><span class='line'><span class="c"># manual interface.</span>
-</span><span class='line'>client.loop_forever<span class="o">()</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="nv">$ </span>python ./paho-mqtt-test.py
-</span><span class='line'>
-</span><span class='line'>Connected with result code 0
-</span><span class='line'><span class="nv">$SYS</span>/broker/version mosquitto version 1.3.5
-</span><span class='line'>..
-</span><span class='line'>..
-</span><span class='line'><span class="nv">$SYS</span>/broker/uptime <span class="m">1258785</span> seconds
-</span><span class='line'><span class="nv">$SYS</span>/broker/clients/total 2
-</span><span class='line'><span class="nv">$SYS</span>/broker/clients/inactive 1
-</span><span class='line'><span class="nv">$SYS</span>/broker/clients/active 1
-</span><span class='line'><span class="nv">$SYS</span>/broker/clients/maximum 2
-</span><span class='line'><span class="nv">$SYS</span>/broker/clients/expired 0
-</span><span class='line'><span class="nv">$SYS</span>/broker/messages/stored 72
-</span><span class='line'><span class="nv">$SYS</span>/broker/messages/received 80212
-</span><span class='line'><span class="nv">$SYS</span>/broker/messages/sent 65057
-</span><span class='line'><span class="nv">$SYS</span>/broker/subscriptions/count 2
-</span><span class='line'><span class="nv">$SYS</span>/broker/retained messages/count 50
-</span><span class='line'><span class="nv">$SYS</span>/broker/heap/current 12888
-</span><span class='line'><span class="nv">$SYS</span>/broker/heap/maximum 23872
-</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/dropped 5069
-</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/received 20949
-</span><span class='line'><span class="nv">$SYS</span>/broker/publish/messages/sent 5802
-</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/received 598854
-</span><span class='line'><span class="nv">$SYS</span>/broker/publish/bytes/sent 382692
-</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/received 2003874
-</span><span class='line'><span class="nv">$SYS</span>/broker/bytes/sent 1025439
-</span><span class='line'>.....
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>となりました。
-ここまで、10分かからず完了。</p>
-
-<p>先人に感謝。引き続き、巨人の肩の上で仕事させてもらいます。</p>
-
-<hr />
-
-<p><a href="http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf">MQTT-SN</a></p>
-
-<p>MQTT For Sensor Networks</p>
-
-<p>だそうです。概略だけ、かいつまんでみると。</p>
-
-<blockquote><p>It is optimized for communications over networks where bandwidth is at a premium or where the network con-
-nection could be intermittent. However MQTT requires an underlying network, such as TCP/IP, that provides
-an ordered lossless connection capability and this is too complex for very simple, small footprint, and low-cost
-devices such as wireless SAs.
-The purpose of this document is to specify MQTT-SN, a pub/sub protocol for wireless sensor networks.
-MQTT-SN can be considered as a version of MQTT which is adapted to the peculiarities of a wireless commu-
-nication environment.</p>
-
-<p>センサーネットワークのような、回線の費用がかかるような場所、しばしば回線が落ちるようなところに最適化されたMQTTプロトコルではありますが、小さなローコストのシンプルデバイスにとっては、複雑すぎるTCP/IPのようなロスレスのコネクションを基礎にしています。
-このドキュメントはワイヤレスセンサネットワークのためのパブリッシュ・サブスクライブプロトコルであるMQTT-SNの仕様を規定します。MQTT-SNはワイヤレスコミュニケーション環境の特色に特化したMQTTのバージョンだと考えられます。</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[MQTTのパケットを覗いてみた(1)]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/20/mqtt-packets/"/>
-    <updated>2014-12-20T12:24:00+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/20/mqtt-packets</id>
-    <content type="html"><![CDATA[<p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
-ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
-
-<!-- more -->
-
-
-<h2>mosquitto_sub でサブスクライブ要求した場合</h2>
-
-<p>まずは、パケットをキャプチャするものを用意しなければいけません。
-定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。
-<a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
-
-<p>まとめておくと、</p>
-
-<figure class='code'><figcaption><span>Install wireshark and configure&#8230;</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>:# apt-get install wireshark
-</span><span class='line'>:# setcap <span class="s1">&#39;CAP_NET_RAW+eip CAP_NET_ADMIN+eip&#39;</span> /usr/bin/dumpcap
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
-
-<p>サブスクライブを要求します。</p>
-
-<pre><code>:$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
-</code></pre>
-
-<p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
-
-<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
-
-<hr />
-
-<h3>STEP 1: 接続要求　Client -> Broker</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">10</span> <span class="m">22</span> <span class="m">00</span> <span class="m">06</span> 4d <span class="m">51</span> <span class="m">49</span> <span class="m">73</span> <span class="m">64</span> <span class="m">70</span> <span class="m">03</span> <span class="m">02</span> <span class="m">00</span> 3c <span class="m">00</span> <span class="m">14</span>  .<span class="err">&quot;</span>..MQIsdp...&lt;..
-</span><span class='line'><span class="m">0010</span>   6d 6f <span class="m">73</span> <span class="m">71</span> 5f <span class="m">73</span> <span class="m">75</span> <span class="m">62</span> 5f <span class="m">33</span> <span class="m">35</span> <span class="m">38</span> <span class="m">35</span> 5f <span class="m">75</span> <span class="m">62</span>  mosq_sub_3585_ub
-</span><span class='line'><span class="m">0020</span>   <span class="m">75</span> 6e <span class="m">74</span> <span class="m">75</span>                                      untu
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><p>固定ヘッダ：<br/>
-0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br/>
-0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)</p></li>
-<li><p>可変ヘッダー<br/>
-0002 : 次のメッセージの長さ　MSB<br/>
-0003 : LSB　（ここでは6byte）<br/>
-0004 : &ldquo;MQIsdp&rdquo; （ここは定型句のようです）<br/>
-000A : プロトコルバージョン &ldquo;03&rdquo;<br/>
-000B : FLAGs (CleanSession=&lsquo;1&rsquo;)<br/>
-000C : Keep Alive timer[s] MSB<br/>
-000D : Keep Alive timer[s] LSB  （ここでは60秒）<br/>
-000E : 次のメッセージの長さ　MSB<br/>
-000F :  　　LSB　（ここでは20byte) <br/>
-0010 : クライアント識別子 (オプション&ndash;idで指定したものが入ります。この例ではデフォルト値）</p></li>
-</ul>
-
-
-<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
-
-<hr />
-
-<h3>STEP 2 : 要求の返事　Client &lt;- Broker</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">20</span> <span class="m">02</span> <span class="m">00</span> <span class="m">00</span>                                       ...
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><p>固定ヘッダ：<br/>
-0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br/>
-0001 : 長さ 2byte</p></li>
-<li><p>可変ヘッダ：<br/>
-0002 : トピック名圧縮要求(予約：未使用）<br/>
-0003 : 接続要求戻りコード（ここでは&#8217;00&#8217;で接続許可。&#8217;00&#8217;以外は接続拒否）</p></li>
-</ul>
-
-
-<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
-
-<hr />
-
-<h3>STEP 3: サブスクライブ要求　Client -> Broker</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">82</span> 1b <span class="m">00</span> <span class="m">01</span> <span class="m">00</span> <span class="m">16</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span>  ......<span class="nv">$SYS</span>/broke
-</span><span class='line'><span class="m">0010</span>   <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">23</span> <span class="m">00</span>           r/messages/#.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><p>固定ヘッダ：<br/>
-0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br/>
-0001 長さ　27byte</p></li>
-<li><p>可変ヘッダ：<br/>
-0002 メッセージID　16bit (MSB,LSB)<br/>
-0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br/>
-0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br/>
-001C QoS指定　要求するサブスクライブのQoS指定　QoS=&lsquo;0&rsquo;</p></li>
-</ul>
-
-
-<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
-
-<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
-
-<hr />
-
-<h3>STEP 4: データの送付　Client &lt;- Broker</h3>
-
-<p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0000</span>   <span class="m">31</span> 1f <span class="m">00</span> 1b <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f  1...<span class="nv">$SYS</span>/broker/
-</span><span class='line'><span class="m">0010</span>   6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">73</span> <span class="m">74</span> 6f <span class="m">72</span> <span class="m">65</span> <span class="m">64</span> <span class="m">37</span>  messages/stored7
-</span><span class='line'><span class="m">0020</span>   <span class="m">32</span> <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  21<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
-</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
-</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> <span class="m">30</span> <span class="m">31</span> <span class="m">20</span> <span class="m">00</span> <span class="m">19</span> <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f  ed738301 ..<span class="nv">$SYS</span>/
-</span><span class='line'><span class="m">0050</span>   <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span> 2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f  broker/messages/
-</span><span class='line'><span class="m">0060</span>   <span class="m">73</span> <span class="m">65</span> 6e <span class="m">74</span> <span class="m">35</span> <span class="m">39</span> <span class="m">34</span> <span class="m">34</span> <span class="m">31</span>                       sent59441
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>固定ヘッダ：<br/>
-0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br/>
-0001 : 長さ　31byte</p>
-
-<p>可変ヘッダ：
-0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br/>
-0004 : トピック名　&#8217;$SYS/broker/messages/stored&#8217;<br/>
-  (QoSによっては、ここにメッセージID（16bit）が入る）<br/>
-001F : ペイロード　上記トピックのデータが来る<br/>
-　（ここまでが固定ヘッダで指定された長さ）</p>
-
-<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
-
-<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="m">0020</span>      <span class="m">31</span> <span class="m">24</span> <span class="m">00</span> 1d <span class="m">24</span> <span class="m">53</span> <span class="m">59</span> <span class="m">53</span> 2f <span class="m">62</span> <span class="m">72</span> 6f 6b <span class="m">65</span> <span class="m">72</span>  .1<span class="nv">$.</span>.<span class="nv">$SYS</span>/broker
-</span><span class='line'><span class="m">0030</span>   2f 6d <span class="m">65</span> <span class="m">73</span> <span class="m">73</span> <span class="m">61</span> <span class="m">67</span> <span class="m">65</span> <span class="m">73</span> 2f <span class="m">72</span> <span class="m">65</span> <span class="m">63</span> <span class="m">65</span> <span class="m">69</span> <span class="m">76</span>  /messages/receiv
-</span><span class='line'><span class="m">0040</span>   <span class="m">65</span> <span class="m">64</span> <span class="m">37</span> <span class="m">33</span> <span class="m">38</span> <span class="m">33</span> 30
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
-
-<p>仕様をよく見ると下記のように書いてありました。</p>
-
-<blockquote><p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.</p>
-
-<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br/>
-Each byte encodes 128 values and a &ldquo;continuation bit&rdquo;.<br/>
-For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br/>
-The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p></blockquote>
-
-<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。
-つまりは、</p>
-
-<ul>
-<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
-<li>切った残りのbitに&#8217;1&#8217;がのこっているのなら、切り取った7bitの最上位に&#8217;1&#8217;をつけて、最初の「長さを示す値(1byte)」とする</li>
-<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
-</ul>
-
-
-<p>という事がわかりました。</p>
-
-<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので
-単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。</p>
-
-<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
-
-<hr />
-
-<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
-
-<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。
-しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
-
-<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br/>
-clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br/>
-最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
-
-<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。
-デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
 ]]></content>
   </entry>
   

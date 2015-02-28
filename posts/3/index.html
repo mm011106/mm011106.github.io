@@ -9,7 +9,9 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="現在、テスト用に2台のRaspiでMQTTを使ったテレメトリシステムを運用しています。先日、どうも一台のRaspiのファイルシステムの調子が悪くなったようで、コンソールにエラーが出ていました。立ち上がらなくなると大変なので、適宜バックアップを取り、 &hellip;">
+  <meta name="description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。
+手順は、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +52,93 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/21/paho-mqtt/">Paho MQTT のインストール</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-21T11:25:59+09:00" pubdate data-updated="true">2014 / 12 / 21</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br/>
+現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br/>
+手順は、Pahoのページにも出ていますので、とても簡単。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/21/paho-mqtt/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/12/20/mqtt-packets/">MQTTのパケットを覗いてみた(1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2014-12-20T12:24:00+09:00" pubdate data-updated="true">2014 / 12 / 20</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。
+ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/12/20/mqtt-packets/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -400,95 +489,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/04/mosquitto-dot-conf/">mosquitto.confを見てみた</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-04T20:21:14+09:00" pubdate data-updated="true">2014 / 12 / 04</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>やっぱりmanは見ないとダメ、ということで、まずは<code>mosquitto.conf</code>を紐解いています。
-原文はこちら<a href="http://mosquitto.org/man/mosquitto-conf-5.html"><code>man mosquitto.conf(5)</code></a></p>
-
-<p>つらつらとながめていると、昨日疑問に思っていた部分が書かれていました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/04/mosquitto-dot-conf/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/12/03/mqtt-option/">mosquitto_subのオプション</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2014-12-03T20:43:00+09:00" pubdate data-updated="true">2014 / 12 / 03</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今日も何気なく検索しながら、webを眺めていたら、<code>mosquitto_sub</code>のこんなオプションを発見。</p>
-
-<p><strong><code>-c, --disable-clean-session</code></strong></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/12/03/mqtt-option/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="4">&larr; Older</a>
@@ -536,6 +536,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a>
       </li>
     
@@ -545,14 +553,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
       </li>
     
   </ul>
@@ -595,6 +595,14 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a>
       </li>
     
@@ -604,14 +612,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a>
       </li>
     
   </ul>

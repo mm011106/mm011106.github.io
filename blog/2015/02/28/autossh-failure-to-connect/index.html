@@ -5,11 +5,16 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: mosquitto - MQTT and &#8230;</title>
+  <title>autosshが起動スクリプトでうまく動かない訳 - MQTT and &#8230;</title>
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="Category: mosquitto">
+  <meta name="description" content="エラーする原因をつかみました。
+初めてのホストに接続するとき良く目にする以下のメッセージ。 1
+2
+3
+The authenticity of host 'mybroker.ABC_corp.jp (xxx.xxx.xxx.xxx)' can't be established.
+ECDSA key &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mm011106.github.io/blog/categories/mosquitto/">
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/02/28/autossh-failure-to-connect/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
    <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
@@ -49,80 +54,121 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: mosquitto</h1>
+    
+      <h1 class="entry-title">autosshが起動スクリプトでうまく動かない訳</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-28T14:10:43+09:00" pubdate data-updated="true">2015 / 02 / 28</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
+
+
+<div class="entry-content"><p>エラーする原因をつかみました。
+初めてのホストに接続するとき良く目にする以下のメッセージ。</p>
+
+<!-- more -->
 
 
 
-  
-  <h2>2015</h2>
 
-<article>
-  
-<h1><a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a></h1>
-<time datetime="2015-01-21T20:07:57+09:00" pubdate><span class='month'>Jan</span> <span class='day'>21</span> <span class='year'>2015</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/ubuntu/'>ubuntu</a></span>
-</footer>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>The authenticity of host 'mybroker.ABC_corp.jp (xxx.xxx.xxx.xxx)' can't be established.
+</span><span class='line'>ECDSA key fingerprint is xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx.
+</span><span class='line'>Are you sure you want to continue connecting (yes/no)? </span></code></pre></td></tr></table></div></figure>
 
 
-</article>
+<p>というのが、曲者でした。<br/>
+接続しようとしているユーザの~/.ssh/known_hostsに接続先の「ホストキー」がないと「本当に接続していいのか？」と聞かれます。<br/>
+これは、ssh で接続するときに、先方のホストが本当に正しい（自分の知っている）物かどうかを確認するために、自分が持っている接続先の鍵と送られてきた鍵が等しいかどうかを確認しますが、その結果「違う」と判断された場合出るようです。なので通常、そのホストに初めて接続する場合に出てきます。</p>
 
+<p>インタラクティブにやっているときはyesでいいのですが、スクリプトで実行されているときにこのような質問が来るとスクリプトが止まってしまいます。
+本来的には、きちんとKnown_hostsに接続先を登録するべきだと思いますが、どうも「ちゃんとやってるのに聞かれる」という場合があるように見て取れます。私の設定が悪いんでしょうけれど。。。</p>
 
+<p>ちなみに、ホストキーは/etc/ssh/ssh_host_ecdsa_key.pubです。</p>
 
-<article>
-  
-<h1><a href="/blog/2015/01/18/ore-ore-certificate/">オレオレ証明書を作ってみようかと　準備</a></h1>
-<time datetime="2015-01-18T11:28:32+09:00" pubdate><span class='month'>Jan</span> <span class='day'>18</span> <span class='year'>2015</span></time>
+<p>今回は、このメッセージが出ないように設定することで回避します。</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ca-certificate/'>ca certificate</a>, <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/ssl/'>ssl</a></span>
-</footer>
+<p>基本的には、known_hostsに接続しようとするホストの鍵があれば良いので、一度手動で接続するというのも一つの手です。ただ、自分の場合、hostkeyがあるはずなのにうまく行かない、という事があります。</p>
 
+<p>具体的には、StrictHostKeyChecking をno に設定します。ですが、/etc/ssh/ssh_config で設定変更してしまうと全ユーザが影響を受けてしまうので、ローカルの設定を変更します。</p>
 
-</article>
+<p>~/.ssh/configを開いて、最初の方に <code>StrictHostKeyChecking no</code>　を追加します。</p>
 
+<p>これでok。</p>
 
-
-<article>
-  
-<h1><a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a></h1>
-<time datetime="2015-01-11T11:05:38+09:00" pubdate><span class='month'>Jan</span> <span class='day'>11</span> <span class='year'>2015</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/ssh/'>ssh</a></span>
-</footer>
-
-
-</article>
-
-
-
-  
-  <h2>2014</h2>
-
-<article>
-  
-<h1><a href="/blog/2014/12/19/disable-clean-session/">2つのトピックが。。。</a></h1>
-<time datetime="2014-12-19T20:45:30+09:00" pubdate><span class='month'>Dec</span> <span class='day'>19</span> <span class='year'>2014</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/mosquitto/'>mosquitto</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt</a>, <a class='category' href='/blog/categories/raspi/'>raspi</a></span>
-</footer>
-
-
-</article>
-
+<p>configを使ったautosshもこれで安定したような気がします。</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-28T14:10:43+09:00" pubdate data-updated="true">2015 / 02 / 28</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/autossh/'>autossh,</a>, <a class='category' href='/blog/categories/init-dot-d/'>init.d</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/02/28/autossh-failure-to-connect/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/02/28/autossh-failure-to-connect/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/02/28/preview-md/" title="Previous Post: mdファイルのプレビュー">&laquo; mdファイルのプレビュー</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>

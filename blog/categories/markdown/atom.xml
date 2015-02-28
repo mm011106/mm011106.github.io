@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: markdown | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/markdown/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-02-28T14:34:09+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[mdファイルのプレビュー]]></title>
+    <link href="http://mm011106.github.io/blog/2015/02/28/preview-md/"/>
+    <updated>2015-02-28T13:23:14+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/02/28/preview-md</id>
+    <content type="html"><![CDATA[<p>FireFoxとかChromeでmarkdownのプレビューが出来るようなので、設定してみました。 <br/>
+おかげでだいぶ文章書きがはかどるようになりました。</p>
+
+<!-- more -->
+
+
+<p>FireFoxで使ったアドオンは、<a href="https://addons.mozilla.org/ja/firefox/addon/markdown-viewer/">markdown-viewe</a>というものです。特に設定など必要なく簡単に使えます。</p>
+
+<p>Chromeで使ったのは<a href="https://github.com/volca/markdown-preview">Markdown Preview Plus</a>です。</p>
+
+<p>こちらはちょっと設定が必要で、chrome側がプラグインに与えるファイルの読み書きをして良いかどうかのパーミッションがあって、それがデフォルトでは「禁止」になっています。これを「許可」にしてあげます。</p>
+
+<p>chromeの設定ー拡張機能を開くと拡張機能の一覧が出てきます。当該拡張機能のところ、名前の下あたりに出てくる、「ファイルのURLへのアクセスを許可する」というのをチェックします。</p>
+
+<p>これでOK。</p>
+
+<p>chromeの拡張機能のほうが綺麗に（それっぽく）表示してくれる感じです。</p>
+]]></content>
+  </entry>
+  
+</feed>
