@@ -9,9 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。 カメラ側の設定 まずは、デバイス（カメラ）側のスクリプト ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。 remotecam.py 1
-2
-3 &hellip;">
+  <meta name="description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。 2015/2/28 UPDATE!! カメラ側の設定 まずは、デバイス（カメラ）側のスクリプト ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +78,8 @@
 
 
 <div class="entry-content"><p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
+
+<blockquote><p>2015/2/28 UPDATE!!</p></blockquote>
 
 <!-- more -->
 
@@ -169,9 +169,56 @@
 
 <p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。<del>ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</del></p>
 
-<h5>2015/2/11追記：</h5>
+<h4>2015/2/11追記：</h4>
 
-<h5>上記のバイナリデータのハンドリングの件ですが、うまく行かない理由は私のスキル不足です。多分python内部での変数のデータ扱いをうまく変換してやる必要が有りそうです。  只今勉強中。</h5>
+<h4>上記のバイナリデータのハンドリングの件ですが、うまく行かない理由は私のスキル不足です。多分python内部での変数のデータ扱いをうまく変換してやる必要が有りそうです。  只今勉強中。</h4>
+
+<blockquote><h3>2015/2/28  追記：</h3>
+
+<p>上記、バイナリデータの送信の件ですが、<br/>
+実際に出てくるエラーは<br/>
+<code>UnicodeDecodeError: 'ascii' codec can't decode</code><br/>
+というものでしたので、そのまま検索をかけてみると、デコードがうまく行っていない、旨のエラーのようです。<br/>
+であれば、変換をしないように設定すればいいのかなあ、どうするのかなあ、と思いつつソースコードを（わからないなりに）眺めていると、</p></blockquote>
+
+<figure class='code'><figcaption><span>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.python.git/tree/src/paho/mqtt/client.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>        <span class="k">if</span> isinstance<span class="o">(</span>payload, str<span class="o">)</span>:
+</span><span class='line'>            <span class="nv">upayload</span> <span class="o">=</span> payload.encode<span class="o">(</span><span class="s1">&#39;utf-8&#39;</span><span class="o">)</span>
+</span><span class='line'>            <span class="nv">payloadlen</span> <span class="o">=</span> len<span class="o">(</span>upayload<span class="o">)</span>
+</span><span class='line'>        <span class="k">elif</span> isinstance<span class="o">(</span>payload, bytearray<span class="o">)</span>:
+</span><span class='line'>            <span class="nv">payloadlen</span> <span class="o">=</span> len<span class="o">(</span>payload<span class="o">)</span>
+</span><span class='line'>        <span class="k">elif</span> isinstance<span class="o">(</span>payload, unicode<span class="o">)</span>:
+</span><span class='line'>            <span class="nv">upayload</span> <span class="o">=</span> payload.encode<span class="o">(</span><span class="s1">&#39;utf-8&#39;</span><span class="o">)</span>
+</span><span class='line'>            <span class="nv">payloadlen</span> <span class="o">=</span> len<span class="o">(</span>upayload<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>という記述を見つけ、payloadのタイプによってエンコードを分けていることがわかりました。<code>bytearray</code>なら何もせずにそのままのデータが送られるので<code>bytearray</code>にすればいい。 <br/>
+再び検索して、読み込んだファイルをbytearray型で変数に代入する方法を調べ、結果として次のようなソースコードになりました。</p></blockquote>
+
+<figure class='code'><figcaption><span>replace with &#8216;mosquitto_pub &#8230;&#8230;&#8217;</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># 撮影した写真ファイルは/run/shm/temp.jpg</span>
+</span><span class='line'>       with open<span class="o">(</span><span class="s1">&#39;/run/shm/temp.jpg&#39;</span>, <span class="s1">&#39;rb&#39;</span><span class="o">)</span> as <span class="nb">source</span>:
+</span><span class='line'>            <span class="nv">payload_pub</span> <span class="o">=</span> bytearray<span class="o">(</span>source.read<span class="o">())</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># bytearray 型にして変数に代入、それをそのままペイロードとしてパブリッシュ</span>
+</span><span class='line'>        client.publish<span class="o">(</span>topic_root+topic_pub, payload_pub<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>これで無事バイナリファイルを送信することが出来ました。</p></blockquote>
 
 <p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
 
