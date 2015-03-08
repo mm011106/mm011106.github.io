@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="エラーする原因をつかみました。
-初めてのホストに接続するとき良く目にする以下のメッセージ。 ">
+  <meta name="description" content="gmailでメールを送るスクリプトを作り直しました。
+プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-03-08T10:53:20+09:00" pubdate data-updated="true">2015 / 03 / 08</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>gmailでメールを送るスクリプトを作り直しました。<br/>
+プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/03/08/send-email-via-gmail/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -437,49 +480,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/02/ore-ore-certificate3/">オレオレ証明書を作ってみようかと　実践2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-02-02T20:41:28+09:00" pubdate data-updated="true">2015 / 02 / 02</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>先の投稿では「オレオレ証明書」を作って、無事nginxに導入してTLS接続が出来るようになりました。<br/>
-あとはこれをmosquittoに応用するだけ、と思っていたら実はCA certificate（CA証明書）が必要だと言うことにはたと気づき、がっくり。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/02/02/ore-ore-certificate3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -525,6 +525,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
       </li>
     
@@ -538,10 +542,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
   </ul>
@@ -584,6 +584,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
       </li>
     
@@ -597,10 +601,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/21/autossh-2/">autosshでポートフォワード</a>
       </li>
     
   </ul>

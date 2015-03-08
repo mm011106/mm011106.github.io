@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-02-28T18:24:47+09:00</updated>
+  <updated>2015-03-08T13:14:20+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,168 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[gmailでメールを送る]]></title>
+    <link href="http://mm011106.github.io/blog/2015/03/08/send-email-via-gmail/"/>
+    <updated>2015-03-08T10:53:20+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/03/08/send-email-via-gmail</id>
+    <content type="html"><![CDATA[<p>gmailでメールを送るスクリプトを作り直しました。<br/>
+プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。</p>
+
+<!-- more -->
+
+
+<p>実際には、gmailアカウントからセキュリティの設定をしなおすと一応接続はしてくれるようになります。しかし、送付先がgmail内に制限されているようです。</p>
+
+<h2>再び検索</h2>
+
+<p>全く持ってどうすればいいのかわからなかったので、またしても検索しました。</p>
+
+<p>結果、<a href="http://qiita.com/ssh0/items/7baa0cd094d9fb7561e1">こちらのページ</a>を見つけましたので、これを基に自分の作業用のメール送信スクリプトを作ることにします。ありがとうございます。<br/>
+おかげさまで6時間ぐらいで完成させることが出来ました。</p>
+
+<h2>目的・目標</h2>
+
+<p>このスクリプトの目的は、基本的なメール送信の手順を確認することが第一の目的です。 <br/>
+デバイスのデータをまとめているサーバ側からユーザへの通知方法の1つとして、メールは必須と考えられるので基本的なところを勉強しておこうということです。
+また今回作ったスクリプトは、データをまとめたグラフをユーザへプッシュすることを目的としています。</p>
+
+<p>スクリプトの目標は以下のとおりです。</p>
+
+<ul>
+<li>送信者リスト(recipients list)から送信先を読み込んで、それをメールの送信先として設定する。</li>
+<li>添付ファイル(PDF)を付けられるようにする。`</li>
+<li>送信者リストのファイル名からIDを抽出して、それをメールのタイトルに入れる
+
+<ul>
+<li>具体的には、送信者リストのファイル名の中の数値(整数)をとりだします</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>結果</h2>
+
+<p>ソースコードはgithubの方に載せておきます。（相変わらず使い方がよくわからない。。。） <br/>
+<a href="https://github.com/mm011106/sendgmail.py/blob/master/sendgmail.py">sendgmail.py</a></p>
+
+<p>動作の検証を何回かやって、エラーハンドリング用のコードを少し入れて通常に使うにはokぐらいになりました。</p>
+
+<h2>ポイント</h2>
+
+<p>今回の作業でポイントとなったところをいくつか記録しておきます。</p>
+
+<h3>ヘッダの中の宛先とメール送信コマンドの引数としての宛先</h3>
+
+<p>普段メールを書いているときにはほとんど意識しない宛先の取り扱いですが、意識していないからこそひっかかったという感じでしょうか。</p>
+
+<p>送信先を読み込んで、その宛先を <code>msg['To'] = to_addr</code>というように設定してあげます。<code>to_addr</code>は文字列で複数のメールアドレスがコンマで区切られて入っています。<br/>
+最初はてっきりこの設定で実際のメール送信の宛先になるものだ、と思い込んでいました。<br/>
+しかしながら、複数の宛先が指定されていても、送られてくるのは最初の宛先だけ、という状況でした。
+アドレス指定が文字列じゃいけなくて、リストなのかなあ、などと思いつつ色々調べていて、はたと気がつきました。「もしかしたら送信用のアドレス指定とメールヘッダ用の宛先指定は違うのじゃないか？」と。スクリプトを眺めると0.1秒でそれが正しいことがわかりました。</p>
+
+<p>結局、<code>msg['To'] = to_addr</code>はヘッダ用で、実際の送信にこの内容は関与しない、という事です。さらに送信用の実際のアドレス指定は<code>send_via_gmail(from_addr, to_addr, passwd, msg)</code>の<code>to_addr</code>であって、これは複数の宛先の場合「リスト」で有る必要があります。
+具体的には、</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>ヘッダ用アドレス指定：<span class="s1">&#39;aaa@gmial.com, bbb@yahoo.com&#39;</span>
+</span><span class='line'>メール送信用アドレス指定：<span class="o">[</span><span class="s1">&#39;aaa@gmail.com&#39;</span>, <span class="s1">&#39;bbb@yahoo.com&#39;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>これら2つの変数を混同して使っていたため、<code>send_vi_gmail</code>に送られる引数のアドレスは「複数のアドレスを記載した文字列」となっていました。これが、<code>send_via_gmail</code>に渡されてリストとして扱われたため、「要素数１」で（頭に書かれている）1ヶ所だけにメールが送られていたようです。</p>
+
+<h3>パーサが使える！</h3>
+
+<p>pythonでこんなに簡単に引数をパースできるとは！参考にしたページを書いていただいた人に感謝します。ありがとうございます。</p>
+
+<p>早速使わせて頂きました。</p>
+
+<h3>「内包表現」？</h3>
+
+<p>なんだかよくわからないけど、表現としてはすっきりするので使って見ました。<br/>
+具体的には、recipient listから読み込んだ内容をリストにして、そのリスト内から不要なもの（空、#で始まるコメントの要素）を取り除くために使っています。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># 　正規表現定義（コメント行と空行） </span>
+</span><span class='line'><span class="n">re_comment</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^\s*#&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">re_null_line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;^\s*$&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#  内包表現を使って正規表現に”マッチしない”要素を取り出す</span>
+</span><span class='line'><span class="c">#　　address_listには、コメントや空行も含めファイルから読み込んだ宛先が入っている</span>
+</span><span class='line'><span class="n">address_list</span><span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">address_list</span> <span class="k">if</span> <span class="n">re_comment</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="bp">None</span> <span class="p">]</span>
+</span><span class='line'><span class="n">address_list</span><span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">address_list</span> <span class="k">if</span> <span class="n">re_null_line</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="bp">None</span> <span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>添付ファイルの用意</h3>
+
+<p>添付ファイルはMIMEエンコードする必要があるので、なんだかちょっと面倒です。<br/>
+説明できないですが、webの情報をかき集めてこのようなコードにしています。</p>
+
+<p>多分こんなかんじかと。。。</p>
+
+<ul>
+<li>MIMEBaseで添付ファイルのオブジェクトをPDFとして作る。</li>
+<li>添付ファイルの実体をファイルから読み込んでオブジェクトに入れる。</li>
+<li>base64でエンコード</li>
+<li>ヘッダをつける</li>
+</ul>
+
+
+<p>ここには書かれていませんが、このあとメッセージにattachします。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#   prepare PDF file as a attachment</span>
+</span><span class='line'>    <span class="n">attach_file_name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">attach_file</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="n">attach_file_name</span> <span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">attach_file_name</span><span class="p">)</span> <span class="p">:</span>
+</span><span class='line'>            <span class="n">attachment</span> <span class="o">=</span> <span class="n">MIMEBase</span><span class="p">(</span><span class="s">&quot;application&quot;</span><span class="p">,</span><span class="s">&quot;pdf&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">attach_file</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+</span><span class='line'>                <span class="n">attachment</span><span class="o">.</span><span class="n">set_payload</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">Encoders</span><span class="o">.</span><span class="n">encode_base64</span><span class="p">(</span><span class="n">attachment</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">base_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">attach_file_name</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">attachment</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s">&quot;Content-Disposition&quot;</span><span class="p">,</span> <span class="s">&quot;attachment&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">base_file_name</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">else</span><span class="p">:</span>
+</span><span class='line'>            <span class="k">print</span> <span class="p">(</span><span class="s">&#39;No attachment file is found.&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span><span class="p">:</span>
+</span><span class='line'>       <span class="k">print</span> <span class="p">(</span><span class="s">&#39;No attachment file is specified.&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>展望</h2>
+
+<p>動作は問題ありませんが、メールアカウントのパスワードが生で入っているのがちょっと気になりますね。  スクリプト自体をrootしか見れないようにすれば少しは良いかもしれません。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[autosshが起動スクリプトでうまく動かない訳]]></title>
@@ -3285,188 +3447,6 @@ trueの場合、クライアントは有効な証明書を接続するために�
 
 
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[paho-mqttで回線を切るとどうなるか]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/29/vim/"/>
-    <updated>2014-12-29T10:28:40+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/29/vim</id>
-    <content type="html"><![CDATA[<p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
-
-<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。</p>
-
-<!-- more -->
-
-
-<p>サブスクライバは下記のようなものです。これはpaho-mqttのページにあったテスト用のスクリプトです。</p>
-
-<figure class='code'><figcaption><span>test_subscriber.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="n">topic</span> <span class="o">=</span> <span class="s">&quot;TOPIC/YOU/WANTS/SEE&quot;</span>
-</span><span class='line'><span class="n">broker</span> <span class="o">=</span> <span class="s">&quot;192.168.0.xxx&quot;</span>
-</span><span class='line'><span class="n">portNo</span> <span class="o">=</span> <span class="mi">1883</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="kn">as</span> <span class="nn">mqtt</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># The callback for when the client receives a CONNACK response from the server.</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span>
-</span><span class='line'>  <span class="c"># Subscribing in on_connect() means that if we lose the connection and</span>
-</span><span class='line'>  <span class="c"># reconnect then subscriptions will be renewed.</span>
-</span><span class='line'><span class="c">#    client.subscribe(&quot;$SYS/broker/messages/#&quot;)</span>
-</span><span class='line'>    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># The callback for when a PUBLISH message is received from the server.</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-</span><span class='line'>  <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="o">+</span><span class="s">&quot; &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
-</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="n">on_connect</span>
-</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">portNo</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Blocking call that processes network traffic, dispatches callbacks and</span>
-</span><span class='line'><span class="c"># handles reconnecting.</span>
-</span><span class='line'><span class="c"># Other loop*() functions are available that give a threaded interface and a</span>
-</span><span class='line'><span class="c"># manual interface.</span>
-</span><span class='line'><span class="n">client</span><span class="o">.</span><span class="n">loop_forever</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>で、これを実行して、途中でネットワークを切って見ました。</p>
-
-<p>端末上ではこんな感じ。</p>
-
-<figure class='code'><figcaption><span>In case of transmission line failure..</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>1419926642, 1767, 1433, 2513, 0
-</span><span class='line'>Connected with result code 0
-</span><span class='line'>1419926762, 1767, 1434, 2514, 0
-</span><span class='line'>1419926821, 1767, 1432, 2513, 0
-</span><span class='line'>  :
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最初のサブスクライブを確認してから、接続を60秒以上切断し、元に戻します。</p>
-
-<p>データの最初のフィールドはタイムスタンプなので、120秒のデータ欠損があることがわかります。
-その後経路が回復した時点で、再接続されていることがわかります。</p>
-
-<p>スクリプトでは<code>client.connect(broker, portNo, 60)</code>として60秒以上交信しないとpingでMQTT接続をキープするように設定しています。この実験では、60秒以上コネクションを切っていますのでpingが発行され、その答えは帰ってこない状況に有ります。さらにブローカはmosquittoをデフォルトで動かしているので、ブローカがMQTTのコネクションを切ることはありません。（persistent_client_expirationを設定していない）</p>
-
-<p>スクリプトを実行した時のパケットの様子を見てみると。。。。</p>
-
-<ul>
-<li><p>TCP でのネゴシエーションがあったあと、MQTTでの接続リクエストがなされます。</p></li>
-<li><p>続いてMQTTの接続許可がブローカから来ます。
-そしてサブスクライブ要求としてトピックの指定をブローカに送ります。</p></li>
-<li><p>この返事として、TCPのACKがあり、サブスクライブの準備が整います。指定したトピックにパブリッシュがあると、サブスクライブされるようになります。</p></li>
-</ul>
-
-
-<p>そして、スクリプト開始から66.9秒後に最初のデータがきました。その後、接続を切ります。</p>
-
-<p>183秒のときに接続を再開。</p>
-
-<p>このとき起こったことは。。。。</p>
-
-<ul>
-<li><p>まず、TCPでの接続のために、クライアントからブローカに向かってSYN,ACK、SYNが取り交わされます。</p></li>
-<li><p>その後、最初の接続と同じように、MQTTのコネクションが最初の接続と同じIDで開始され、次にサブスクライブ要求が発行されています。</p></li>
-<li><p>サブスクライブ要求後、サブスクライブ確認のメッセージがブローカから帰ってきます。</p></li>
-<li><p>その3秒後、ブローカからFINパケットとともにデータが送られてきて、クライアントがRSTパケットを返してTCP接続が切られます。</p>
-
-<ul>
-<li>このFIN-RST応答は、そのシーケンス番号から、回線を切る前のコネクションの異常終了のためのやり取りだという事がわかりました。ですので、このパケットに乗っていたデータは以前のコネクションのデータだということで破棄されているはずです。スクリプトの出力を見るとこのデータは出力されていませんので、これは正しい理解だという事にします。</li>
-</ul>
-</li>
-</ul>
-
-
-<!--
-このタイミングはパブリッシュのタイミングなので、サブスクライブデータが送られてくるタイミングでもあります。
-ブローカ側としては、TCPコネクションが再開したのでデータを送るけれど、すでに同じIDでコネクション要求が入っているので、これは最後のデータね。ということでFINパケットと共に送られたものと思います。
-一方のクライアント側は、再接続しているので、このパケットを受け取るソケットが無く、RSTパケットで強制終了のお願いをして終わりにしたのだと考えられます。
--->
-
-
-<ul>
-<li>そのあと、最新のデータが配信されてきました。このデータのタイムスタンプは<code>1419926762</code>で、スクリプトの出力からこのタイムスタンプのデータの受信は確認出来ました。</li>
-</ul>
-
-
-<p>以上が、回線を切断された時のこのスクリプトの動作です。</p>
-
-<p>ここで疑問は、「なぜ、コネクション要求がクライアントから出されるのか」という点です。
-スクリプトでは、接続がロストした時の内容は記述していません。ということは、ライブラリ側の判断で再接続がなされているという事になります。</p>
-
-<p>で、よく<a href="https://pypi.python.org/pypi/paho-mqtt#network-loop">マニュアル</a>を読むと、loop_forever()ファンクションがこれを管理しているようです。</p>
-
-<h3>Network loop</h3>
-
-<blockquote><p>These functions are the driving force behind the client. If they are not called, incoming network data will not be processed and outgoing network data may not be sent in a timely fashion.</p>
-
-<p>これらのファンクションはクライアントの裏で駆動力となるものです。これらが呼ばれなければ入力されたデータは処理されず、出力されるべきデータは時間通りに送られないでしょう。</p></blockquote>
-
-<h3>loop_forever()</h3>
-
-<blockquote><p>This is a blocking form of the network loop and will not return until the client calls disconnect(). It automatically handles reconnecting.</p>
-
-<p>これはネットワークループのブロッキングフォームで（私には意味不明）、クライアントがdisconnect()関数を呼び出すまでは帰って来ません。自動的に再接続を管理します。</p></blockquote>
-
-<p>ということなので、（予想では）loop_forever()が再接続を発行して、その結果、スクリプトの処理で再度サブスクライブ要求が出される。ということなのでしょう。</p>
-
-<p>今回、断線後の再接続では切断前と同じIDを使っていましたので、MQTTプロトコル的には再度サブスクライブ要求を出さずとも、以前に指定したトピックをサブスクライブできたはずです。 <br/>
-ただ、一体何が起こっているのか判断がつかない状況では、再接続後に再度サブスクライブ要求を出すというのは妥当な処理なのかなとも思います。</p>
-
-<p> ここでのもうひとつの疑問は、「回線が切れた、と判断する基準は何？」ということです。</p>
-
-<p>これについて、<code>connect()</code>のkeepaliveだけ切断する状況と、充分短い時間（ほんの数秒）切断する状況で確認してみたところ、短い時間では再接続が起こらなかったことから、keepaliveの時間以上接続が切れていると(pingに応答がないと)切断されたと判断して「再接続」を行うようです。</p>
-
-<p>マニュアル上では</p>
-
-<h3>keepalive</h3>
-
-<blockquote><p>maximum period in seconds allowed between communications with the broker. If no other messages are being exchanged, this controls the rate at which the client will send ping messages to the broker</p>
-
-<p>ブローカとの最大許されるコミュニケーション間の時間（秒）。他のメッセージが交換されなければ、この数値に基づいてクライアントがpingメッセージをブローカに送るレートをコントロールします。</p></blockquote>
-
-<p>ということで、pingに応答がなければ再接続のトリガになるとは書かれていません。</p>
 ]]></content>
   </entry>
   
