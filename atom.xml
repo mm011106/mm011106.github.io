@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-03-08T13:14:20+09:00</updated>
+  <updated>2015-03-29T12:11:12+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,164 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[IBM IoT foundationを試してみた]]></title>
+    <link href="http://mm011106.github.io/blog/2015/03/29/ibm-iot-foundation/"/>
+    <updated>2015-03-29T09:42:17+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/03/29/ibm-iot-foundation</id>
+    <content type="html"><![CDATA[<p>デバイスの方で手一杯で、MQTTブローカをVPSで立ち上げるとか、データのビジュアライズとか解析とかまで手が出ないので、SaaSというかIaaSをためしに使って見ることにしました。</p>
+
+<!-- more -->
+
+
+<p>最近では、wolfram もIoT向けのサービスを提供しているぐらい、いろんな会社でやっていますが、私はMQTTを使っていることもあり、本家IBMの&#8221;IBM Internet of Things foundation&#8221;を試し始めました。<br/>
+イマイチわかってはいないのですが、IBM Bluemixというサービスがあって、その拡張としてMQTTを扱えるようにした、というような感じだと認識しています。</p>
+
+<h2>まずはアカウントを作る</h2>
+
+<p>で、早速<a href="https://internetofthings.ibmcloud.com/">IBM IoT foundation</a>のページに行って登録しました。
+ページの上の方にSignUp、下の方に Try Quick startのボタンがあったので、QuickStartの方から登録しました。支払い条件とかを聞かれませんでしたので、完全にお試しのようです。
+ページの上の方にあるSignUpではコースを選んだりするところがあり、こちらは「購入」という感じです。ただ、デバイスが20台以下、月間のデータ転送量が100MB以下、月間の使用ストレージが1GB以下だと無料のようです。</p>
+
+<p>まずは、アカウントを作ります。
+多分<a href="https://apps.admin.ibmcloud.com/manage/trial/iot.html">ここから</a>入れば大丈夫だと思います。。。。大手のIT企業のwebページはどうも複雑で、昨日やったことをトレースしようと思ってもうまく行きませんでした。</p>
+
+<p>登録すると、confirmation e-mailが届きますので指定されたURLをクリックして完了です。
+このとき表示されるwebページが「ダッシュボード」となります。左上に”Organization: xxxxx (Trial)&ldquo;のように表示されていると思います。この6文字のコードがデバイスを接続するホスト名につくIDの&#8221;organaization Code&#8221;となりますので、メモしておいてください。</p>
+
+<h2>デバイスを登録</h2>
+
+<p>次にやることは、デバイスの登録です。
+このページの左側コラムにあるように、「ページのdeviceタブを押して」「Add Deviceを選択」します。<br/>
+そうすると、新しいページに移動します。ページ中央に&#8221;Device Type&#8221;を入力する欄、その下に&#8221;Device ID&#8221;を入力する欄があります。これはデバイスを識別するためのもので、自分で勝手に決めていいようです。私はDevice Type に製品の型式、Device IDに、指示のようにMACアドレス（コロン抜きで）を入れました。</p>
+
+<p>入力を終えると、次のページでデバイスをクラウドに接続するための大事な情報が表示されるので、メモしておきます。</p>
+
+<figure class='code'><figcaption><span>DEVICE IDs</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">org</span><span class="o">=</span>asdfjk
+</span><span class='line'><span class="nb">type</span><span class="o">=</span>AD
+</span><span class='line'><span class="nv">id</span><span class="o">=</span>abcd12345654
+</span><span class='line'>auth-method<span class="o">=</span>token
+</span><span class='line'>auth-token<span class="o">=(</span>@dS<span class="p">&amp;</span>34+#2upCxP1
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>のような感じです。</p>
+
+<h2>MQTTで接続</h2>
+
+<p>さあ、これで接続だあ！とmosquitto_pubでデータをパブリッシュしてみます。</p>
+
+<p>ひとまず、ホームとなる「ダッシュボード」に戻ります。URLは<code>https://internetofthings.ibmcloud.com/dashboard/#/organizations/${org}/home</code>のようになるはずです。迷ったらここに戻りましょう（私は何度と無く迷子になりました）。
+${org}には先の「大切な情報」の中のorgを入れます。</p>
+
+<p>Deviceタブをクリックして、先ほど登録したデバイスが出てくるのを確認します。</p>
+
+<p>次に、ページの一番上、グレーのバンドのところに&#8221;QuickStart&#8221;というところがあるので、それを押してみます。すると、新しいページに移動して、左側にMACアドレスを入力する欄が出てきます。なんだかわからないまま、うながされるまま登録したデバイスのMACを入れてみます。</p>
+
+<p>すると、「メッセージを待ってます」みたいなセリフが出て「Device IDは登録されていますが、データが来ていません。有効なデータが来ればビジュアライズしますよ」というメッセージが見えます。</p>
+
+<p>ならば、web上でビジュアライズしてもらおうじゃあないか、ということでMQTTでパブリッシュしてみます。</p>
+
+<p>とはいうものの、何をどうしていいやら。。。。。webを捜し回ること1時間ほど。<a href="https://docs.internetofthings.ibmcloud.com/messaging/devices.html">Documentation</a>
+を発見。結局これが一番わかり易い感じです。</p>
+
+<p>これによれば、MQTTのパラメタを以下のように指定すればつながるようです。
+shellスクリプト風の表記をして見ました。</p>
+
+<ul>
+<li>client_id : d:${org_id}:${device_type}:${device_id}</li>
+<li>username : &ldquo;use-token-auth&rdquo;</li>
+<li>password : ${auth-token}</li>
+</ul>
+
+
+<p>必要な情報はすべてデバイスを登録した時点で「重要な情報」として出てきたものです。</p>
+
+<p>同時にトピックツリーも重要ですが、デフォルトでこのような構成になっているようです。</p>
+
+<ul>
+<li>iot-2/evt/${event_id}/fmt/${format_string}</li>
+</ul>
+
+
+<p>event_id,format_stringは任意に（適当に）決めていいようです。ただ、クラウドで処理する分には決まりがあるようです。（ここらへん未だに解明できていない。。。）</p>
+
+<p>具体的にmosquitto_pubのコマンドパラメータに展開すると、</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mosquitto_pub -i d:asdfjk:AD -h asdfjk.messaging.internetofthings.ibmcloud.com <span class="se">\</span>
+</span><span class='line'>-u use-token-auth -P <span class="s2">&quot;(@dS&amp;34+#2upCxP1&quot;</span> <span class="se">\</span>
+</span><span class='line'>-t iot-2/evt/hogehoge/fmt/json -m <span class="s2">&quot;hello IBM&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>のような感じになるはずです。</p>
+
+<p>で、早速、適当なデータをPublishしてみるも<a href="https://quickstart.internetofthings.ibmcloud.com/#/device//sensor/">web上</a>には何も現れません。</p>
+
+<p>また、ダッシュボード上のデバイス一覧を見ると、データが受信されていることはわかったので、一応つながっているのだな。ということはわかりました。<br/>
+webでのデータ表示方法の解明まで時間がかかりそうだったので、データが来ていることが確認できた所でやめておきます。</p>
+
+<h2>ダメなら、ブローカとして使えるか？</h2>
+
+<p>デバイスが送ったデータをクラウド上で表示するのが定番でしょうけれど、どうもうまく行かなかったので、クラウドをふつうのブローカと同じように使えないかとやって見ました。 <br/>
+結論から言うと、ストレートフォワードなブローカから比べると面倒くさいけど、できました。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># デバイス側</span>
+</span><span class='line'>mosquitto_pub -i d:<span class="k">${</span><span class="nv">ORG</span><span class="k">}</span>:<span class="k">${</span><span class="nv">TYPE</span><span class="k">}</span>:<span class="k">${</span><span class="nv">ID</span><span class="k">}</span> <span class="se">\</span>
+</span><span class='line'> -h AAAAAA.messaging.internetofthings.ibmcloud.com <span class="se">\</span>
+</span><span class='line'> -u use-token-auth -P <span class="s2">&quot;${auth-token}&quot;</span> <span class="se">\</span>
+</span><span class='line'> -t iot-2/evt/hogehoge/fmt/text -m <span class="s2">&quot;hello IBM&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># サブスクライブ</span>
+</span><span class='line'>mosquitto_sub -i a:<span class="k">${</span><span class="nv">ORG</span><span class="k">}</span>:<span class="k">${</span><span class="nv">TYPE</span><span class="k">}</span> <span class="se">\</span>
+</span><span class='line'> -h AAAAA.messaging.internetofthings.ibmcloud.com <span class="se">\</span>
+</span><span class='line'> -u <span class="s2">&quot;${API-KEY}&quot;</span> -P <span class="s2">&quot;${API-AUTH-Token}&quot;</span> <span class="se">\</span>
+</span><span class='line'> -t iot-2/type/<span class="k">${</span><span class="nv">TYPE</span><span class="k">}</span>/id/<span class="k">${</span><span class="nv">ID</span><span class="k">}</span>/evt/hogehoge/fmt/text
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>サブスクライブするためにはAPI-KEYというものが必要になります。これを発行するためにダッシュボードに戻ります。</p>
+
+<p>ダッシュボードのページに&#8221;API KEYS&#8221;というタブがあるので、それをクリックします。さらに&#8221;New API Key&#8221;というハイライトがあると思うので、それをクリックします。</p>
+
+<p>ポップアップが現れて、Key, Auth Tokenが表示されますので、メモしておきます。サブスクライブするときにこのキーを指定する必要があります。</p>
+
+<h2>まとめ</h2>
+
+<p>最初に&#8221;Organaization&#8221;を作ります。IoT foundationに登録すれば自動的に自分のOrganaizationコードが発行されます。</p>
+
+<p>次に、デバイスを登録します。登録すると接続のためのTYPE,ID,Tokenが発行されます。</p>
+
+<p>さらに、アプリケーション（デバイスのデータを受信・利用する側）のIDを登録します。登録すると key, Auth-tokenが発行されます。</p>
+
+<p>デバイス側のトピックツリーとアプリケーション側のトピックツリーはちょっと違っています。デバイス側のツリーはアプリケーション側のツリーのサブセットという感じです。アプリケーションは多くのデバイスからのデータを取り込む必要があるためそうなっているのかと。</p>
+
+<p>デバイス、アプリケーションkeyは「ダッシュボード」&#8221;<a href="https://internetofthings.ibmcloud.com/dashboard/#/organizations/$">https://internetofthings.ibmcloud.com/dashboard/#/organizations/$</a>{org}/home&#8221;からいつでも確認できます。
+デバイスからのパブリッシュのタイムスタンプも確認できるので、動作状況を軽くチェックするにはいいかもしれません。</p>
+
+<p>とりあえず、IBM IoT foundationをMQTTブローカとして使えることがわかりました。ターゲットのwebアプリケーションを作るところまではまだまだですが、ドキュメントをよく読めばある程度わかるかな、という感じです。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[gmailでメールを送る]]></title>
@@ -3361,92 +3519,6 @@ trueの場合、クライアントは有効な証明書を接続するために�
 <p>一方全く同じパラメタをconfigファイルに書きこんで、configに設定したhost名でsshを起動すると普通に接続できます。</p>
 
 <p>謎です。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[引用のフォントサイズ]]></title>
-    <link href="http://mm011106.github.io/blog/2014/12/31/font-size/"/>
-    <updated>2014-12-31T14:36:58+09:00</updated>
-    <id>http://mm011106.github.io/blog/2014/12/31/font-size</id>
-    <content type="html"><![CDATA[<p>以前から、ブログの「引用」のフォントサイズがでかいなあと思っていたのですが、何とか直せたのでメモ。</p>
-
-<!-- more -->
-
-
-<p>まずは、引用ってなんていうタグ？というところから開始。</p>
-
-<p>firefoxにはWEB開発用にスタイルシートやhtmlのソースとwebページを対比させながら表示する開発モードがあるので、これを使いながらタグを調べました。  <br/>
-その結果、&lt;blockquote>ということがわかり、今度はoctopressのスタイルシートの元を検索。結果<code>_typography.scss</code>にその設定がありました。</p>
-
-<p>引用しておくと</p>
-
-<figure class='code'><figcaption><span>_typography.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
-</span><span class='line'>  <span class="err">$</span><span class="n">bq</span><span class="o">-</span><span class="k">margin</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.2em</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">line-height</span><span class="o">:</span> <span class="m">1.5em</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">padding-left</span><span class="o">:</span> <span class="m">1em</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">border-left</span><span class="o">:</span> <span class="m">4px</span> <span class="k">solid</span> <span class="n">rgba</span><span class="p">(</span><span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span><span class="o">,</span> <span class="o">.</span><span class="m">5</span><span class="p">);</span>
-</span><span class='line'>  <span class="n">cite</span> <span class="err">{</span>
-</span><span class='line'>    <span class="k">font-style</span><span class="o">:</span> <span class="k">italic</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">a</span> <span class="err">{</span> <span class="k">color</span><span class="o">:</span> <span class="err">$</span><span class="k">text</span><span class="o">-</span><span class="k">color</span><span class="o">-</span><span class="n">light</span> <span class="cp">!important</span><span class="p">;</span> <span class="n">word</span><span class="o">-</span><span class="n">wrap</span><span class="o">:</span> <span class="n">break</span><span class="o">-</span><span class="n">word</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="o">&amp;</span><span class="nd">:before</span> <span class="p">{</span> <span class="k">content</span><span class="o">:</span> <span class="s1">&#39;\2014&#39;</span><span class="p">;</span> <span class="k">padding</span><span class="o">:</span><span class="err">{</span><span class="k">right</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;</span> <span class="k">left</span><span class="o">:</span> <span class="m">.3em</span><span class="p">;}</span> <span class="nt">color</span><span class="o">:</span> <span class="o">$</span><span class="nt">text-color-light</span><span class="o">;</span> <span class="err">}</span>
-</span><span class='line'>  <span class="err">}</span>
-</span><span class='line'>  <span class="k">@media</span> <span class="nt">only</span> <span class="nt">screen</span> <span class="nt">and</span> <span class="o">(</span><span class="nt">min-width</span><span class="o">:</span> <span class="nt">992px</span><span class="o">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">padding-left</span><span class="o">:</span> <span class="nt">1</span><span class="nc">.5em</span><span class="o">;</span>
-</span><span class='line'>    <span class="nt">border-left-width</span><span class="o">:</span> <span class="nt">4px</span><span class="o">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="err">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ここに<code>font-size: 1.2em;</code>と指定があるため、文字が他と比べて大きく表示されているように思えましたので、これを上書きすることにします。</p>
-
-<p>具体的には<code>sass/custom/_styles.scss</code>に下記内容を追記しています。</p>
-
-<figure class='code'><figcaption><span>added lines on _styles.scss</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">blockquote</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1.0em</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>これで、本文と同じ程度の大きさのフォントになり、見やすくなりました。</p>
-
-<p>ちなみに、本文のフォントサイズは結局以下のようにして小さくしています。</p>
-
-<figure class='code'><figcaption><span>change the body font size</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nt">body</span> <span class="p">{</span>
-</span><span class='line'>     <span class="k">font-size</span><span class="o">:</span> <span class="m">0.9em</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
 ]]></content>
   </entry>
   
