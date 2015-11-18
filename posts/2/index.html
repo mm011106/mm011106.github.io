@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="先の投稿でCAを作って、そのキーで証明書にサインしたサーバ証明書を作りました。が、今日何気なくwebを眺めていると”SHA-1は廃止、これからはSHA-2を使いましょう”というような記事があり、ああそう言えば昨日作った証明書はSHA-1でのハッシュ値だったなあと。 ">
+  <meta name="description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +50,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/03/paho-client/">Paho-mqttでバイナリファイルを受信してみる</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-03T21:01:10+09:00" pubdate data-updated="true">2015 / 02 / 03</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/03/paho-client/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -436,48 +478,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/11/secure-connection/">接続の暗号化</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-11T11:05:38+09:00" pubdate data-updated="true">2015 / 01 / 11</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/11/secure-connection/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -525,6 +525,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
@@ -538,10 +542,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a>
       </li>
     
   </ul>
@@ -584,6 +584,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
@@ -597,10 +601,6 @@
     
       <li class="post">
         <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a>
       </li>
     
   </ul>

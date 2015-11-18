@@ -4,7 +4,7 @@
   <title><![CDATA[Category: mqtt, | MQTT and ...]]></title>
   <link href="http://mm011106.github.io/blog/categories/mqtt/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-03-29T12:45:04+09:00</updated>
+  <updated>2015-11-18T21:10:57+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -145,7 +145,7 @@ mosquitto_sub -i a:${ORG}:${TYPE} \
 <p>デバイス、アプリケーションkeyは「ダッシュボード」&#8221;<a href="https://internetofthings.ibmcloud.com/dashboard/#/organizations/$">https://internetofthings.ibmcloud.com/dashboard/#/organizations/$</a>{org}/home&#8221;からいつでも確認できます。
 デバイスからのパブリッシュのタイムスタンプも確認できるので、動作状況を軽くチェックするにはいいかもしれません。</p>
 
-<p>とりあえず、IBM IoT foundationをMQTTブローカとして使えることがわかりました。ターゲットのwebアプリケーションを作るところまではまだまだですが、ドキュメントをよく読めばある程度わかるかな、という感じです。</p>
+<p>とりあえず、IBM IoT foundationをMQTTブローカとして使えることがわかりました。目的であるwebアプリケーションを作るところまではまだまだですが、ドキュメントをよく読めばある程度わかるかな、という感じです。</p>
 ]]></content>
   </entry>
   
