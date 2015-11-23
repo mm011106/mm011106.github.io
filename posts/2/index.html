@@ -9,7 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。 ">
+  <meta name="description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。 2015/2/28 UPDATE!! ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +50,92 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/08/remote-stillcam/">Paho mqttでリモートカメラ</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-08T09:49:46+09:00" pubdate data-updated="true">2015 / 02 / 08</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
+
+<blockquote><p>2015/2/28 UPDATE!!</p></blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/08/remote-stillcam/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/07/raspi2-speed/">Raspberry Pi 2　を試して見ました</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-07T10:58:26+09:00" pubdate data-updated="true">2015 / 02 / 07</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>あまり流行りものに飛びつかないんですが、先週何気なくwebを眺めてたら、&#8221;Raspberry Pi 2　発売!&ldquo;という記事があって、「どうせ買うことになるし、在庫あれば買ってみようかな」とおもいまして。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/07/raspi2-speed/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -393,91 +479,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-13T20:43:51+09:00" pubdate data-updated="true">2015 / 01 / 13</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>自分のIPアドレスをMQTTで送信してもらうと、デバグの時にIPアドレスをいちいち調べなくていいので楽だなあ、とおもい試して見ました。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/13/ipaddress/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/12/autossh/">autossh</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-12T08:53:44+09:00" pubdate data-updated="true">2015 / 01 / 12</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>sshのコネクションはどうしても切れてしまうことがあるので、それを阻止するためにautosshを使ってみました。<br/>
-まず、sshのコマンドラインを簡素にするため、MQTTブローカへの接続設定を書いたconfigファイルを用意します。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/12/autossh/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -525,7 +526,15 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015</a>
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
       <li class="post">
@@ -534,14 +543,6 @@
     
       <li class="post">
         <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
       </li>
     
   </ul>
@@ -584,7 +585,15 @@
   <ul id="references">
     
       <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015</a>
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
       <li class="post">
@@ -593,14 +602,6 @@
     
       <li class="post">
         <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/28/autossh-failure-to-connect/">autosshが起動スクリプトでうまく動かない訳</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/28/preview-md/">mdファイルのプレビュー</a>
       </li>
     
   </ul>

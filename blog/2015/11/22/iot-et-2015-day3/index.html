@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ET/IoT 2015　コンファレンスレポート3日目 - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="三日目のレポートです。 11/20 10:00〜10:45 状態遷移設計の基本とツールによる効率化　　河野さん　　スパークシステムズ 状態遷移設計の話。以前書籍を買って勉強したけれど、それを裏打ちする情報を得たくて参加。
+この会社はツールを売っている会社。 状態遷移設計とは
+設計のためのヒント &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/11/22/iot-et-2015-day3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">ET/IoT 2015　コンファレンスレポート3日目</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-11-22T15:19:46+09:00" pubdate data-updated="true">2015 / 11 / 22</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>三日目のレポートです。</p>
+
+<!-- more -->
+
+
+<hr />
+
+<h1>11/20 10:00〜10:45</h1>
+
+<h2><em>状態遷移設計の基本とツールによる効率化</em>　　河野さん　　スパークシステムズ</h2>
+
+<p>状態遷移設計の話。以前書籍を買って勉強したけれど、それを裏打ちする情報を得たくて参加。<br/>
+この会社はツールを売っている会社。</p>
+
+<ol>
+<li>状態遷移設計とは</li>
+<li>設計のためのヒント</li>
+<li>ツールの活用</li>
+</ol>
+
+
+<hr />
+
+<ul>
+<li><p>状態遷移設計とは<br/>
+  ここでは表記方法としてUML/SYSMLを使用</p>
+
+<ul>
+<li>「状態」に着目した「振る舞い」の設計</li>
+<li>「振る舞い」の対語として「構造」</li>
+<li>システム全体を見通すための状態遷移設計とソースコードを起こすためのものがある</li>
+</ul>
+
+
+<p>  前者の「システム全体を見通すためのもの」にフォーカスする</p></li>
+<li><p>状態とは何か<br/>
+  区分可能な状況に名前をつけて定義したもの<br/>
+  状態が違えば同じ入力でもレスポンスが異なる可能性がある。</p></li>
+<li><p>遷移とは<br/>
+  状態が変化すること</p>
+
+<ul>
+<li>イベントによるもの</li>
+<li>条件によるもの</li>
+</ul>
+
+
+<p>  遷移の前後で処理がある可能性を考慮</p></li>
+<li><p>表記方法<br/>
+  <a href="http://www.sparxsystems.jp/products/EA/tech/StateMachine.htm">表記例など</a><br/>
+  イベントドリブンな処理が多い場合、それを記述しやすい<br/>
+  イベント、状態を中心に全体を見渡すと見え易い、考えやすい。<br/>
+  並列処理を記述しやすい（複数のステートマシンを定義する）</p></li>
+<li><p>設計の流れ</p>
+
+<ul>
+<li>状態の抽出<br/>
+モジュール全体、外部、内部</li>
+<li>状態間の遷移の抽出</li>
+<li>操作の流れに沿った遷移の検討</li>
+<li>イベント抽出から状態（どうあるべきか）を考える</li>
+</ul>
+</li>
+<li><p>状態抽出のヒント<br/>
+  イベント処理の場合、処理中がステートの場合が多い<br/>
+  具体的な状況からステートを抽出する</p>
+
+<ol>
+<li> すべての出力パターンを考える</li>
+<li> すべてのパターン同士をつなぐイベントを記入</li>
+<li> 共通のものを見出す</li>
+<li> 状態の共通性、親子関係を見出す</li>
+</ol>
+
+
+<p>  矛盾なく、無駄なく</p></li>
+<li><p>注意点
+  手順にならないように<br/>
+  考えるのは「状態」であって「手順」ではない。<br/>
+  =>　<strong>製品から見た時の動き</strong>　を考える<br/>
+  これは、ユーザから見た時の動き（ユースケース）とは異なる。</p></li>
+<li><p>より良い状態遷移設計のためのヒント</p>
+
+<ol>
+<li> 状態をまとめる<br/>
+階層的な構造を持ったステートを作ると見やすくなる可能性</li>
+<li> 色や線の太さで区別してみる（異常と正常、通常と緊急など）　見通しが良くなる</li>
+<li> 利用する要素を最小限にして直感的にわかりやすく（図を書くのは見通しを良くするため）</li>
+</ol>
+</li>
+</ul>
+
+
+<h3>感想：</h3>
+
+<p>わかりやすい話だったし、具体的な図の書き方が理解できたような気がする。<br/>
+ツール自身は比較的安価だったので、お絵かきツール的なレベルでとりあえず使ってみるのもいいかもしれない。</p>
+
+<p>まずはやって見るところから始まるし。</p>
+
+<hr />
+
+<h1>2015/11/20 13:00〜13:45</h1>
+
+<h2><em>IoT通信技術が生む、新たな価値・サービスとは？</em>　　和泉さん　株式会社日新システム</h2>
+
+<p>日進システムさんでやられているIoTデバイス（ハブ）を中心とした解説。</p>
+
+<p>ざっくりまとめると</p>
+
+<ul>
+<li>IoTは現在幻滅期に入っている（ガードナー　<a href="https://www.gartner.co.jp/press/html/pr20150827-01.html">ハイプサイクル　2015年版</a>）。</li>
+<li>デバイス側は未だ標準化されておらず、ビジネスが立ち上がるまで数年かかるだろう。</li>
+<li>Industry 4.0 などはIoTを生産基盤としてとらえているが、まだ夢の話。現状できることからはじめるべき</li>
+<li>実例として920MHZ帯(Wi-SUN)の活用例</li>
+<li><a href="https://unit.aist.go.jp/cfsr/2009/PDRevakit/">PDR</a>、音波ビーコンによる室内の位置検出</li>
+<li>Wi-SUNのネットワークを3Gと相補的に使うことで、長期バッテリ動作のシステムが構築できる</li>
+</ul>
+
+
+<p>と言った感じ。</p>
+
+<h3>感想：</h3>
+
+<p>ということで、Wi-SUNが使えそうかなあと思い調べて見ることにする。</p>
+
+<hr />
+
+<h1>2015/11/20 14:00〜14:45</h1>
+
+<h2><em>産業向けIoTの実現に必須のセンサ計測とエッジコンピューティング </em>　　岡田さん　日本ナショナルインスツルメンツ</h2>
+
+<p>NIでのIoTの取り組みについて。<br/>
+実世界はアナログで動いており、それをそのままサンプリングした場合データが膨大になる。なので、エッジデバイスできちんと処理をしてあげましょう。という話。</p>
+
+<p>キーワード：</p>
+
+<ul>
+<li>構造化データ（処理データ）　＜ー＞　非構造化データ（生データ）</li>
+<li>「ビッグ『アナログ』データ」TM</li>
+<li>マルチモーダルなセンシングシステムでは、相互のデータの同期が重要ー＞NIでのソリューションで解決可能</li>
+</ul>
+
+
+<p>全体的に既知の内容でしたので、ばっさり省略。</p>
+
+<h3>感想：</h3>
+
+<p>NIは比較的大きな規模のIoTデバイスを想定している。特に動画・画像系の処理に注力している感じ。AlteraなどがSoCで実現していることを、計測ボード（ユニット）で実現し、TATを短くすることで付加価値をつけるというスタンス。<br/>
+（しかしながら、LabViewが有効なツールだとは思えない）<br/>
+大型のデバイスを持ち込むことで高度な処理を比較的短時間で具現化できること、変更が容易であるため観測対象が変化した場合も同じ構成のハードウエアで継続的に処理できる可能性をアピール。</p>
+
+<hr />
+
+<h1>2015/11/20 15:00〜16:30</h1>
+
+<h2><em>どう使う？IoT時代のオープンソース</em>　パネルディスカッション</h2>
+
+<p>モデレーター：進藤 智則 NikkeiBP</p>
+
+<p>パネリスト：</p>
+
+<ul>
+<li>姉崎 章博　NEC</li>
+<li>太田 寛　　日本マイクロソフト</li>
+<li><p>鈴村 延保　アイシン・コムクルーズ</p>
+
+<p>  パネリストについて詳しくは<a href="http://www.jasa.or.jp/expo/conf/confpage-p02.html">こちら</a></p></li>
+</ul>
+
+
+<p>太田氏：</p>
+
+<ul>
+<li>プロトコルなどが高度化し速い速度で入れ替わっている時代に自前でコーディングするのは不可能に近い。そのためOSSの利用は必須といってもいい。</li>
+</ul>
+
+
+<p>（他に注目すべき発言なし）</p>
+
+<p>鈴村氏：</p>
+
+<ul>
+<li>自動車の業界ではOSSを利用することはかなりハードルが高い（ライセンス）</li>
+<li>ただ、OSSのプラットフォームや考え方は社内の開発ワークフローに導入すべき
+  レビューの管理、工程の可視化、ドキュメンテーションなどなど。。</li>
+<li>特にGitHubの環境は開発に最適と思われるのでどんどん活用するべき</li>
+</ul>
+
+
+<p>姉崎氏</p>
+
+<ul>
+<li>OSSのライセンスについて間違った考え方をしている人が多い</li>
+<li>ライセンスは「契約」ではなく「許諾の条件」である。</li>
+<li>著作権により著作物の複製・2次利用は制限されているが、BSD・GPLなどのライセンス条項は「こういう状態で配布すれば著作権で主張される権利を一部緩和しますよ」ということ。</li>
+<li>よって、ライセンス違反は著作権の侵害となる。</li>
+</ul>
+
+
+<p><em>IPAのOSSライセンスについてのレポートはこの点で嘘が書かれている</em></p>
+
+<h3>感想</h3>
+
+<p>マイクロソフトの話は大したことは無く、いつも大口を叩く割にアタリマエのことしか言ってない。</p>
+
+<p>一方、鈴村氏はミッションクリティカルな分野でOSSの活用を考えており、OSSそのものよりそれによって導きだされた開発環境や手法が有効であるとの発言で、それには重みを感じた。</p>
+
+<p>姉崎氏のライセンスの話は、OSSライセンスの概観とともに考え方についても語られており、大変参考になった。<br/>
+<a href="http://www.atmarkit.co.jp/flinux/index/indexfiles/osslcindex.html">@ITの記事</a>をリンクしておきます。</p>
+
+<h3>感想</h3>
+
+<p>OSSのライセンスは正直良くわからないことが多かったが、今回のtalkを聞いて概要がつかめたような感じがする。今後活用することもあると思うので、勉強したい。<br/>
+また、GitHubの活用についても、「使い方」ではなく「ワークフローのあり方」とGitHub上でそのあるべき姿をどのように実現するのか・できるのか、という点から勉強しなおしてみたいと思った。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-11-22T15:19:46+09:00" pubdate data-updated="true">2015 / 11 / 22</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/et2015/'>et2015,</a>, <a class='category' href='/blog/categories/iot/'>iot</a>, <a class='category' href='/blog/categories/mqtt/'>mqtt,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/11/22/iot-et-2015-day3/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/11/22/iot-et-2015-day3/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/21/iot-et-2015-day2/" title="Previous Post: ET/IoT 2015　コンファレンスレポート 2日目">&laquo; ET/IoT 2015　コンファレンスレポート 2日目</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
