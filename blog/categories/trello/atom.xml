@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: trello, | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/trello/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2015-12-06T11:22:48+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[TrelloにPythonでアクセスしてみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/12/06/python-and-trello-api/"/>
+    <updated>2015-12-06T10:08:06+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/12/06/python-and-trello-api</id>
+    <content type="html"><![CDATA[<p>IoTとは全然関係ないですけど、TrelloというSaaSを業務で使い始めて、他のツールとのインターフェイスが必要になり始めました。Trelloはカード型のToDo管理のシステムですが、うちではワークフローのステート管理につかっています。ですので、Trelloで管理しているワークフロー終了後に次の別のワークフローに移すことやチェックのためにデータをダウンロードする必要が出てきました。</p>
+
+<p>TrelloはJSON形式でデータを一括ダウンロードできるのと、直接APIを通じてデータにアクセスすることもできます。
+今回はPythonでAPIを叩くことに挑戦してみました。</p>
+
+<!-- more -->
+
+
+<h2>準備</h2>
+
+<p>先人のおかげさまで、TrelloへのアクセスにもPythonのパッケージが用意されています。結果として、ほとんどコードを書かずにアクセするこことができました。<br/>
+MacOS10.9にCanopyをインストールした環境での作業記録になります。</p>
+
+<p>パッケージ<code>trello 0.9.1</code>のダウンロードはPythonSoftwareFoudationの<a href="https://pypi.python.org/pypi/trello">ページ</a>から。</p>
+
+<p>さらに必要であればURLリクエスト処理をしてくれる<code>requests</code>をインストールしてください。（私の場合は、新品に近い環境でしたので、インストールが必要でした）</p>
+
+<p>インストールには、ダウンロードしたフォルダに移動して<code>$ python setup.py install</code>です。</p>
+
+<p>さて、実際のコードはどうなるのかと思い、参考のために
+<a href="https://pythonhosted.org/trello/index.html">Trello Python API</a>
+に行って例をみてみると、たった数行でアクセスできることが解りました。</p>
+
+<p>この例ではパブリックにオープンなボードでの例ですが、今回は公開されていない（パーソナルな）Trelloボードにアクセスすることを試します。<br/>
+Personalなボードにアクセスするため、下記の手順でユーザに対応したAPI-keyとログインを省略するためのアクセストークン(以後token)を入手する必要があります。<br/>
+私の場合は両者とも手作業で行いましたが、tokenについてはスクリプト(pythonから）で入手できるかもしれません。</p>
+
+<h3>API を入手する</h3>
+
+<ul>
+<li>Trelloにログインします。</li>
+<li>ログインした状態で　<a href="https://trello.com/app-key">https://trello.com/app-key</a>にアクセスすると、’key&#8217;と&#8217;Secret&#8217;という２つの番号をもらえます。</li>
+<li>&lsquo;key&rsquo; はスクリプトの中で使用します。&#8217;Secret&#8217;は大事にしまっておきなさい、ということなので、しまっておきます。</li>
+</ul>
+
+
+<h3>tokenを入手する</h3>
+
+<p>pythonを起動して
+<code>
+from trello import TrelloApi    
+trello = TrelloApi('key')  # 先ほどゲットしたAPI-keyを入れます
+trello.get_token_url('My App', expires='30days', write_access=True)
+</code>
+とすると、urlが表示されますのでそれをブラウザで表示させます。</p>
+
+<p>「このMy Appというアプリケーションにアクセスを許可しますがいいですか？」的な確認が出てきて、okするとtokenが表示されると思います。それを記録しておきます。</p>
+
+<h2>実行</h2>
+
+<p>ここまでくればあとはコードを書くだけです。
+今までのところで、アクセスに必要な情報とパッケージはok準備万端なので、例などを参考に下記のコードをステップバイステップで実行してみました。</p>
+
+<pre><code>from trello import TrelloApi
+trello = TrelloApi('key')
+trello.set_token('Token')
+
+token='****'  #記録したtokenとkeyを指定します。
+key='***'
+
+#これでアクセス可能な状態になります。
+# 例として、ボード上のリスト名とそのidを表示させます。
+# （APIでは常にidでアクセスする先を指定するので重要）
+
+idBoard='****'  #ボードidを入れます。
+
+lists=trello.boards.get_list(idBoard)
+for list in lists:
+    print list['name'] + "    " + list['id']
+</code></pre>
+
+<p>たった数行でアクセス可能になり、実際のアクセスも１行でできるというコードに。<strong>すばらしい！</strong></p>
+
+<p>実は、実際のアクセスにはボードやリスト、カードなどのidが必要です。上記の例ではボードidは既知としてコードを書いています。</p>
+
+<p>実際はAPIから引っ張れるかもしれませんが、そこまでたどり着けていません。idは直接Trelloのページからボードに移動し、[menu]-[more]-[print &amp; export]-[export to JSON]でデータを表示させ、そこから読み取っています。</p>
+
+<p>JSONをブラウザでみるためにChromeに<a href="https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc">JSONView</a>を入れています。</p>
+
+<p>すばらしく便利です。</p>
+]]></content>
+  </entry>
+  
+</feed>

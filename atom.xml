@@ -4,7 +4,7 @@
   <title><![CDATA[MQTT and ...]]></title>
   <link href="http://mm011106.github.io/atom.xml" rel="self"/>
   <link href="http://mm011106.github.io/"/>
-  <updated>2015-11-23T11:17:47+09:00</updated>
+  <updated>2015-12-06T11:22:48+09:00</updated>
   <id>http://mm011106.github.io/</id>
   <author>
     <name><![CDATA[Masakazu Miyamoto]]></name>
@@ -12,6 +12,115 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[TrelloにPythonでアクセスしてみる]]></title>
+    <link href="http://mm011106.github.io/blog/2015/12/06/python-and-trello-api/"/>
+    <updated>2015-12-06T10:08:06+09:00</updated>
+    <id>http://mm011106.github.io/blog/2015/12/06/python-and-trello-api</id>
+    <content type="html"><![CDATA[<p>IoTとは全然関係ないですけど、TrelloというSaaSを業務で使い始めて、他のツールとのインターフェイスが必要になり始めました。Trelloはカード型のToDo管理のシステムですが、うちではワークフローのステート管理につかっています。ですので、Trelloで管理しているワークフロー終了後に次の別のワークフローに移すことやチェックのためにデータをダウンロードする必要が出てきました。</p>
+
+<p>TrelloはJSON形式でデータを一括ダウンロードできるのと、直接APIを通じてデータにアクセスすることもできます。
+今回はPythonでAPIを叩くことに挑戦してみました。</p>
+
+<!-- more -->
+
+
+<h2>準備</h2>
+
+<p>先人のおかげさまで、TrelloへのアクセスにもPythonのパッケージが用意されています。結果として、ほとんどコードを書かずにアクセするこことができました。<br/>
+MacOS10.9にCanopyをインストールした環境での作業記録になります。</p>
+
+<p>パッケージ<code>trello 0.9.1</code>のダウンロードはPythonSoftwareFoudationの<a href="https://pypi.python.org/pypi/trello">ページ</a>から。</p>
+
+<p>さらに必要であればURLリクエスト処理をしてくれる<code>requests</code>をインストールしてください。（私の場合は、新品に近い環境でしたので、インストールが必要でした）</p>
+
+<p>インストールには、ダウンロードしたフォルダに移動して<code>$ python setup.py install</code>です。</p>
+
+<p>さて、実際のコードはどうなるのかと思い、参考のために
+<a href="https://pythonhosted.org/trello/index.html">Trello Python API</a>
+に行って例をみてみると、たった数行でアクセスできることが解りました。</p>
+
+<p>この例ではパブリックにオープンなボードでの例ですが、今回は公開されていない（パーソナルな）Trelloボードにアクセスすることを試します。<br/>
+Personalなボードにアクセスするため、下記の手順でユーザに対応したAPI-keyとログインを省略するためのアクセストークン(以後token)を入手する必要があります。<br/>
+私の場合は両者とも手作業で行いましたが、tokenについてはスクリプト(pythonから）で入手できるかもしれません。</p>
+
+<h3>API を入手する</h3>
+
+<ul>
+<li>Trelloにログインします。</li>
+<li>ログインした状態で　<a href="https://trello.com/app-key">https://trello.com/app-key</a>にアクセスすると、’key&#8217;と&#8217;Secret&#8217;という２つの番号をもらえます。</li>
+<li>&lsquo;key&rsquo; はスクリプトの中で使用します。&#8217;Secret&#8217;は大事にしまっておきなさい、ということなので、しまっておきます。</li>
+</ul>
+
+
+<h3>tokenを入手する</h3>
+
+<p>pythonを起動して</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>from trello import TrelloApi 
+</span><span class='line'>trello = TrelloApi('key')  # 先ほどゲットしたAPI-keyを入れます
+</span><span class='line'>trello.get_token_url('My App', expires='30days', write_access=True)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とすると、urlが表示されますのでそれをブラウザで表示させます。</p>
+
+<p>「このMy Appというアプリケーションにアクセスを許可しますがいいですか？」的な確認が出てきて、okするとtokenが表示されると思います。それを記録しておきます。</p>
+
+<h2>実行</h2>
+
+<p>ここまでくればあとはコードを書くだけです。
+今までのところで、アクセスに必要な情報とパッケージはok準備万端なので、例などを参考に下記のコードをステップバイステップで実行してみました。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>from trello import TrelloApi
+</span><span class='line'>trello = TrelloApi('key')
+</span><span class='line'>trello.set_token('Token')
+</span><span class='line'>
+</span><span class='line'>token='****'  #記録したtokenとkeyを指定します。
+</span><span class='line'>key='***'
+</span><span class='line'>
+</span><span class='line'>#これでアクセス可能な状態になります。
+</span><span class='line'># 例として、ボード上のリスト名とそのidを表示させます。
+</span><span class='line'># （APIでは常にidでアクセスする先を指定するので重要）
+</span><span class='line'>
+</span><span class='line'>idBoard='****'  #ボードidを入れます。
+</span><span class='line'>
+</span><span class='line'>lists=trello.boards.get_list(idBoard)
+</span><span class='line'>for list in lists:
+</span><span class='line'>    print list['name'] + "    " + list['id']
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>たった数行でアクセス可能になり、実際のアクセスも１行でできるというコードに。<strong>すばらしい！</strong></p>
+
+<p>実は、実際のアクセスにはボードやリスト、カードなどのidが必要です。上記の例ではボードidは既知としてコードを書いています。</p>
+
+<p>実際はAPIから引っ張れるかもしれませんが、そこまでたどり着けていません。idは直接Trelloのページからボードに移動し、[menu]-[more]-[print &amp; export]-[export to JSON]でデータを表示させ、そこから読み取っています。</p>
+
+<p>JSONをブラウザでみるためにChromeに<a href="https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc">JSONView</a>を入れています。</p>
+
+<p>すばらしく便利です。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ET/IoT 2015　コンファレンスレポート3日目]]></title>
@@ -211,14 +320,22 @@
 <p>姉崎氏</p>
 
 <ul>
-<li>OSSのライセンスについて間違った考え方をしている人が多い</li>
+<li>OSSのライセンスについて間違った考え方をしている人が多い
+
+<ul>
 <li>ライセンスは「契約」ではなく「許諾の条件」である。</li>
-<li>著作権により著作物の複製・2次利用は制限されているが、BSD・GPLなどのライセンス条項は「こういう状態で配布すれば著作権で主張される権利を一部緩和しますよ」ということ。</li>
+</ul>
+</li>
+<li><p>著作権により著作物の複製・2次利用は<del>制限</del>著作者の専有の権利とされているが、
+BSD・GPLなどのライセンス条項は「こういう状態で配布すれば
+<del>著作権で主張される権利を一部緩和</del>著作者が専有する権利の行使を許諾しますよ」ということ。</p></li>
 <li>よって、ライセンス違反は著作権の侵害となる。</li>
 </ul>
 
 
 <p><em>IPAのOSSライセンスについてのレポートはこの点で嘘が書かれている</em></p>
+
+<p><strong>2015/11/25:講演者の姉崎さまに当ページの記載についてご指摘いただきましたので修正しました。ありがとうございます。姉崎さま。</strong></p>
 
 <h3>感想</h3>
 
@@ -3826,99 +3943,6 @@ client だけをインストールしている場合は関係ないです。</p>
 <p>これで、-Nオプションが使えるはず。</p>
 
 <p>ちなみに、Raspberry Pi用のビルドは普通に<code>apt-get install</code> でインストールしても最新版が入るようです。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[オレオレ証明書を作ってみようかと　準備]]></title>
-    <link href="http://mm011106.github.io/blog/2015/01/18/ore-ore-certificate/"/>
-    <updated>2015-01-18T11:28:32+09:00</updated>
-    <id>http://mm011106.github.io/blog/2015/01/18/ore-ore-certificate</id>
-    <content type="html"><![CDATA[<p>現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。
-ここでは、まず勉強。</p>
-
-<!-- more -->
-
-
-<p>英語のwebでは&#8221;self-signed certificate&#8221;なんて言われていますが、日本では「オレオレ詐欺」にちなんで、「オレオレ証明書」と呼ぶのがツウのやりかたのようです。でも、これは結構いいネーミングじゃないかと思います。日本で「オレオレ」というのはかなりダーティな印象があるので、「これ、オレオレ証明書だよね」というと、直感的に騙されそうな感じがします。</p>
-
-<p>昔の記事（2007年頃）ですが、銀行のオンラインバンキングなどでもオレオレ証明の一種が使われていたということで、間違ったITリテラシを教えてしまうという危険が<a href="http://takagi-hiromitsu.jp/diary/20071117.html">指摘</a>されています。</p>
-
-<p>このページの終わりの方には証明書の分類が挙げられており、一口に「オレオレ」といってもいろいろあるのだよ。ということがわかります。</p>
-
-<p>今回つくろうとしているのは、ここで言うところの「第四種オレオレ証明書」です。<br/>
-とくに悪意があってself-signedにするわけではなく、パブリックに公開されるサーバではないし、特定の用途にしか使わない、自分たち専用の暗号化経路ということです。</p>
-
-<p>ポリシーとしては、</p>
-
-<ul>
-<li>経路の暗号化には証明書ベースの共通鍵暗号化</li>
-<li>ログイン制御にはユーザ名/パスワード</li>
-<li>ポート番号の変更</li>
-</ul>
-
-
-<p>という3本柱で考えてみたいと思います。</p>
-
-<p>証明書ベースの認証を行うという事は、だれでも（ポート番号がわかれば）暗号化経路を作れる、ということになります。そのため、実際にブローカに接続できるかどうかは、ユーザ名による認証を行う必要があると思ったからです。実際には、IPやドメイン名の制限など、可能な接続制限を取る必要があると思います。</p>
-
-<h2>mosquitto.conf と mosquitto_pub/subの暗号化についての記載</h2>
-
-<p>まずは、いま使っているクライアント・サーバアプリケーションが証明書ベースの暗号化にどのように対応しているかを確認しておきます。
-まずは、ブローカ側の<code>mosquitto.conf</code>から</p>
-
-<h3>mosquitto.conf</h3>
-
-<h4>Authentication</h4>
-
-<blockquote><p>The authentication options described below allow a wide range of possibilities in conjunction with the listener options. This section aims to clarify the possibilities.</p>
-
-<p>以下に示す認証のオプションはリスナーのオプションとともに活用することで広いレンジの可能性を提供します。このセクションはその可能性を明らかにします。</p>
-
-<p>The simplest option is to have no authentication at all. This is the default if no other options are given. Unauthenticated encrypted support is provided by using the certificate based SSL/TLS based options cafile/capath, certfile and keyfile.</p>
-
-<p>最もシンプルなものは認証をしないようにすることです。これは他のオプションが与えられない限り、デフォルトの設定になります。認証なしの暗号化はcafile/capathオプションにより証明書ベースのSSL/TLSから提供されます。</p>
-
-<p>MQTT provides username/password authentication as part of the protocol. Use the password_file option to define the valid usernames and passwords. Be sure to use network encryption if you are using this option otherwise the username and password will be vulnerable to interception.</p>
-
-<p>MQTTはプロトコルの一部としてユーザ名／パスワードによる認証を提供しています。
-<code>password_file</code>オプションを使うことで有効なユーザ名とパスワードを設定できます。このオプションを使うときは経路の暗号化を必ず実施してください。そうしないとユーザ名／パスワードは盗聴の対象となってしまいます。</p>
-
-<p>When using certificate based encryption there are two options that affect authentication. The first is require_certificate, which may be set to true or false. If false, the SSL/TLS component of the client will verify the server but there is no requirement for the client to provide anything for the server: authentication is limited to the MQTT built in username/password. If require_certificate is true, the client must provide a valid certificate in order to connect successfully. In this case, the second option, use_identity_as_username, becomes relevant. If set to true, the Common Name (CN) from the client certificate is used instead of the MQTT username for access control purposes. The password is not replaced because it is assumed that only authenticated clients have valid certificates. If use_identity_as_username is false, the client must authenticate as normal (if required by password_file) through the MQTT options.</p>
-
-<p>証明書ベースの暗号化を行う場合、2つのオプションが認証に影響を与えます。<br/>
-1つめは<code>require_certificate</code>で、trueもしくはfalseに設定できます。<br/>
-falseの場合、クライアントのSSL/TLSコンポーネントはサーバが正確であるかどうかを確かめます。しかし、クライアントは何もサーバに提供する必要はありません。認証はMQTTにビルトインされたユーザ名・パスワードに制限されます。<br/>
-trueの場合、クライアントは有効な証明書を接続するために提供する必要があります。</p>
-
-<p>このケースでは2つ目のオプション、<code>use_identity_as_username</code>が関連してきます。<br/>
-これをtrueにセットするとアクセスコントロールのために証明書共通名(CN)がMQTTのユーザ名の代わりに使われます。パスワードは、認証取得をしたユーザのみが有効な証明書を持っていると考えているため変更されません。<br/>
-<code>use_identity_as_username</code>がfalseの場合、クライアントは通常と同じようにMQTTによって認証されます。（password_fileが必要です）</p>
-
-<p>When using pre-shared-key based encryption through the psk_hint and psk_file options, the client must provide a valid identity and key in order to connect to the broker before any MQTT communication takes place. If use_identity_as_username is true, the PSK identity is used instead of the MQTT username for access control purposes. If use_identity_as_username is false, the client may still authenticate using the MQTT username/password if using the password_file option.
-（ここは事前共有キーの話なのでパス）</p>
-
-<p>Both certificate and PSK based encryption are configured on a per-listener basis.</p>
-
-<p>この証明書ベース、PSKベースの暗号化どちらの場合でもリスナー単位での設定になります。</p>
-
-<p>Authentication plugins can be created to replace the password_file and psk_file options (as well as the ACL options) with e.g. SQL based lookups.</p>
-
-<p>たとえば、SQLデータベース参照などの認証プラグインを、ユーザ名／パスワード認証とPSKファイルのオプションをリプレイスするために設定することも可能です。</p>
-
-<p>It is possible to support multiple authentication schemes at once. A config could be created that had a listener for all of the different encryption options described above and hence a large number of ways of authenticating.</p>
-
-<p>また複数の認証スキームを一度にサポートするようにすることも可能です。設定ファイルは一つのリスナーに対して上記にあるすべての違った暗号化のオプション、つまりいくつもの認証方法を設定することも可能です。</p></blockquote>
-
-<p>と、ここまでの説明では、「いろんな方法で暗号化、認証ができます」というところだけしかわかりませんでした。<br/>
-これからやろうとしている証明書ベースの暗号化では、認証と絡めることもできるし、それとは別にすることもできる、というところでしょうか。</p>
-
-<p>証明書をクライアントが提供するようなやり方もできるように読めます。
-確かに、クライアントが証明書を提示するという方が理にかなっているかもしれません。今想定しているような構成では、接続してきたクライアントが「偽物」である可能性を排除したいわけで、一般的なHTTPプロトコルでの証明書のようにサーバ側の真贋をユーザのセキュリティのために提供するのとは全く逆になります。</p>
-
-<p>兎にも角にも手を動かさないことには勉強できないので、まずは、証明書をサーバが提供するという、一般的なやり方の設定をしてみようと思います。証明書ベースの暗号化経路を確立、次にユーザ名／パスワードでクライアント認証をする、という手順になります。</p>
-
-<p>今日のところは、これまで。</p>
 ]]></content>
   </entry>
   

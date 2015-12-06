@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>TrelloにPythonでアクセスしてみる - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="IoTとは全然関係ないですけど、TrelloというSaaSを業務で使い始めて、他のツールとのインターフェイスが必要になり始めました。Trelloはカード型のToDo管理のシステムですが、うちではワークフローのステート管理につかっています。ですので、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2015/12/06/python-and-trello-api/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">TrelloにPythonでアクセスしてみる</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-12-06T10:08:06+09:00" pubdate data-updated="true">2015 / 12 / 06</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>IoTとは全然関係ないですけど、TrelloというSaaSを業務で使い始めて、他のツールとのインターフェイスが必要になり始めました。Trelloはカード型のToDo管理のシステムですが、うちではワークフローのステート管理につかっています。ですので、Trelloで管理しているワークフロー終了後に次の別のワークフローに移すことやチェックのためにデータをダウンロードする必要が出てきました。</p>
+
+<p>TrelloはJSON形式でデータを一括ダウンロードできるのと、直接APIを通じてデータにアクセスすることもできます。
+今回はPythonでAPIを叩くことに挑戦してみました。</p>
+
+<!-- more -->
+
+
+<h2>準備</h2>
+
+<p>先人のおかげさまで、TrelloへのアクセスにもPythonのパッケージが用意されています。結果として、ほとんどコードを書かずにアクセするこことができました。<br/>
+MacOS10.9にCanopyをインストールした環境での作業記録になります。</p>
+
+<p>パッケージ<code>trello 0.9.1</code>のダウンロードはPythonSoftwareFoudationの<a href="https://pypi.python.org/pypi/trello">ページ</a>から。</p>
+
+<p>さらに必要であればURLリクエスト処理をしてくれる<code>requests</code>をインストールしてください。（私の場合は、新品に近い環境でしたので、インストールが必要でした）</p>
+
+<p>インストールには、ダウンロードしたフォルダに移動して<code>$ python setup.py install</code>です。</p>
+
+<p>さて、実際のコードはどうなるのかと思い、参考のために
+<a href="https://pythonhosted.org/trello/index.html">Trello Python API</a>
+に行って例をみてみると、たった数行でアクセスできることが解りました。</p>
+
+<p>この例ではパブリックにオープンなボードでの例ですが、今回は公開されていない（パーソナルな）Trelloボードにアクセスすることを試します。<br/>
+Personalなボードにアクセスするため、下記の手順でユーザに対応したAPI-keyとログインを省略するためのアクセストークン(以後token)を入手する必要があります。<br/>
+私の場合は両者とも手作業で行いましたが、tokenについてはスクリプト(pythonから）で入手できるかもしれません。</p>
+
+<h3>API を入手する</h3>
+
+<ul>
+<li>Trelloにログインします。</li>
+<li>ログインした状態で　<a href="https://trello.com/app-key">https://trello.com/app-key</a>にアクセスすると、’key&#8217;と&#8217;Secret&#8217;という２つの番号をもらえます。</li>
+<li>&lsquo;key&rsquo; はスクリプトの中で使用します。&#8217;Secret&#8217;は大事にしまっておきなさい、ということなので、しまっておきます。</li>
+</ul>
+
+
+<h3>tokenを入手する</h3>
+
+<p>pythonを起動して</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>from trello import TrelloApi 
+</span><span class='line'>trello = TrelloApi('key')  # 先ほどゲットしたAPI-keyを入れます
+</span><span class='line'>trello.get_token_url('My App', expires='30days', write_access=True)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>とすると、urlが表示されますのでそれをブラウザで表示させます。</p>
+
+<p>「このMy Appというアプリケーションにアクセスを許可しますがいいですか？」的な確認が出てきて、okするとtokenが表示されると思います。それを記録しておきます。</p>
+
+<h2>実行</h2>
+
+<p>ここまでくればあとはコードを書くだけです。
+今までのところで、アクセスに必要な情報とパッケージはok準備万端なので、例などを参考に下記のコードをステップバイステップで実行してみました。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>from trello import TrelloApi
+</span><span class='line'>trello = TrelloApi('key')
+</span><span class='line'>trello.set_token('Token')
+</span><span class='line'>
+</span><span class='line'>token='****'  #記録したtokenとkeyを指定します。
+</span><span class='line'>key='***'
+</span><span class='line'>
+</span><span class='line'>#これでアクセス可能な状態になります。
+</span><span class='line'># 例として、ボード上のリスト名とそのidを表示させます。
+</span><span class='line'># （APIでは常にidでアクセスする先を指定するので重要）
+</span><span class='line'>
+</span><span class='line'>idBoard='****'  #ボードidを入れます。
+</span><span class='line'>
+</span><span class='line'>lists=trello.boards.get_list(idBoard)
+</span><span class='line'>for list in lists:
+</span><span class='line'>    print list['name'] + "    " + list['id']
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>たった数行でアクセス可能になり、実際のアクセスも１行でできるというコードに。<strong>すばらしい！</strong></p>
+
+<p>実は、実際のアクセスにはボードやリスト、カードなどのidが必要です。上記の例ではボードidは既知としてコードを書いています。</p>
+
+<p>実際はAPIから引っ張れるかもしれませんが、そこまでたどり着けていません。idは直接Trelloのページからボードに移動し、[menu]-[more]-[print &amp; export]-[export to JSON]でデータを表示させ、そこから読み取っています。</p>
+
+<p>JSONをブラウザでみるためにChromeに<a href="https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc">JSONView</a>を入れています。</p>
+
+<p>すばらしく便利です。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-12-06T10:08:06+09:00" pubdate data-updated="true">2015 / 12 / 06</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/python/'>python</a>, <a class='category' href='/blog/categories/trello/'>trello,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2015/12/06/python-and-trello-api/" data-via="" data-counturl="http://mm011106.github.io/blog/2015/12/06/python-and-trello-api/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/22/iot-et-2015-day3/" title="Previous Post: ET/IoT 2015　コンファレンスレポート3日目">&laquo; ET/IoT 2015　コンファレンスレポート3日目</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
