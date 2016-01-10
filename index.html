@@ -9,7 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="IoTとは全然関係ないですけど、TrelloというSaaSを業務で使い始めて、他のツールとのインターフェイスが必要になり始めました。Trelloはカード型のToDo管理のシステムですが、うちではワークフローのステート管理につかっています。ですので、 &hellip;">
+  <meta name="description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。
+いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -50,6 +51,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2016-01-10T20:19:35+09:00" pubdate data-updated="true">2016 / 01 / 10</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。<br/>
+いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その「めんどくささ」のおかげでセキュリティやデータの可視性が高いのですが。<br/>
+で、このタイミングでBaaSに移行しないと、時代に乗り遅れるなあとも想い、冬休みの１週間を使って試してみました。<br/>
+今回は<a href="https://mlkcca.com/">milkcocoa</a>というサービスを使いました。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/01/10/edge-device-with-nodejs/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -438,49 +484,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-02-23T21:20:50+09:00" pubdate data-updated="true">2015 / 02 / 23</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するデーモンをシステム起動時に動かすことを試しました。
-今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/02/23/init-dot-d-script/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -526,6 +529,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
       </li>
     
@@ -539,10 +546,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
   </ul>
@@ -585,6 +588,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
       </li>
     
@@ -598,10 +605,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
   </ul>
@@ -619,7 +622,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Masakazu Miyamoto -
+  Copyright &copy; 2016 - Masakazu Miyamoto -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

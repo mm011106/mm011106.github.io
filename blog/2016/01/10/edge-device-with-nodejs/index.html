@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>milkcocoaにnode.jsでアクセスする - MQTT and &#8230;</title>
+  <meta name="author" content="Masakazu Miyamoto">
+
+  
+  <meta name="description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。
+いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mm011106.github.io/blog/2016/01/10/edge-device-with-nodejs/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="MQTT and ..." type="application/atom+xml">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href='http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+
+
+
+
+  
+
+  <style>html{background: url(/images/background.png) no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover;background-size: cover;}</style>
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+</hgroup>
+
+</header>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">milkcocoaにnode.jsでアクセスする</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2016-01-10T20:19:35+09:00" pubdate data-updated="true">2016 / 01 / 10</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。<br/>
+いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その「めんどくささ」のおかげでセキュリティやデータの可視性が高いのですが。<br/>
+で、このタイミングでBaaSに移行しないと、時代に乗り遅れるなあとも想い、冬休みの１週間を使って試してみました。<br/>
+今回は<a href="https://mlkcca.com/">milkcocoa</a>というサービスを使いました。</p>
+
+<!-- more -->
+
+
+<h2>仕組み</h2>
+
+<p>milkcocoaは、interfaceの記事によればメッセージ送受信にフォーカスしている、ということでしたので、きっとAPIや設定方法なども比較的単純で解りやすいだろうということで選びました。<br/>
+結論から言えば、だいぶ前に一度ためしたIBMのBlueMixから比べるとだいぶストレートフォワードな感じでした。webも日本語ですし。</p>
+
+<p>で、その中身についてはmilkcocoaのwebが詳しく解説されているかと思います。単純にはMQTTのメーッセージングシステムをnode.jsで使えるようにAPIを整備した、というかんじでしょうか。MQTTに特有なTopicとかQoS, Willなどの概念をざっくり丸くワップしてもらって、何も考えずにとにかくメッセージを送受信できるようになっています。<br/>
+<a href="http://blog.mlkcca.com/iot/milkcocoa-mqtt/">C++用のAPI</a>も用意があるようです。こちらは、phao MQTTをワップしているAPIを提供している感じでしょうか。</p>
+
+<p>今回はじめてnode.jsを使ってみましたが、通信用のアプリケーションを作るのには向いているような気がしました（素人ながら）。非同期処理というか並列処理的な考え方はちょっと違和感があるかもしれませんが、私はHDLも少し噛んでいるので「ああ、そういうことね」と比較的すんなり腑に落ちました。しかしながら、コールバック関数で何でも処理する、というのは今でも混乱しています。</p>
+
+<h2>ポイント</h2>
+
+<p>特にポイントと言えるほどの難しいところは無く、サンプルコードを自分のやりたいように拡張していけばすんなりできてしまいました。<br/>
+一応、作ったアプリケーションを<a href="https://github.com/mm011106/milkcocoa_edge_device">サンプル</a>としておいておきます。<br/>
+まったくもってエラーハンドリングしていないので、confgファイルとかで間違った設定するとチンプンカンプンになってしまうかもしれません。</p>
+
+<p>node.jsのド素人の私が３日ぐらいで一応動くコードが書けたのはひとえにmilkcocoaのスタッフの皆さんが努力されたAPIの使いやすさ、JavaScriptのコードの書き方、使い方を公開していただいている方々のおかげです。感謝。感謝。</p>
+
+<h3>push と send</h3>
+
+<p>pushメソッドだとサーバの方にデータが蓄えられて、webのダッシュボードからデータを確認できたり、グラフ化（β版）のサービスが提供されていたりします。また、pushメソッドで送信したデータにはタイムスタンプがつきます。<br/>
+ですので、デバイスの方でタイムスタンプをつけなくても受信側では「いつのデータ」なのかがすぐに解ります。</p>
+
+<p>一方、sendメソッドだとサーバにはデータが残りません。また、sendで送られたデータはタイムスタンプもつきません。そのかわり、データ数量の制限には引っかからないようです。（実際、カウントされていません）<br/>
+そのため、sendで送られるデータを見るためには事前に受信状態のノードを用意しておく必要があります。</p>
+
+<p>そして、送ったデータのメソッドは読み込む側も意識する必要があります。具体的には受信時にsendイベントによる受信か、pushイベントによるものかを指定するする必要がります。<br/>
+送信側もpushなのかsendなのかで使う関数がちがってきます。（MQTTのトピックがメソッドで違ってくるので致し方ないかと）</p>
+
+<h3>接続キー</h3>
+
+<p>サーバとの接続には以下の情報が必要です。</p>
+
+<ul>
+<li>AppID：アプリケーションの名前です。ユーザが設定します。</li>
+<li>Data Store：アプリケーションごとにいくつかのデータをストアする場所を設定します。ユーザが設定できます。（AppIDと含めてmqttのトピックのようなもの）</li>
+<li>API_Key, API_Secret：接続時の認証のためのキーになります。スクリプトなど秘匿性のある場合はこのセットを、htmlのような秘匿性が無いものについてはトークン認証を使うようです。</li>
+</ul>
+
+
+<h3>データフォーマット</h3>
+
+<p>送信は自分が送りたいデータをJavaScriptのオプジェクトにして送信ファンクションを呼び出します。
+受信側では、そのデータにヘッダがつきます。
+sendでは</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"path":"データストア名","value":{"送信したデータ"}}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>となります。
+なので、データをパースする場合は.value以下をパースした方が解りやすいかもしれません。</p>
+
+<p>pushではこれにタイムスタンプがついていたような気がしますが、よく覚えていません。
+すいません。。。。</p>
+
+<h2>まとめ</h2>
+
+<p>まとめるほどの内容でもないですが、<br/>
+とにかく、簡単にメッセージの送受信ができます。一度なれてしまえば瞬間にメッセージングのコードはかけるので、アプリケーションのコーディングとデバグに集中できます。</p>
+
+<p>私の場合、JavaScriptの全くの素人でしたので、自分で納得いくレベルまで行くのに時間がかかってしまいました。今からはエラーハンドリングに集中してレベルアップしたいと思います。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Masakazu Miyamoto</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2016-01-10T20:19:35+09:00" pubdate data-updated="true">2016 / 01 / 10</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/iot/'>iot,</a>, <a class='category' href='/blog/categories/logger/'>logger</a>, <a class='category' href='/blog/categories/node-dot-js/'>node.js,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mm011106.github.io/blog/2016/01/10/edge-device-with-nodejs/" data-via="" data-counturl="http://mm011106.github.io/blog/2016/01/10/edge-device-with-nodejs/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/12/06/python-and-trello-api/" title="Previous Post: TrelloにPythonでアクセスしてみる">&laquo; TrelloにPythonでアクセスしてみる</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+  </ul>
+</section>
+
+<!-- #<section id="titles">
+  <a href="http://mm011106.github.io" title="MQTT and ..."><img id="logo" src="http://mm011106.github.io/images/logo2.png" /></a>
+  <h1 id="site_title"><a href="http://mm011106.github.io" title="MQTT and ...">MQTT and &#8230;</a></h1>
+  <h3 id="site_subtitle">My first step to the IoT world.</h3>
+</section>
+
+<section id="menu">
+  <ul>
+    <li><i class="fa fa-home fa-lg"></i><a href="http://mm011106.github.io"> Home </a></li>
+    <li><i class="fa fa-calendar fa-lg"></i><a href="http://mm011106.github.io/blog/archives/"> Archives </a></li>
+    <li><i class="fa fa-user fa-lg"></i><a href="http://mm011106.github.io/about/"> About </a></li>
+    <li><i class="fa fa-rss fa-lg"></i><a href="http://mm011106.github.io/atom.xml"> Feed </a></li>
+  </ul>
+</section>
+
+<section id="social">
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+ &#8211;>
+
+<h1> test for a linke </h1>
+
+<!-- <section>
+  <h1>Test for a link to a new page</h1>
+  <ul id="references">
+    
+      <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/22/iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
+      </li>
+    
+  </ul>
+</section>
+
+&#8211;>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Masakazu Miyamoto -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

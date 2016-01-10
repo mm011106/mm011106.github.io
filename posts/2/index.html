@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="以前、ポーフォワードをautosshで設定するというのをやりましたが、今回はそれをもう少しまとめてみました。
-起動スクリプトの理解を少し深めて、さらにポートフォワード用のユーザを作ってそこで実行するようにして見ました。 ">
+  <meta name="description" content="以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するデーモンをシステム起動時に動かすことを試しました。
+今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/23/init-dot-d-script/">init.dスクリプトを書いてみる</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-23T21:20:50+09:00" pubdate data-updated="true">2015 / 02 / 23</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するデーモンをシステム起動時に動かすことを試しました。
+今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/23/init-dot-d-script/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -437,49 +480,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/21/update-mosquitto/">mosquittoをアップデートする</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-21T20:07:57+09:00" pubdate data-updated="true">2015 / 01 / 21</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>なんか変だと思っていたら、ubuntuに入れたmosquittoのバージョンが最新ではありませんでした。webにあるmanページとどうも違うなと思っていたら、そんなことが原因でした。
-なので、アップデート。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/21/update-mosquitto/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -527,6 +527,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
       </li>
     
@@ -540,10 +544,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
   </ul>
@@ -586,6 +586,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
       </li>
     
@@ -599,10 +603,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/03/29/ibm-iot-foundation/">IBM IoT foundationを試してみた</a>
       </li>
     
   </ul>
@@ -620,7 +620,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Masakazu Miyamoto -
+  Copyright &copy; 2016 - Masakazu Miyamoto -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
