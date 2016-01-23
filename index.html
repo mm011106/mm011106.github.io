@@ -9,8 +9,7 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。
-いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、 &hellip;">
+  <meta name="description" content="RaspberryPiでエッジデバイスを作って、実際にデプロイしてみました。今のところ順調にデータを送ってくれています。しかしながら、やっぱりlinuxはちょっと重たい感じもするし、値段はともかくオーバースペックという感もあります。 以前予定していた通り、mbedでの開発を考えてみました。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +50,50 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2016-01-23T19:43:05+09:00" pubdate data-updated="true">2016 / 01 / 23</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>RaspberryPiでエッジデバイスを作って、実際にデプロイしてみました。今のところ順調にデータを送ってくれています。しかしながら、やっぱりlinuxはちょっと重たい感じもするし、値段はともかくオーバースペックという感もあります。</p>
+
+<p>以前予定していた通り、mbedでの開発を考えてみました。これからならmbedOSベースだろうということで、とりあえずはmbedOSに慣れてみよう、ということで。。。。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/01/23/installation-of-mbedos/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -441,49 +484,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-02-25T21:03:27+09:00" pubdate data-updated="true">2015 / 02 / 25</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>環境変数でデバイスのパラメタを指定することを考えてみました。<br/>
-システムワイドの環境変数設定は<code>/etc/environment</code>に入れるようですが、実際にこれを使いたいと思うのは起動時、という場合が多いのでちょっと困りものです。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/02/25/read-env-in-init-dot-d/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -529,6 +529,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
       </li>
     
@@ -542,10 +546,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
   </ul>
@@ -588,6 +588,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
       </li>
     
@@ -601,10 +605,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
   </ul>

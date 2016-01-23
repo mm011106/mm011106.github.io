@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: mbed | MQTT and ...]]></title>
+  <link href="http://mm011106.github.io/blog/categories/mbed/atom.xml" rel="self"/>
+  <link href="http://mm011106.github.io/"/>
+  <updated>2016-01-23T20:03:00+09:00</updated>
+  <id>http://mm011106.github.io/</id>
+  <author>
+    <name><![CDATA[Masakazu Miyamoto]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[mbedでedge deviceを作ってみる（という予定）]]></title>
+    <link href="http://mm011106.github.io/blog/2016/01/23/installation-of-mbedos/"/>
+    <updated>2016-01-23T19:43:05+09:00</updated>
+    <id>http://mm011106.github.io/blog/2016/01/23/installation-of-mbedos</id>
+    <content type="html"><![CDATA[<p>RaspberryPiでエッジデバイスを作って、実際にデプロイしてみました。今のところ順調にデータを送ってくれています。しかしながら、やっぱりlinuxはちょっと重たい感じもするし、値段はともかくオーバースペックという感もあります。</p>
+
+<p>以前予定していた通り、mbedでの開発を考えてみました。これからならmbedOSベースだろうということで、とりあえずはmbedOSに慣れてみよう、ということで。。。。</p>
+
+<!-- more -->
+
+
+<p>一昨年の11月にリリースされると聞いていたので楽しみにしていましたが、現在<a href="https://www.mbed.com/en/development/software/mbed-os/releases/">TechnologyPreview</a>のようです。</p>
+
+<h2>mbedOSを導入</h2>
+
+<p>mbedのwebにある<a href="https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/installation/">Installation</a>を見ながら進めます。ホストはMacOSです。<br/>
+ここでは、直接インストールするのではなく、Dockerを使ってみます。<br/>
+私の理解では、Dockerは実行環境を仮想化する仕組みで、実際の計算機の実行環境と全く別に設定された「コンテナ」とよばれる環境中で作成したアプリケーションを実行できるものです。こうすることで、特定のアプリケーションを動かすための実行環境を使っている開発環境と別に用意できるため、開発環境上でのソフトウエアのコンフリクトを防げるとともに、「コンテナ」をそのまま実際の実行環境に移行できるので「開発時の環境と実行時の環境を全く同じ」にできます。</p>
+
+<h3>1. dockerを導入</h3>
+
+<p><a href="https://www.docker.com/docker-toolbox">docker</a>のwebからMac版をダウンロードしてインストール。<br/>
+インストール途中で「起動してみてもいいよ」的な状態になるので、とりあえず無視して終了。</p>
+
+<h3>2. docker 起動</h3>
+
+<p>Launchpadから「Docker Quickstart Terminal」を起動すると、クジラのアスキーアートとともに起動。<br/>
+何がなんだか解らないので、tutorialにある
+<code>
+$ docker run hello-world
+</code></p>
+
+<p>を実行してみると、</p>
+
+<pre><code>
+Hello from Docker.
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker Hub account:
+ https://hub.docker.com
+
+For more examples and ideas, visit:
+ https://docs.docker.com/userguide/
+</code></pre>
+
+<p>ということで、新しい「コンテナ」にhello-worldのイメージを展開してその中にある実行ファイルを実行して、それがDocker clientにこのメッセージを送信、それがターミナルに表示されている、という形になっているとのこと。</p>
+
+<p>インストールはうまく行っているということなので、次に。</p>
+
+<h3>3. yottaのインストール</h3>
+
+<p>mbedOSのアプリケーションはすべてyottaによって作成される必要がある、ということですので、<a href="https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/docker_install/">こちらを参考に</a>yottaをインストールします。</p>
+
+<p><code>$ docker pull mbed/yotta</code></p>
+
+<p>これでdockerのmbed/yottaコンテナを持ってきます。yottaのコマンドをこのコンテナに対して発行することで独立した環境でyottaを実行できる、という感じかとおもいます。<br/>
+そのためのスクリプトとして<a href="https://raw.githubusercontent.com/ARMmbed/GettingStartedmbedOS/master/Docs/Scripts/yotta.sh">yotta.sh</a>を使うようです。
+これをwgetして、</p>
+
+<p><code>$ ln -s {pathToTheDownloaded}/yotta.sh /usr/local/bin/yotta</code></p>
+
+<p>とすることで、<code>$ yotta ~ ~ ~</code> の形でyottaをコンテナ内で実行できるようになります。</p>
+
+<h2>試してみる</h2>
+
+<p><a href="https://docs.mbed.com/docs/getting-started-mbed-os/en/latest/FirstProjectmbedOS/">blinky</a>を試してみます。といってもmbedOSでサポートされているボードが手元に無いので、途中までですが。。。。</p>
+
+<p>先のリンクにあった通りに実行してみます。</p>
+
+<pre><code>$ mkdir blinky
+$ cd blinky
+$ yotta init
+</code></pre>
+
+<p>とすることで、ディレクトリが作業用としてイニシャライズされます。<br/>
+モジュール（作ろうとしているアプリケーション）の名前やバージョン、ライブラリなのか実行形式なのか、短い説明、ライセンスを聞かれますので、適宜答えると終了です。</p>
+
+<p>次に、ターゲット環境を設定。
+現状、おなじみのmbedデバイスはあまりサポートされていないようです。<br/>
+次のコマンドでターゲットの設定ファイルがリストアップされます。</p>
+
+<p><code>$ yotta search target</code></p>
+
+<p>といっても、あまり見通しのよいリストではない感じですね。
+ここでは、サンプル通り</p>
+
+<p><code>$ yotta target frdm-k64f-gcc</code></p>
+
+<p>としてみます。mbedアカウントのログインが必要のようです。コンソールに出てくるURLをコピーしてブラウザでログインすると処理が進みます。</p>
+
+<p>しばらくして、ダウンロードとデプロイが完了したあとに、チェックしてみます。</p>
+
+<pre><code>$ yotta target
+frdm-k64f-gcc 2.0.0
+kinetis-k64-gcc 2.0.0
+mbed-gcc 1.1.0
+</code></pre>
+
+<p>なにやら設定されたようです。</p>
+
+<p>次にdependenciesをインストールします。ライブラリ、ということでしょうか。</p>
+
+<pre><code>$ yotta install mbed-drivers
+info: get versions for mbed-drivers
+info: download mbed-drivers@0.11.8 from the public module registry
+info: dependency mbed-drivers: ~0.11.8 written to module.json
+info: get versions for mbed-hal
+info: download mbed-hal@1.2.1 from the public module registry
+info: get versions for cmsis-core
+info: download cmsis-core@1.1.1 from the public module registry
+info: get versions for ualloc
+info: download ualloc@1.0.3 from the public module registry
+....
+....
+</code></pre>
+
+<p>bliknkyのソースコードを用意して、<code>./source/app.cpp</code>として保存します。</p>
+
+<pre><code class="cpp">#include "mbed-drivers/mbed.h"
+
+static void blinky(void) {
+    static DigitalOut led(LED1);
+    led = !led;
+    printf("LED = %d \r\n",led.read());
+}
+
+void app_start(int, char**) {
+    minar::Scheduler::postCallback(blinky).period(minar::milliseconds(500));
+}
+</code></pre>
+
+<p>ビルドしてみます。結構時間がかかります。２分とか。（最初だけかも）</p>
+
+<pre><code>$ yotta build
+info: generate for target: frdm-k64f-gcc 2.0.0 at /yotta_home/work/bliknky/yotta_targets/frdm-k64f-gcc
+GCC version is: 4.9.3
+-- The ASM compiler identification is GNU
+-- Found assembler: /usr/bin/arm-none-eabi-gcc
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /yotta_home/work/bliknky/build/frdm-k64f-gcc
+[130/130] Linking CXX executable source/bliknky
+</code></pre>
+
+<p>てな感じで終了。</p>
+
+<p><code>./build/frdm-k64f-gcc/source/</code>に<code>blinky.bin</code>というファイルが出来ていて、それがターゲットの実行ファイル（の転送できる形）のようです。</p>
+
+<p>手元にボードが無いのでここまで。</p>
+
+<p>本筋ではないですが、dockerはかなり便利ですね。インストール作業無し（コンテナを引っ張ってくるだけ）でこれだけのツールがReadyToUseになります。コンテナを作ってくれた人には感謝です。<br/>
+大抵は、インストールがうまく行かなくて２、３度はコケてしまうこともあり、場合によってはついにあきらめてしまうこともあるので。。。。</p>
+]]></content>
+  </entry>
+  
+</feed>

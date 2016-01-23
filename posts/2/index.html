@@ -9,8 +9,8 @@
   <meta name="author" content="Masakazu Miyamoto">
 
   
-  <meta name="description" content="以前ハードウエアのスイッチでRaspberry Piをシャットダウンする時に、GPIOを監視するデーモンをシステム起動時に動かすことを試しました。
-今回、MQTTのデータ経路を暗号化するためのポートフォワードを起動時にオープンすることを試します。 ">
+  <meta name="description" content="環境変数でデバイスのパラメタを指定することを考えてみました。
+システムワイドの環境変数設定は/etc/environmentに入れるようですが、実際にこれを使いたいと思うのは起動時、という場合が多いのでちょっと困りものです。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -51,6 +51,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/02/25/read-env-in-init-dot-d/">起動スクリプトで環境変数を読み込む</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+<time datetime="2015-02-25T21:03:27+09:00" pubdate data-updated="true">2015 / 02 / 25</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>環境変数でデバイスのパラメタを指定することを考えてみました。<br/>
+システムワイドの環境変数設定は<code>/etc/environment</code>に入れるようですが、実際にこれを使いたいと思うのは起動時、という場合が多いのでちょっと困りものです。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/02/25/read-env-in-init-dot-d/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -438,48 +481,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/01/25/webcam/">WebCamをつなげてみる</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-
-<time datetime="2015-01-25T09:20:05+09:00" pubdate data-updated="true">2015 / 01 / 25</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/01/25/webcam/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="3">&larr; Older</a>
@@ -527,6 +528,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
       </li>
     
@@ -540,10 +545,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
   </ul>
@@ -586,6 +587,10 @@
   <ul id="references">
     
       <li class="post">
+        <a href="/blog/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
       </li>
     
@@ -599,10 +604,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/21/iot-et-2015-day2/">ET/IoT 2015　コンファレンスレポート 2日目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/18/iot-et-2015/">ET/IoT 2015　コンファレンスレポート</a>
       </li>
     
   </ul>
