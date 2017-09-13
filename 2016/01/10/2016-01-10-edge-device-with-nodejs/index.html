@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>milkcocoaにnode.jsでアクセスする | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
+<meta property="og:type" content="article">
+<meta property="og:title" content="milkcocoaにnode.jsでアクセスする">
+<meta property="og:url" content="https://mm011106.github.io/2016/01/10/2016-01-10-edge-device-with-nodejs/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-12T11:31:45.977Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="milkcocoaにnode.jsでアクセスする">
+<meta name="twitter:description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2016-01-10-edge-device-with-nodejs" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/" class="article-date">
+  <time datetime="2016-01-10T11:19:35.000Z" itemprop="datePublished">2016-01-10</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      milkcocoaにnode.jsでアクセスする
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。<br>いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その「めんどくささ」のおかげでセキュリティやデータの可視性が高いのですが。<br>で、このタイミングでBaaSに移行しないと、時代に乗り遅れるなあとも想い、冬休みの１週間を使って試してみました。<br>今回は<a href="https://mlkcca.com/" target="_blank" rel="external">milkcocoa</a>というサービスを使いました。<br><a id="more"></a></p>
+<h2 id="仕組み"><a href="#仕組み" class="headerlink" title="仕組み"></a>仕組み</h2><p>milkcocoaは、interfaceの記事によればメッセージ送受信にフォーカスしている、ということでしたので、きっとAPIや設定方法なども比較的単純で解りやすいだろうということで選びました。<br>結論から言えば、だいぶ前に一度ためしたIBMのBlueMixから比べるとだいぶストレートフォワードな感じでした。webも日本語ですし。</p>
+<p>で、その中身についてはmilkcocoaのwebが詳しく解説されているかと思います。単純にはMQTTのメーッセージングシステムをnode.jsで使えるようにAPIを整備した、というかんじでしょうか。MQTTに特有なTopicとかQoS, Willなどの概念をざっくり丸くワップしてもらって、何も考えずにとにかくメッセージを送受信できるようになっています。<br><a href="http://blog.mlkcca.com/iot/milkcocoa-mqtt/" target="_blank" rel="external">C++用のAPI</a>も用意があるようです。こちらは、phao MQTTをワップしているAPIを提供している感じでしょうか。</p>
+<p>今回はじめてnode.jsを使ってみましたが、通信用のアプリケーションを作るのには向いているような気がしました（素人ながら）。非同期処理というか並列処理的な考え方はちょっと違和感があるかもしれませんが、私はHDLも少し噛んでいるので「ああ、そういうことね」と比較的すんなり腑に落ちました。しかしながら、コールバック関数で何でも処理する、というのは今でも混乱しています。</p>
+<h2 id="ポイント"><a href="#ポイント" class="headerlink" title="ポイント"></a>ポイント</h2><p>特にポイントと言えるほどの難しいところは無く、サンプルコードを自分のやりたいように拡張していけばすんなりできてしまいました。<br>一応、作ったアプリケーションを<a href="https://github.com/mm011106/milkcocoa_edge_device" target="_blank" rel="external">サンプル</a>としておいておきます。<br>まったくもってエラーハンドリングしていないので、confgファイルとかで間違った設定するとチンプンカンプンになってしまうかもしれません。</p>
+<p>node.jsのド素人の私が３日ぐらいで一応動くコードが書けたのはひとえにmilkcocoaのスタッフの皆さんが努力されたAPIの使いやすさ、JavaScriptのコードの書き方、使い方を公開していただいている方々のおかげです。感謝。感謝。</p>
+<h3 id="push-と-send"><a href="#push-と-send" class="headerlink" title="push と send"></a>push と send</h3><p>pushメソッドだとサーバの方にデータが蓄えられて、webのダッシュボードからデータを確認できたり、グラフ化（β版）のサービスが提供されていたりします。また、pushメソッドで送信したデータにはタイムスタンプがつきます。<br>ですので、デバイスの方でタイムスタンプをつけなくても受信側では「いつのデータ」なのかがすぐに解ります。</p>
+<p>一方、sendメソッドだとサーバにはデータが残りません。また、sendで送られたデータはタイムスタンプもつきません。そのかわり、データ数量の制限には引っかからないようです。（実際、カウントされていません）<br>そのため、sendで送られるデータを見るためには事前に受信状態のノードを用意しておく必要があります。</p>
+<p>そして、送ったデータのメソッドは読み込む側も意識する必要があります。具体的には受信時にsendイベントによる受信か、pushイベントによるものかを指定するする必要がります。<br>送信側もpushなのかsendなのかで使う関数がちがってきます。（MQTTのトピックがメソッドで違ってくるので致し方ないかと）</p>
+<h3 id="接続キー"><a href="#接続キー" class="headerlink" title="接続キー"></a>接続キー</h3><p>サーバとの接続には以下の情報が必要です。</p>
+<ul>
+<li>AppID：アプリケーションの名前です。ユーザが設定します。</li>
+<li>Data Store：アプリケーションごとにいくつかのデータをストアする場所を設定します。ユーザが設定できます。（AppIDと含めてmqttのトピックのようなもの）</li>
+<li>API_Key, API_Secret：接続時の認証のためのキーになります。スクリプトなど秘匿性のある場合はこのセットを、htmlのような秘匿性が無いものについてはトークン認証を使うようです。</li>
+</ul>
+<h3 id="データフォーマット"><a href="#データフォーマット" class="headerlink" title="データフォーマット"></a>データフォーマット</h3><p>送信は自分が送りたいデータをJavaScriptのオプジェクトにして送信ファンクションを呼び出します。<br>受信側では、そのデータにヘッダがつきます。<br>sendでは<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;path&quot;:&quot;データストア名&quot;,&quot;value&quot;:&#123;&quot;送信したデータ&quot;&#125;&#125;</div></pre></td></tr></table></figure></p>
+<p>となります。<br>なので、データをパースする場合は.value以下をパースした方が解りやすいかもしれません。</p>
+<p>pushではこれにタイムスタンプがついていたような気がしますが、よく覚えていません。<br>すいません。。。。</p>
+<h2 id="まとめ"><a href="#まとめ" class="headerlink" title="まとめ"></a>まとめ</h2><p>まとめるほどの内容でもないですが、<br>とにかく、簡単にメッセージの送受信ができます。一度なれてしまえば瞬間にメッセージングのコードはかけるので、アプリケーションのコーディングとデバグに集中できます。</p>
+<p>私の場合、JavaScriptの全くの素人でしたので、自分で納得いくレベルまで行くのに時間がかかってしまいました。今からはエラーハンドリングに集中してレベルアップしたいと思います。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2016/01/10/2016-01-10-edge-device-with-nodejs/" data-id="cj7iwtfip0023vv410oluawke" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/01/23/2016-01-23-installation-of-mbedos/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          mbedでedge deviceを作ってみる（という予定）
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/06/2015-12-06-python-and-trello-api/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">TrelloにPythonでアクセスしてみる</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/mbed/">mbed</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/mbed/" style="font-size: 10px;">mbed</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/23/ブログスタート/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/2016-01-23-installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/2015-12-06-python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+          <li>
+            <a href="/2015/11/22/2015-11-22-iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

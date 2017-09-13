@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>paho-mqttで回線を切るとどうなるか | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。 paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="paho-mqttで回線を切るとどうなるか">
+<meta property="og:url" content="https://mm011106.github.io/2014/12/29/2014-12-29-vim/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。 paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-12T11:40:45.683Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="paho-mqttで回線を切るとどうなるか">
+<meta name="twitter:description" content="vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。 paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2014-12-29-vim" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/12/29/2014-12-29-vim/" class="article-date">
+  <time datetime="2014-12-29T01:28:40.000Z" itemprop="datePublished">2014-12-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/paho-mqtt/">paho-mqtt</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      paho-mqttで回線を切るとどうなるか
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>vimのことを書こうと思いましたが、どうもいいネタが思い浮かばないのでMQTTの話にします。</p>
+<p>paho-mqttでテスト用のサブスクライブスクリプトを動かして、途中でネットワークのコネクションを切るとどうなるか、という実験です。<br><a id="more"></a></p>
+<p>サブスクライバは下記のようなものです。これはpaho-mqttのページにあったテスト用のスクリプトです。</p>
+<figure class="highlight python"><figcaption><span>test_subscriber.py</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">topic = <span class="string">"TOPIC/YOU/WANTS/SEE"</span></div><div class="line">broker = <span class="string">"192.168.0.xxx"</span></div><div class="line">portNo = <span class="number">1883</span></div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">import</span> paho.mqtt.client <span class="keyword">as</span> mqtt</div><div class="line"></div><div class="line"><span class="comment"># The callback for when the client receives a CONNACK response from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(client, userdata, rc)</span>:</span></div><div class="line">    print(<span class="string">"Connected with result code "</span>+str(rc))</div><div class="line">	<span class="comment"># Subscribing in on_connect() means that if we lose the connection and</span></div><div class="line">	<span class="comment"># reconnect then subscriptions will be renewed.</span></div><div class="line"><span class="comment">#    client.subscribe("$SYS/broker/messages/#")</span></div><div class="line">    client.subscribe(topic)</div><div class="line"></div><div class="line"><span class="comment"># The callback for when a PUBLISH message is received from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(client, userdata, msg)</span>:</span></div><div class="line">	print(msg.topic+<span class="string">" "</span>+str(msg.payload))</div><div class="line"></div><div class="line">client = mqtt.Client()</div><div class="line">client.on_connect = on_connect</div><div class="line">client.on_message = on_message</div><div class="line"></div><div class="line">client.connect(broker, portNo, <span class="number">60</span>)</div><div class="line"></div><div class="line"><span class="comment"># Blocking call that processes network traffic, dispatches callbacks and</span></div><div class="line"><span class="comment"># handles reconnecting.</span></div><div class="line"><span class="comment"># Other loop*() functions are available that give a threaded interface and a</span></div><div class="line"><span class="comment"># manual interface.</span></div><div class="line">client.loop_forever()</div></pre></td></tr></table></figure>
+<p>で、これを実行して、途中でネットワークを切って見ました。</p>
+<p>端末上ではこんな感じ。</p>
+<figure class="highlight sh"><figcaption><span>In case of transmission line failure..</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">1419926642, 1767, 1433, 2513, 0</div><div class="line">Connected with result code 0</div><div class="line">1419926762, 1767, 1434, 2514, 0</div><div class="line">1419926821, 1767, 1432, 2513, 0</div><div class="line">  :</div></pre></td></tr></table></figure>
+<p>最初のサブスクライブを確認してから、接続を60秒以上切断し、元に戻します。</p>
+<p>データの最初のフィールドはタイムスタンプなので、120秒のデータ欠損があることがわかります。<br>その後経路が回復した時点で、再接続されていることがわかります。</p>
+<p>スクリプトでは<code>client.connect(broker, portNo, 60)</code>として60秒以上交信しないとpingでMQTT接続をキープするように設定しています。この実験では、60秒以上コネクションを切っていますのでpingが発行され、その答えは帰ってこない状況に有ります。さらにブローカはmosquittoをデフォルトで動かしているので、ブローカがMQTTのコネクションを切ることはありません。（persistent_client_expirationを設定していない）</p>
+<p>スクリプトを実行した時のパケットの様子を見てみると。。。。</p>
+<ul>
+<li><p>TCP でのネゴシエーションがあったあと、MQTTでの接続リクエストがなされます。</p>
+</li>
+<li><p>続いてMQTTの接続許可がブローカから来ます。<br>そしてサブスクライブ要求としてトピックの指定をブローカに送ります。</p>
+</li>
+<li><p>この返事として、TCPのACKがあり、サブスクライブの準備が整います。指定したトピックにパブリッシュがあると、サブスクライブされるようになります。</p>
+</li>
+</ul>
+<p>そして、スクリプト開始から66.9秒後に最初のデータがきました。その後、接続を切ります。</p>
+<p>183秒のときに接続を再開。</p>
+<p>このとき起こったことは。。。。</p>
+<ul>
+<li><p>まず、TCPでの接続のために、クライアントからブローカに向かってSYN,ACK、SYNが取り交わされます。</p>
+</li>
+<li><p>その後、最初の接続と同じように、MQTTのコネクションが最初の接続と同じIDで開始され、次にサブスクライブ要求が発行されています。</p>
+</li>
+<li><p>サブスクライブ要求後、サブスクライブ確認のメッセージがブローカから帰ってきます。</p>
+</li>
+<li><p>その3秒後、ブローカからFINパケットとともにデータが送られてきて、クライアントがRSTパケットを返してTCP接続が切られます。</p>
+<ul>
+<li>このFIN-RST応答は、そのシーケンス番号から、回線を切る前のコネクションの異常終了のためのやり取りだという事がわかりました。ですので、このパケットに乗っていたデータは以前のコネクションのデータだということで破棄されているはずです。スクリプトの出力を見るとこのデータは出力されていませんので、これは正しい理解だという事にします。</li>
+</ul>
+</li>
+</ul>
+<!--
+このタイミングはパブリッシュのタイミングなので、サブスクライブデータが送られてくるタイミングでもあります。
+ブローカ側としては、TCPコネクションが再開したのでデータを送るけれど、すでに同じIDでコネクション要求が入っているので、これは最後のデータね。ということでFINパケットと共に送られたものと思います。
+一方のクライアント側は、再接続しているので、このパケットを受け取るソケットが無く、RSTパケットで強制終了のお願いをして終わりにしたのだと考えられます。
+-->
+<ul>
+<li>そのあと、最新のデータが配信されてきました。このデータのタイムスタンプは<code>1419926762</code>で、スクリプトの出力からこのタイムスタンプのデータの受信は確認出来ました。</li>
+</ul>
+<p>以上が、回線を切断された時のこのスクリプトの動作です。</p>
+<p>ここで疑問は、「なぜ、コネクション要求がクライアントから出されるのか」という点です。<br>スクリプトでは、接続がロストした時の内容は記述していません。ということは、ライブラリ側の判断で再接続がなされているという事になります。</p>
+<p>で、よく<a href="https://pypi.python.org/pypi/paho-mqtt#network-loop" target="_blank" rel="external">マニュアル</a>を読むと、loop_forever()ファンクションがこれを管理しているようです。</p>
+<p>###Network loop</p>
+<blockquote>
+<p>These functions are the driving force behind the client. If they are not called, incoming network data will not be processed and outgoing network data may not be sent in a timely fashion.</p>
+<p>これらのファンクションはクライアントの裏で駆動力となるものです。これらが呼ばれなければ入力されたデータは処理されず、出力されるべきデータは時間通りに送られないでしょう。</p>
+</blockquote>
+<p>###loop_forever()</p>
+<blockquote>
+<p>This is a blocking form of the network loop and will not return until the client calls disconnect(). It automatically handles reconnecting.</p>
+<p>これはネットワークループのブロッキングフォームで（私には意味不明）、クライアントがdisconnect()関数を呼び出すまでは帰って来ません。自動的に再接続を管理します。</p>
+</blockquote>
+<p>ということなので、（予想では）loop_forever()が再接続を発行して、その結果、スクリプトの処理で再度サブスクライブ要求が出される。ということなのでしょう。</p>
+<p>今回、断線後の再接続では切断前と同じIDを使っていましたので、MQTTプロトコル的には再度サブスクライブ要求を出さずとも、以前に指定したトピックをサブスクライブできたはずです。<br>ただ、一体何が起こっているのか判断がつかない状況では、再接続後に再度サブスクライブ要求を出すというのは妥当な処理なのかなとも思います。</p>
+<p> ここでのもうひとつの疑問は、「回線が切れた、と判断する基準は何？」ということです。</p>
+<p>これについて、<code>connect()</code>のkeepaliveだけ切断する状況と、充分短い時間（ほんの数秒）切断する状況で確認してみたところ、短い時間では再接続が起こらなかったことから、keepaliveの時間以上接続が切れていると(pingに応答がないと)切断されたと判断して「再接続」を行うようです。</p>
+<p>マニュアル上では</p>
+<p>###keepalive</p>
+<blockquote>
+<p>maximum period in seconds allowed between communications with the broker. If no other messages are being exchanged, this controls the rate at which the client will send ping messages to the broker</p>
+<p>ブローカとの最大許されるコミュニケーション間の時間（秒）。他のメッセージが交換されなければ、この数値に基づいてクライアントがpingメッセージをブローカに送るレートをコントロールします。</p>
+</blockquote>
+<p>ということで、pingに応答がなければ再接続のトリガになるとは書かれていません。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2014/12/29/2014-12-29-vim/" data-id="cj7iwtfg9000qvv41ngljkf4h" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/12/31/2014-12-31-font-size/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          引用のフォントサイズ
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/21/2014-12-21-paho-mqtt/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Paho MQTT のインストール</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/mbed/">mbed</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/mbed/" style="font-size: 10px;">mbed</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/23/ブログスタート/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/2016-01-23-installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/2015-12-06-python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+          <li>
+            <a href="/2015/11/22/2015-11-22-iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>gmailでメールを送る | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="gmailでメールを送るスクリプトを作り直しました。プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gmailでメールを送る">
+<meta property="og:url" content="https://mm011106.github.io/2015/03/08/2015-03-08-send-email-via-gmail/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="gmailでメールを送るスクリプトを作り直しました。プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-12T11:36:04.794Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gmailでメールを送る">
+<meta name="twitter:description" content="gmailでメールを送るスクリプトを作り直しました。プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2015-03-08-send-email-via-gmail" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/03/08/2015-03-08-send-email-via-gmail/" class="article-date">
+  <time datetime="2015-03-08T01:53:20.000Z" itemprop="datePublished">2015-03-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/python-gmail/">python, gmail</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      gmailでメールを送る
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>gmailでメールを送るスクリプトを作り直しました。<br>プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。<br><a id="more"></a></p>
+<p>実際には、gmailアカウントからセキュリティの設定をしなおすと一応接続はしてくれるようになります。しかし、送付先がgmail内に制限されているようです。  </p>
+<h2 id="再び検索"><a href="#再び検索" class="headerlink" title="再び検索"></a>再び検索</h2><p>全く持ってどうすればいいのかわからなかったので、またしても検索しました。</p>
+<p>結果、<a href="http://qiita.com/ssh0/items/7baa0cd094d9fb7561e1" target="_blank" rel="external">こちらのページ</a>を見つけましたので、これを基に自分の作業用のメール送信スクリプトを作ることにします。ありがとうございます。<br>おかげさまで6時間ぐらいで完成させることが出来ました。</p>
+<h2 id="目的・目標"><a href="#目的・目標" class="headerlink" title="目的・目標"></a>目的・目標</h2><p>このスクリプトの目的は、基本的なメール送信の手順を確認することが第一の目的です。<br>デバイスのデータをまとめているサーバ側からユーザへの通知方法の1つとして、メールは必須と考えられるので基本的なところを勉強しておこうということです。<br>また今回作ったスクリプトは、データをまとめたグラフをユーザへプッシュすることを目的としています。</p>
+<p>スクリプトの目標は以下のとおりです。</p>
+<ul>
+<li>送信者リスト(recipients list)から送信先を読み込んで、それをメールの送信先として設定する。</li>
+<li>添付ファイル(PDF)を付けられるようにする。`</li>
+<li>送信者リストのファイル名からIDを抽出して、それをメールのタイトルに入れる<ul>
+<li>具体的には、送信者リストのファイル名の中の数値(整数)をとりだします</li>
+</ul>
+</li>
+</ul>
+<h2 id="結果"><a href="#結果" class="headerlink" title="結果"></a>結果</h2><p>ソースコードはgithubの方に載せておきます。（相変わらず使い方がよくわからない。。。）<br><a href="https://github.com/mm011106/sendgmail.py/blob/master/sendgmail.py" target="_blank" rel="external">sendgmail.py</a></p>
+<p>動作の検証を何回かやって、エラーハンドリング用のコードを少し入れて通常に使うにはokぐらいになりました。</p>
+<h2 id="ポイント"><a href="#ポイント" class="headerlink" title="ポイント"></a>ポイント</h2><p>今回の作業でポイントとなったところをいくつか記録しておきます。</p>
+<h3 id="ヘッダの中の宛先とメール送信コマンドの引数としての宛先"><a href="#ヘッダの中の宛先とメール送信コマンドの引数としての宛先" class="headerlink" title="ヘッダの中の宛先とメール送信コマンドの引数としての宛先"></a>ヘッダの中の宛先とメール送信コマンドの引数としての宛先</h3><p>普段メールを書いているときにはほとんど意識しない宛先の取り扱いですが、意識していないからこそひっかかったという感じでしょうか。  </p>
+<p>送信先を読み込んで、その宛先を <code>msg[&#39;To&#39;] = to_addr</code>というように設定してあげます。<code>to_addr</code>は文字列で複数のメールアドレスがコンマで区切られて入っています。<br>最初はてっきりこの設定で実際のメール送信の宛先になるものだ、と思い込んでいました。<br>しかしながら、複数の宛先が指定されていても、送られてくるのは最初の宛先だけ、という状況でした。<br>アドレス指定が文字列じゃいけなくて、リストなのかなあ、などと思いつつ色々調べていて、はたと気がつきました。「もしかしたら送信用のアドレス指定とメールヘッダ用の宛先指定は違うのじゃないか？」と。スクリプトを眺めると0.1秒でそれが正しいことがわかりました。</p>
+<p>結局、<code>msg[&#39;To&#39;] = to_addr</code>はヘッダ用で、実際の送信にこの内容は関与しない、という事です。さらに送信用の実際のアドレス指定は<code>send_via_gmail(from_addr, to_addr, passwd, msg)</code>の<code>to_addr</code>であって、これは複数の宛先の場合「リスト」で有る必要があります。<br>具体的には、</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ヘッダ用アドレス指定：<span class="string">'aaa@gmial.com, bbb@yahoo.com'</span></div><div class="line">メール送信用アドレス指定：[<span class="string">'aaa@gmail.com'</span>, <span class="string">'bbb@yahoo.com'</span>]</div></pre></td></tr></table></figure>
+<p>これら2つの変数を混同して使っていたため、<code>send_vi_gmail</code>に送られる引数のアドレスは「複数のアドレスを記載した文字列」となっていました。これが、<code>send_via_gmail</code>に渡されてリストとして扱われたため、「要素数１」で（頭に書かれている）1ヶ所だけにメールが送られていたようです。</p>
+<h3 id="パーサが使える！"><a href="#パーサが使える！" class="headerlink" title="パーサが使える！"></a>パーサが使える！</h3><p>pythonでこんなに簡単に引数をパースできるとは！参考にしたページを書いていただいた人に感謝します。ありがとうございます。</p>
+<p>早速使わせて頂きました。  </p>
+<h3 id="「内包表現」？"><a href="#「内包表現」？" class="headerlink" title="「内包表現」？"></a>「内包表現」？</h3><p>なんだかよくわからないけど、表現としてはすっきりするので使って見ました。<br>具体的には、recipient listから読み込んだ内容をリストにして、そのリスト内から不要なもの（空、#で始まるコメントの要素）を取り除くために使っています。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 　正規表現定義（コメント行と空行） </span></div><div class="line">re_comment = re.compile(<span class="string">"^\s*#"</span>)</div><div class="line">re_null_line = re.compile(<span class="string">"^\s*$"</span>)</div><div class="line"></div><div class="line"><span class="comment">#  内包表現を使って正規表現に”マッチしない”要素を取り出す</span></div><div class="line"><span class="comment">#　　address_listには、コメントや空行も含めファイルから読み込んだ宛先が入っている</span></div><div class="line">address_list= [x <span class="keyword">for</span> x <span class="keyword">in</span> address_list <span class="keyword">if</span> re_comment.match(x) == <span class="keyword">None</span> ]</div><div class="line">address_list= [x <span class="keyword">for</span> x <span class="keyword">in</span> address_list <span class="keyword">if</span> re_null_line.match(x) == <span class="keyword">None</span> ]</div></pre></td></tr></table></figure>
+<h3 id="添付ファイルの用意"><a href="#添付ファイルの用意" class="headerlink" title="添付ファイルの用意"></a>添付ファイルの用意</h3><p>添付ファイルはMIMEエンコードする必要があるので、なんだかちょっと面倒です。<br>説明できないですが、webの情報をかき集めてこのようなコードにしています。</p>
+<p>多分こんなかんじかと。。。</p>
+<ul>
+<li>MIMEBaseで添付ファイルのオブジェクトをPDFとして作る。</li>
+<li>添付ファイルの実体をファイルから読み込んでオブジェクトに入れる。</li>
+<li>base64でエンコード</li>
+<li>ヘッダをつける</li>
+</ul>
+<p>ここには書かれていませんが、このあとメッセージにattachします。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">#   prepare PDF file as a attachment</span></div><div class="line">    attach_file_name = args.attach_file</div><div class="line"></div><div class="line">    <span class="keyword">if</span> attach_file_name != <span class="keyword">None</span> :</div><div class="line">        <span class="keyword">if</span> os.path.exists(attach_file_name) :</div><div class="line">            attachment = MIMEBase(<span class="string">"application"</span>,<span class="string">"pdf"</span>)</div><div class="line"></div><div class="line">            <span class="keyword">with</span> open(args.attach_file, <span class="string">'rb'</span>) <span class="keyword">as</span> fp:</div><div class="line">                attachment.set_payload(fp.read())</div><div class="line">    </div><div class="line">            Encoders.encode_base64(attachment)</div><div class="line">            base_file_name = os.path.basename(attach_file_name)</div><div class="line">            attachment.add_header(<span class="string">"Content-Disposition"</span>, <span class="string">"attachment"</span>, filename=base_file_name)</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            <span class="keyword">print</span> (<span class="string">'No attachment file is found.'</span>)</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">       <span class="keyword">print</span> (<span class="string">'No attachment file is specified.'</span>)</div></pre></td></tr></table></figure>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>動作は問題ありませんが、メールアカウントのパスワードが生で入っているのがちょっと気になりますね。  スクリプト自体をrootしか見れないようにすれば少しは良いかもしれません。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/03/08/2015-03-08-send-email-via-gmail/" data-id="cj7iwtfi9001svv41r9azol16" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/03/29/2015-03-29-ibm-iot-foundation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          IBM IoT foundationを試してみた
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/28/2015-02-28-autossh-failure-to-connect/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">autosshが起動スクリプトでうまく動かない訳</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/mbed/">mbed</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/mbed/" style="font-size: 10px;">mbed</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/23/ブログスタート/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/2016-01-23-installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/2015-12-06-python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+          <li>
+            <a href="/2015/11/22/2015-11-22-iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

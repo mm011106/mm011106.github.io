@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>オレオレ証明書を作ってみようかと　準備 | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。ここでは、まず勉強。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="オレオレ証明書を作ってみようかと　準備">
+<meta property="og:url" content="https://mm011106.github.io/2015/01/18/2015-01-18-ore-ore-certificate/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。ここでは、まず勉強。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-12T11:37:18.425Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="オレオレ証明書を作ってみようかと　準備">
+<meta name="twitter:description" content="現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。ここでは、まず勉強。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2015-01-18-ore-ore-certificate" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/01/18/2015-01-18-ore-ore-certificate/" class="article-date">
+  <time datetime="2015-01-18T02:28:32.000Z" itemprop="datePublished">2015-01-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/SSL/">SSL</a>►<a class="article-category-link" href="/categories/SSL/CA-certificate/">CA certificate</a>►<a class="article-category-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      オレオレ証明書を作ってみようかと　準備
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>現在、セキュアな通信はSSHで確保する方針ですが、証明書ベースの暗号化についても考えておいてもいいのじゃないかなあとおもい、いわゆる「オレオレ証明書」を試してみようかと思った次第です。<br>ここでは、まず勉強。<br><a id="more"></a></p>
+<p>英語のwebでは”self-signed certificate”なんて言われていますが、日本では「オレオレ詐欺」にちなんで、「オレオレ証明書」と呼ぶのがツウのやりかたのようです。でも、これは結構いいネーミングじゃないかと思います。日本で「オレオレ」というのはかなりダーティな印象があるので、「これ、オレオレ証明書だよね」というと、直感的に騙されそうな感じがします。</p>
+<p>昔の記事（2007年頃）ですが、銀行のオンラインバンキングなどでもオレオレ証明の一種が使われていたということで、間違ったITリテラシを教えてしまうという危険が<a href="http://takagi-hiromitsu.jp/diary/20071117.html" target="_blank" rel="external">指摘</a>されています。</p>
+<p>このページの終わりの方には証明書の分類が挙げられており、一口に「オレオレ」といってもいろいろあるのだよ。ということがわかります。</p>
+<p>今回つくろうとしているのは、ここで言うところの「第四種オレオレ証明書」です。<br>とくに悪意があってself-signedにするわけではなく、パブリックに公開されるサーバではないし、特定の用途にしか使わない、自分たち専用の暗号化経路ということです。</p>
+<p>ポリシーとしては、</p>
+<ul>
+<li>経路の暗号化には証明書ベースの共通鍵暗号化</li>
+<li>ログイン制御にはユーザ名/パスワード</li>
+<li>ポート番号の変更</li>
+</ul>
+<p>という3本柱で考えてみたいと思います。</p>
+<p>証明書ベースの認証を行うという事は、だれでも（ポート番号がわかれば）暗号化経路を作れる、ということになります。そのため、実際にブローカに接続できるかどうかは、ユーザ名による認証を行う必要があると思ったからです。実際には、IPやドメイン名の制限など、可能な接続制限を取る必要があると思います。</p>
+<h2 id="mosquitto-conf-と-mosquitto-pub-subの暗号化についての記載"><a href="#mosquitto-conf-と-mosquitto-pub-subの暗号化についての記載" class="headerlink" title="mosquitto.conf と mosquitto_pub/subの暗号化についての記載"></a>mosquitto.conf と mosquitto_pub/subの暗号化についての記載</h2><p>まずは、いま使っているクライアント・サーバアプリケーションが証明書ベースの暗号化にどのように対応しているかを確認しておきます。<br>まずは、ブローカ側の<code>mosquitto.conf</code>から</p>
+<h3 id="mosquitto-conf"><a href="#mosquitto-conf" class="headerlink" title="mosquitto.conf"></a>mosquitto.conf</h3><h4 id="Authentication"><a href="#Authentication" class="headerlink" title="Authentication"></a>Authentication</h4><blockquote>
+<p>The authentication options described below allow a wide range of possibilities in conjunction with the listener options. This section aims to clarify the possibilities.</p>
+<p>以下に示す認証のオプションはリスナーのオプションとともに活用することで広いレンジの可能性を提供します。このセクションはその可能性を明らかにします。</p>
+<p>The simplest option is to have no authentication at all. This is the default if no other options are given. Unauthenticated encrypted support is provided by using the certificate based SSL/TLS based options cafile/capath, certfile and keyfile.</p>
+<p>最もシンプルなものは認証をしないようにすることです。これは他のオプションが与えられない限り、デフォルトの設定になります。認証なしの暗号化はcafile/capathオプションにより証明書ベースのSSL/TLSから提供されます。</p>
+<p>MQTT provides username/password authentication as part of the protocol. Use the password_file option to define the valid usernames and passwords. Be sure to use network encryption if you are using this option otherwise the username and password will be vulnerable to interception.</p>
+<p>MQTTはプロトコルの一部としてユーザ名／パスワードによる認証を提供しています。<br><code>password_file</code>オプションを使うことで有効なユーザ名とパスワードを設定できます。このオプションを使うときは経路の暗号化を必ず実施してください。そうしないとユーザ名／パスワードは盗聴の対象となってしまいます。</p>
+<p>When using certificate based encryption there are two options that affect authentication. The first is require_certificate, which may be set to true or false. If false, the SSL/TLS component of the client will verify the server but there is no requirement for the client to provide anything for the server: authentication is limited to the MQTT built in username/password. If require_certificate is true, the client must provide a valid certificate in order to connect successfully. In this case, the second option, use_identity_as_username, becomes relevant. If set to true, the Common Name (CN) from the client certificate is used instead of the MQTT username for access control purposes. The password is not replaced because it is assumed that only authenticated clients have valid certificates. If use_identity_as_username is false, the client must authenticate as normal (if required by password_file) through the MQTT options.</p>
+<p>証明書ベースの暗号化を行う場合、2つのオプションが認証に影響を与えます。<br>1つめは<code>require_certificate</code>で、trueもしくはfalseに設定できます。<br>falseの場合、クライアントのSSL/TLSコンポーネントはサーバが正確であるかどうかを確かめます。しかし、クライアントは何もサーバに提供する必要はありません。認証はMQTTにビルトインされたユーザ名・パスワードに制限されます。<br>trueの場合、クライアントは有効な証明書を接続するために提供する必要があります。  </p>
+<p>このケースでは2つ目のオプション、<code>use_identity_as_username</code>が関連してきます。<br>これをtrueにセットするとアクセスコントロールのために証明書共通名(CN)がMQTTのユーザ名の代わりに使われます。パスワードは、認証取得をしたユーザのみが有効な証明書を持っていると考えているため変更されません。<br><code>use_identity_as_username</code>がfalseの場合、クライアントは通常と同じようにMQTTによって認証されます。（password_fileが必要です）</p>
+<p>When using pre-shared-key based encryption through the psk_hint and psk_file options, the client must provide a valid identity and key in order to connect to the broker before any MQTT communication takes place. If use_identity_as_username is true, the PSK identity is used instead of the MQTT username for access control purposes. If use_identity_as_username is false, the client may still authenticate using the MQTT username/password if using the password_file option.<br>（ここは事前共有キーの話なのでパス）</p>
+<p>Both certificate and PSK based encryption are configured on a per-listener basis.</p>
+<p>この証明書ベース、PSKベースの暗号化どちらの場合でもリスナー単位での設定になります。</p>
+<p>Authentication plugins can be created to replace the password_file and psk_file options (as well as the ACL options) with e.g. SQL based lookups.  </p>
+<p>たとえば、SQLデータベース参照などの認証プラグインを、ユーザ名／パスワード認証とPSKファイルのオプションをリプレイスするために設定することも可能です。</p>
+<p>It is possible to support multiple authentication schemes at once. A config could be created that had a listener for all of the different encryption options described above and hence a large number of ways of authenticating.</p>
+<p>また複数の認証スキームを一度にサポートするようにすることも可能です。設定ファイルは一つのリスナーに対して上記にあるすべての違った暗号化のオプション、つまりいくつもの認証方法を設定することも可能です。</p>
+</blockquote>
+<p>と、ここまでの説明では、「いろんな方法で暗号化、認証ができます」というところだけしかわかりませんでした。<br>これからやろうとしている証明書ベースの暗号化では、認証と絡めることもできるし、それとは別にすることもできる、というところでしょうか。</p>
+<p>証明書をクライアントが提供するようなやり方もできるように読めます。<br>確かに、クライアントが証明書を提示するという方が理にかなっているかもしれません。今想定しているような構成では、接続してきたクライアントが「偽物」である可能性を排除したいわけで、一般的なHTTPプロトコルでの証明書のようにサーバ側の真贋をユーザのセキュリティのために提供するのとは全く逆になります。</p>
+<p>兎にも角にも手を動かさないことには勉強できないので、まずは、証明書をサーバが提供するという、一般的なやり方の設定をしてみようと思います。証明書ベースの暗号化経路を確立、次にユーザ名／パスワードでクライアント認証をする、という手順になります。</p>
+<p>今日のところは、これまで。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/01/18/2015-01-18-ore-ore-certificate/" data-id="cj7iwtfgn0010vv41d5ponu3y" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/01/21/2015-01-21-update-mosquitto/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          mosquittoをアップデートする
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/01/13/2015-01-13-ipaddress/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">自分のIPアドレスを送信する</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/mbed/">mbed</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/mbed/" style="font-size: 10px;">mbed</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/23/ブログスタート/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/2016-01-23-installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/2015-12-06-python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+          <li>
+            <a href="/2015/11/22/2015-11-22-iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

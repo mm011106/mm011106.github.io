@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Paho MQTT のインストール | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。手順は、Pahoのページにも出ていますので、とても簡単。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Paho MQTT のインストール">
+<meta property="og:url" content="https://mm011106.github.io/2014/12/21/2014-12-21-paho-mqtt/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。手順は、Pahoのページにも出ていますので、とても簡単。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-12T11:40:45.683Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Paho MQTT のインストール">
+<meta name="twitter:description" content="もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。手順は、Pahoのページにも出ていますので、とても簡単。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-2014-12-21-paho-mqtt" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/12/21/2014-12-21-paho-mqtt/" class="article-date">
+  <time datetime="2014-12-21T02:25:59.000Z" itemprop="datePublished">2014-12-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/mqtt/">mqtt</a>►<a class="article-category-link" href="/categories/mqtt/paho/">paho</a>►<a class="article-category-link" href="/categories/mqtt/paho/python/">python</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Paho MQTT のインストール
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>もうすこし細かくコントロールできるクライアントを作るべく、Pahoプロジェクトのクライアントをインストールすることにしました。<br>現状のテストデバイスは、シェルとmosquittoのクライアントで完成させるつもりですが、次はこちらに移行しようかとおもってます。<br>手順は、Pahoのページにも出ていますので、とても簡単。<br><a id="more"></a></p>
+<p>インストールする前に、簡単にお勉強。</p>
+<p>Phao Projectとは一体何者？<br><a href="http://www.eclipse.org/paho/" target="_blank" rel="external">Paho project</a></p>
+<blockquote>
+<p>The Paho project provides scalable open-source client implementations of open and standard messaging protocols aimed at new, existing, and emerging applications for Machine‑to‑Machine (M2M) and Internet of Things (IoT). </p>
+<p>M2M、IoTへのアプリケーションに向けた、オープンで標準なメッセージングプロトコルの、スケーラブルでオープンソースのクライアント実装を提供するプロジェクトです。</p>
+</blockquote>
+<p>ということで、たしかにすごい広範囲のクライアント環境を提供しています。</p>
+<ul>
+<li><p>##MQTT Clients  </p>
+</li>
+<li><p>###C/C++<br>  Posix C / Windows C<br>  embedded systems<br>  Posix C++ / Windows C++<br>  embedded MQTT-SN 　　(MQTT-SN って何？？: このページの最後にメモ）</p>
+</li>
+<li><p>###Java<br>  J2SE<br>  Android Service</p>
+</li>
+<li><p>###JavaScript </p>
+</li>
+<li><p>###Python</p>
+</li>
+<li><p>###Go Client</p>
+</li>
+<li><p>###C# .Net and WinRT</p>
+</li>
+<li><p>###Utilities<br>  MQTT Conformance/Interoperability Testing</p>
+</li>
+</ul>
+<p>で、目的のPython向けのクライアントモジュールは、</p>
+<p><a href="http://www.eclipse.org/paho/clients/python/" target="_blank" rel="external">Python support:</a></p>
+<blockquote>
+<p>The Paho Python Client provides a client class with support for both MQTT v3.1 and v3.1.1 on Python 2.7 or 3.x.</p>
+</blockquote>
+<p>ということで、2.7と3.xの両方をサポートしているようです。</p>
+<p>ここまで確認した所で、インストールを始めました。</p>
+<figure class="highlight sh"><figcaption><span>steps installing Paho-mqtt for Python</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line">$ python --version</div><div class="line">Python 2.7.3</div><div class="line"></div><div class="line">$ sudo apt-get install python-pip</div><div class="line"></div><div class="line">$ sudo pip install paho-mqtt</div><div class="line"></div><div class="line">$ cat paho-mqtt-test.py</div><div class="line"></div><div class="line">import paho.mqtt.client as mqtt</div><div class="line"></div><div class="line"><span class="comment"># The callback for when the client receives a CONNACK response from the server.</span></div><div class="line">def on_connect(client, userdata, rc):</div><div class="line">    <span class="built_in">print</span>(<span class="string">"Connected with result code "</span>+str(rc))</div><div class="line">	<span class="comment"># Subscribing in on_connect() means that if we lose the connection and</span></div><div class="line">	<span class="comment"># reconnect then subscriptions will be renewed.</span></div><div class="line">    client.subscribe(<span class="string">"<span class="variable">$SYS</span>/#"</span>)</div><div class="line"></div><div class="line"><span class="comment"># The callback for when a PUBLISH message is received from the server.</span></div><div class="line">def on_message(client, userdata, msg):</div><div class="line">    <span class="built_in">print</span>(msg.topic+<span class="string">" "</span>+str(msg.payload))</div><div class="line"></div><div class="line">client = mqtt.Client()</div><div class="line">client.on_connect = on_connect</div><div class="line">client.on_message = on_message</div><div class="line"></div><div class="line">client.connect(<span class="string">"iot.eclipse.org"</span>, 1883, 60)</div><div class="line"></div><div class="line"><span class="comment"># Blocking call that processes network traffic, dispatches callbacks and</span></div><div class="line"><span class="comment"># handles reconnecting.</span></div><div class="line"><span class="comment"># Other loop*() functions are available that give a threaded interface and a</span></div><div class="line"><span class="comment"># manual interface.</span></div><div class="line">client.loop_forever()</div><div class="line"></div><div class="line"></div><div class="line">$ python ./paho-mqtt-test.py</div><div class="line"></div><div class="line">Connected with result code 0</div><div class="line"><span class="variable">$SYS</span>/broker/version mosquitto version 1.3.5</div><div class="line">..</div><div class="line">..</div><div class="line"><span class="variable">$SYS</span>/broker/uptime 1258785 seconds</div><div class="line"><span class="variable">$SYS</span>/broker/clients/total 2</div><div class="line"><span class="variable">$SYS</span>/broker/clients/inactive 1</div><div class="line"><span class="variable">$SYS</span>/broker/clients/active 1</div><div class="line"><span class="variable">$SYS</span>/broker/clients/maximum 2</div><div class="line"><span class="variable">$SYS</span>/broker/clients/expired 0</div><div class="line"><span class="variable">$SYS</span>/broker/messages/stored 72</div><div class="line"><span class="variable">$SYS</span>/broker/messages/received 80212</div><div class="line"><span class="variable">$SYS</span>/broker/messages/sent 65057</div><div class="line"><span class="variable">$SYS</span>/broker/subscriptions/count 2</div><div class="line"><span class="variable">$SYS</span>/broker/retained messages/count 50</div><div class="line"><span class="variable">$SYS</span>/broker/heap/current 12888</div><div class="line"><span class="variable">$SYS</span>/broker/heap/maximum 23872</div><div class="line"><span class="variable">$SYS</span>/broker/publish/messages/dropped 5069</div><div class="line"><span class="variable">$SYS</span>/broker/publish/messages/received 20949</div><div class="line"><span class="variable">$SYS</span>/broker/publish/messages/sent 5802</div><div class="line"><span class="variable">$SYS</span>/broker/publish/bytes/received 598854</div><div class="line"><span class="variable">$SYS</span>/broker/publish/bytes/sent 382692</div><div class="line"><span class="variable">$SYS</span>/broker/bytes/received 2003874</div><div class="line"><span class="variable">$SYS</span>/broker/bytes/sent 1025439</div><div class="line">.....</div></pre></td></tr></table></figure>
+<p>となりました。<br>ここまで、10分かからず完了。</p>
+<p>先人に感謝。引き続き、巨人の肩の上で仕事させてもらいます。</p>
+<hr>
+<p><a href="http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf" target="_blank" rel="external">MQTT-SN</a></p>
+<p>MQTT For Sensor Networks</p>
+<p>だそうです。概略だけ、かいつまんでみると。</p>
+<blockquote>
+<p>It is optimized for communications over networks where bandwidth is at a premium or where the network con-<br>nection could be intermittent. However MQTT requires an underlying network, such as TCP/IP, that provides<br>an ordered lossless connection capability and this is too complex for very simple, small footprint, and low-cost<br>devices such as wireless SAs.<br>The purpose of this document is to specify MQTT-SN, a pub/sub protocol for wireless sensor networks.<br>MQTT-SN can be considered as a version of MQTT which is adapted to the peculiarities of a wireless commu-<br>nication environment.</p>
+<p>センサーネットワークのような、回線の費用がかかるような場所、しばしば回線が落ちるようなところに最適化されたMQTTプロトコルではありますが、小さなローコストのシンプルデバイスにとっては、複雑すぎるTCP/IPのようなロスレスのコネクションを基礎にしています。<br>このドキュメントはワイヤレスセンサネットワークのためのパブリッシュ・サブスクライブプロトコルであるMQTT-SNの仕様を規定します。MQTT-SNはワイヤレスコミュニケーション環境の特色に特化したMQTTのバージョンだと考えられます。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2014/12/21/2014-12-21-paho-mqtt/" data-id="cj7iwtfg7000pvv41rpdreixm" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/12/29/2014-12-29-vim/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          paho-mqttで回線を切るとどうなるか
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/20/2014-12-20-mqtt-packets/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">MQTTのパケットを覗いてみた(1)</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/mbed/">mbed</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/mbed/" style="font-size: 10px;">mbed</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/01/23/ブログスタート/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/2016-01-23-installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/2015-12-06-python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+          <li>
+            <a href="/2015/11/22/2015-11-22-iot-et-2015-day3/">ET/IoT 2015　コンファレンスレポート3日目</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
