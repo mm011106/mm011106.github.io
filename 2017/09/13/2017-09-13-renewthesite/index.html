@@ -13,13 +13,13 @@
 <meta property="og:site_name" content="MQTT and ...">
 <meta property="og:description" content="今までoctpressを使っていましたが、HTMLジェネレータを新しくしました。いろいろ調べて、HEXOというジェネレータが、テーマがいろいろ選べて良さそうで、生成も早いということでしたので選択。こんな見た目になりました。">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="https://mm011106.github.io/blog/image/01_s.jpg">
-<meta property="og:image" content="https://mm011106.github.io/blog/image/01_s.jpg">
-<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta property="og:image" content="https://mm011106.github.io/image/01_s.jpg">
+<meta property="og:image" content="https://mm011106.github.io/image/01_s.jpg">
+<meta property="og:updated_time" content="2017-09-14T10:13:15.127Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HTMLジェネレータを新しくしました">
 <meta name="twitter:description" content="今までoctpressを使っていましたが、HTMLジェネレータを新しくしました。いろいろ調べて、HEXOというジェネレータが、テーマがいろいろ選べて良さそうで、生成も早いということでしたので選択。こんな見た目になりました。">
-<meta name="twitter:image" content="https://mm011106.github.io/blog/image/01_s.jpg">
+<meta name="twitter:image" content="https://mm011106.github.io/image/01_s.jpg">
   
     <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
   
@@ -104,10 +104,12 @@
 <p>みなさんのwebでは、「導入も超高速」という触れ込みのところが多かったですが、私はgithubへのデプロイがなかなかできずに苦労しました。色んな所で’git init’して、設定して、というのをやっているうちになんだか動いてしまいました。<br>エラーとしてはうまくローカル側でのユーザ設定ができていなかったということのようですが、一体どこのディレクトリの.gitを参照しているのかわからず盲滅法という感じでした。</p>
 <p>まあ、完成したのでいいとしておきます。</p>
 <h2 id="細かいところがわからない"><a href="#細かいところがわからない" class="headerlink" title="細かいところがわからない"></a>細かいところがわからない</h2><p>使い始めたばかりなので、写真を入れたりテーマのバックグラウンドの写真を変更したりとか、細かいカスタマイズポイントがわかっていません。おいおい調べて行きたいと思います。</p>
-<h2 id="写真の挿入"><a href="#写真の挿入" class="headerlink" title="写真の挿入"></a>写真の挿入</h2><p><img src="/blog/image/01_s.jpg" alt="iPhone X" title="cell phone"><br>hexo のブログソースのフォルダ(/source)の中に./image/というディレクトリを作ってその中に絵をおく。<br>それを<br><code>![iPhone X](/blog/image/01_s.jpg &quot;cell phone&quot;)</code><br>のように指定すればｏｋ．</p>
-<p>ただ、サイズ指定はできない。<br>サイズ指定する必要があれば、<br><img src="/blog/image/01_s.jpg" alt="iPhone X" title="cell phone" width="100"></p>
-<p><code>&lt;img src=&quot;/blog/image/01_s.jpg&quot; alt=&quot;iPhone X&quot; title=&quot;cell phone&quot; width=&quot;100&quot;&gt;</code></p>
-<p>このブログはweb server ドキュメントルート直下ではなく/blogの下にあるのでイメージファイルのディレクトリは’/blog/image/‘となる。</p>
+<h2 id="写真の挿入"><a href="#写真の挿入" class="headerlink" title="写真の挿入"></a>写真の挿入</h2><p><img src="/image/01_s.jpg" alt="iPhone X" title="cell phone"></p>
+<p>指定方法：<br><code>![iPhone X](/blog/image/01_s.jpg &quot;cell phone&quot;)</code></p>
+<p>ただ、サイズ指定はできない。<br>サイズ指定する必要があれば、<br><img src="/image/01_s.jpg" alt="iPhone X" title="cell phone" width="100"></p>
+<p><code>&lt;img src=&quot;/image/01_s.jpg&quot; alt=&quot;iPhone X&quot; title=&quot;cell phone&quot; width=&quot;100&quot;&gt;</code></p>
+<p>server ドキュメントルート直下ではなく、サブディレクトリの下、例えば/blogの下にあればイメージファイルのディレクトリは’/blog/image/‘となる。</p>
+<p>hexo のブログソースのフォルダ(/source)の中に./image/というディレクトリを作ってその中に絵をおく。<br>それを<br><code>![iPhone X](/blog/image/01_s.jpg &quot;cell phone&quot;)</code><br>のように指定すればｏｋ．</p>
 <h2 id="ブログソースの保管"><a href="#ブログソースの保管" class="headerlink" title="ブログソースの保管"></a>ブログソースの保管</h2><p>gitにやってもらう。</p>
 <p>sourceディレクトリに移動して</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">git config --global user.email メールアドレス</div><div class="line">git config --global user.name ユーザ名</div><div class="line">git init</div><div class="line">git remote add origin リモートリポジトリURLを指定</div><div class="line"></div><div class="line">git add .</div><div class="line">git commit -m &quot;first update&quot;</div><div class="line">git push -u origin master</div></pre></td></tr></table></figure>
