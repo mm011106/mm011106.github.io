@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>milkcocoaにnode.jsでアクセスする | MQTT and ...</title>
+  <title>Tag: hexo | MQTT and ...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
-<meta property="og:type" content="article">
-<meta property="og:title" content="milkcocoaにnode.jsでアクセスする">
-<meta property="og:url" content="https://mm011106.github.io/2016/01/10/2016-01-10-edge-device-with-nodejs/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="MQTT and ...">
+<meta property="og:url" content="https://mm011106.github.io/tags/hexo/index.html">
 <meta property="og:site_name" content="MQTT and ...">
-<meta property="og:description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-09-12T11:31:45.977Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="milkcocoaにnode.jsでアクセスする">
-<meta name="twitter:description" content="最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その">
+<meta name="twitter:title" content="MQTT and ...">
   
     <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
   
@@ -68,84 +64,39 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-2016-01-10-edge-device-with-nodejs" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/01/10/2016-01-10-edge-device-with-nodejs/" class="article-date">
-  <time datetime="2016-01-10T11:19:35.000Z" itemprop="datePublished">2016-01-10</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      milkcocoaにnode.jsでアクセスする
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2017" class="archive-year">2017</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2017/09/13/2017-09-13-renewthesite/" class="archive-article-date">
+  <time datetime="2017-09-13T11:35:25.000Z" itemprop="datePublished">Sep 13</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2017/09/13/2017-09-13-renewthesite/">HTMLジェネレータを新しくしました</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近のinterfaceという雑誌にIoTの特集があり、その中の記事を読んでいると「もう、MQTTサーバを自前でたてて、ちまちまとメッセージ送信しているような時代じゃないなあ。。。」とがっくり肩を落としてしまいました。<br>いまや、いろいろなBaaSがあって使うのに迷うほどになっています。しかし、単純なMQTTでいろいろと考えてきた身にとっては、どれもちょっと複雑で取っ付きにくい感じがします。まあ、その「めんどくささ」のおかげでセキュリティやデータの可視性が高いのですが。<br>で、このタイミングでBaaSに移行しないと、時代に乗り遅れるなあとも想い、冬休みの１週間を使って試してみました。<br>今回は<a href="https://mlkcca.com/" target="_blank" rel="external">milkcocoa</a>というサービスを使いました。<br><a id="more"></a></p>
-<h2 id="仕組み"><a href="#仕組み" class="headerlink" title="仕組み"></a>仕組み</h2><p>milkcocoaは、interfaceの記事によればメッセージ送受信にフォーカスしている、ということでしたので、きっとAPIや設定方法なども比較的単純で解りやすいだろうということで選びました。<br>結論から言えば、だいぶ前に一度ためしたIBMのBlueMixから比べるとだいぶストレートフォワードな感じでした。webも日本語ですし。</p>
-<p>で、その中身についてはmilkcocoaのwebが詳しく解説されているかと思います。単純にはMQTTのメーッセージングシステムをnode.jsで使えるようにAPIを整備した、というかんじでしょうか。MQTTに特有なTopicとかQoS, Willなどの概念をざっくり丸くワップしてもらって、何も考えずにとにかくメッセージを送受信できるようになっています。<br><a href="http://blog.mlkcca.com/iot/milkcocoa-mqtt/" target="_blank" rel="external">C++用のAPI</a>も用意があるようです。こちらは、phao MQTTをワップしているAPIを提供している感じでしょうか。</p>
-<p>今回はじめてnode.jsを使ってみましたが、通信用のアプリケーションを作るのには向いているような気がしました（素人ながら）。非同期処理というか並列処理的な考え方はちょっと違和感があるかもしれませんが、私はHDLも少し噛んでいるので「ああ、そういうことね」と比較的すんなり腑に落ちました。しかしながら、コールバック関数で何でも処理する、というのは今でも混乱しています。</p>
-<h2 id="ポイント"><a href="#ポイント" class="headerlink" title="ポイント"></a>ポイント</h2><p>特にポイントと言えるほどの難しいところは無く、サンプルコードを自分のやりたいように拡張していけばすんなりできてしまいました。<br>一応、作ったアプリケーションを<a href="https://github.com/mm011106/milkcocoa_edge_device" target="_blank" rel="external">サンプル</a>としておいておきます。<br>まったくもってエラーハンドリングしていないので、confgファイルとかで間違った設定するとチンプンカンプンになってしまうかもしれません。</p>
-<p>node.jsのド素人の私が３日ぐらいで一応動くコードが書けたのはひとえにmilkcocoaのスタッフの皆さんが努力されたAPIの使いやすさ、JavaScriptのコードの書き方、使い方を公開していただいている方々のおかげです。感謝。感謝。</p>
-<h3 id="push-と-send"><a href="#push-と-send" class="headerlink" title="push と send"></a>push と send</h3><p>pushメソッドだとサーバの方にデータが蓄えられて、webのダッシュボードからデータを確認できたり、グラフ化（β版）のサービスが提供されていたりします。また、pushメソッドで送信したデータにはタイムスタンプがつきます。<br>ですので、デバイスの方でタイムスタンプをつけなくても受信側では「いつのデータ」なのかがすぐに解ります。</p>
-<p>一方、sendメソッドだとサーバにはデータが残りません。また、sendで送られたデータはタイムスタンプもつきません。そのかわり、データ数量の制限には引っかからないようです。（実際、カウントされていません）<br>そのため、sendで送られるデータを見るためには事前に受信状態のノードを用意しておく必要があります。</p>
-<p>そして、送ったデータのメソッドは読み込む側も意識する必要があります。具体的には受信時にsendイベントによる受信か、pushイベントによるものかを指定するする必要がります。<br>送信側もpushなのかsendなのかで使う関数がちがってきます。（MQTTのトピックがメソッドで違ってくるので致し方ないかと）</p>
-<h3 id="接続キー"><a href="#接続キー" class="headerlink" title="接続キー"></a>接続キー</h3><p>サーバとの接続には以下の情報が必要です。</p>
-<ul>
-<li>AppID：アプリケーションの名前です。ユーザが設定します。</li>
-<li>Data Store：アプリケーションごとにいくつかのデータをストアする場所を設定します。ユーザが設定できます。（AppIDと含めてmqttのトピックのようなもの）</li>
-<li>API_Key, API_Secret：接続時の認証のためのキーになります。スクリプトなど秘匿性のある場合はこのセットを、htmlのような秘匿性が無いものについてはトークン認証を使うようです。</li>
-</ul>
-<h3 id="データフォーマット"><a href="#データフォーマット" class="headerlink" title="データフォーマット"></a>データフォーマット</h3><p>送信は自分が送りたいデータをJavaScriptのオプジェクトにして送信ファンクションを呼び出します。<br>受信側では、そのデータにヘッダがつきます。<br>sendでは<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;path&quot;:&quot;データストア名&quot;,&quot;value&quot;:&#123;&quot;送信したデータ&quot;&#125;&#125;</div></pre></td></tr></table></figure></p>
-<p>となります。<br>なので、データをパースする場合は.value以下をパースした方が解りやすいかもしれません。</p>
-<p>pushではこれにタイムスタンプがついていたような気がしますが、よく覚えていません。<br>すいません。。。。</p>
-<h2 id="まとめ"><a href="#まとめ" class="headerlink" title="まとめ"></a>まとめ</h2><p>まとめるほどの内容でもないですが、<br>とにかく、簡単にメッセージの送受信ができます。一度なれてしまえば瞬間にメッセージングのコードはかけるので、アプリケーションのコーディングとデバグに集中できます。</p>
-<p>私の場合、JavaScriptの全くの素人でしたので、自分で納得いくレベルまで行くのに時間がかかってしまいました。今からはエラーハンドリングに集中してレベルアップしたいと思います。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2016/01/10/2016-01-10-edge-device-with-nodejs/" data-id="cj7iypr8t0023nq41i074sht3" class="article-share-link">Share</a>
-      
-      
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/01/23/2016-01-23-installation-of-mbedos/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          mbedでedge deviceを作ってみる（という予定）
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2015/12/06/2015-12-06-python-and-trello-api/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">TrelloにPythonでアクセスしてみる</div>
-    </a>
-  
-</nav>
-
-  
 </article>
+  
+  
+    </div></section>
+  
 
 </section>
         
