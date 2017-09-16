@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>mosquitto.conf 再び | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。  max_queued_messages">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mosquitto.conf 再び">
+<meta property="og:url" content="https://mm011106.github.io/2014/12/06/again/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。  max_queued_messages">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.169Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mosquitto.conf 再び">
+<meta name="twitter:description" content="昨日の、通信が途絶えている時にブローカがためておいてくれる件、mosquitto.confにはこんなオプションがありました。  max_queued_messages">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-again" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/12/06/again/" class="article-date">
+  <time datetime="2014-12-06T10:58:41.000Z" itemprop="datePublished">2014-12-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/MQTT/">MQTT</a>►<a class="article-category-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      mosquitto.conf 再び
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>昨日の、通信が途絶えている時にブローカがためておいてくれる件、<code>mosquitto.conf</code>にはこんなオプションがありました。</p>
+<ul>
+<li><strong>max_queued_messages</strong></li>
+</ul>
+<a id="more"></a>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># The maximum number of QoS 1 and 2 messages to hold in a queue </span></div><div class="line"><span class="comment"># above those that are currently in-flight.  Defaults to 100. Set </span></div><div class="line"><span class="comment"># to 0 for no maximum (not recommended).</span></div><div class="line"><span class="comment"># See also queue_qos0_messages.</span></div><div class="line"><span class="comment">#max_queued_messages 100</span></div></pre></td></tr></table></figure>
+<p>データ送信のキューに長さの最大を指定します。これ以上になったらどうなるのかなあ？古いやつから捨てられるのかしら？</p>
+<p>さらに max_inflight_messagesというのもあって、こちらは通信中(?)の最大メッセージ数を規定します。</p>
+<p>client IDの件に関連するオプションでこんなものもありました。</p>
+<ul>
+<li><strong> allow_zero_length_clientid </strong></li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># This option controls whether a client is allowed to connect with a zero</span></div><div class="line"><span class="comment"># length client id or not. This option only affects clients using MQTT v3.1.1</span></div><div class="line"><span class="comment"># and later. If set to false, clients connecting with a zero length client id</span></div><div class="line"><span class="comment"># are disconnected. If set to true, clients will be allocated a client id by</span></div><div class="line"><span class="comment"># the broker. This means it is only useful for clients with clean session set</span></div><div class="line"><span class="comment"># to true.</span></div><div class="line"><span class="comment">#allow_zero_length_clientid true</span></div></pre></td></tr></table></figure>
+<p>client IDなしで接続できるかどうか、を設定するオプションかと思われます。ここに書いてあるようにIDを設定してしまうと、サブスクライブ接続を切った時に、それがテンポラリーなのかパーマネントなのかブローカは知る由がありません。そのため、同じIDで再接続されると切断されていた期間のデータが送られてきます。それは不要、という時もありますよね。。。。</p>
+<p>今のところの対処は、一度 QoS0で再接続してから切る、というのをやっています。こうすると次に接続した時は接続後の情報から入手できます。ほんとはもっといい手があるのかとも思いますが。</p>
+<p>ココらへんは、データアクイジションの側であれば、あとから不要な部分を切り取るとか、いかようにでも処理できるかと思います。コマンド系の接続では重要なポイントになりそうなので、考慮の必要がありそうですね。タイムスタンプを確認するとか。</p>
+<p>などと話していたら、こんなオプションがありました。</p>
+<ul>
+<li><strong>persistent_client_expiration</strong></li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># This option allows persistent clients (those with clean session set to false)</span></div><div class="line"><span class="comment"># to be removed if they do not reconnect within a certain time frame.</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># This is a non-standard option in MQTT V3.1 but allowed in MQTT v3.1.1.</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># Badly designed clients may set clean session to false whilst using a randomly</span></div><div class="line"><span class="comment"># generated client id. This leads to persistent clients that will never</span></div><div class="line"><span class="comment"># reconnect. This option allows these clients to be removed.</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># The expiration period should be an integer followed by one of d w m y for</span></div><div class="line"><span class="comment"># day, week, month and year respectively. For example</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># persistent_client_expiration 2m</span></div><div class="line"><span class="comment"># persistent_client_expiration 14d</span></div><div class="line"><span class="comment"># persistent_client_expiration 1y</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># The default if not set is to never expire persistent clients.</span></div><div class="line"><span class="comment">#persistent_client_expiration</span></div></pre></td></tr></table></figure>
+<p>persistentは「しつこい」という意味らしいですが、長い接続は強制的に解除するということのようです。<br>「ランダムのidを使っていながらclean session（切断時の送信データを破棄してもらうモード）をfalseで接続してくるたちの悪いクライアント」とありますね。そういう接続はしないように設計します。はい。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2014/12/06/again/" data-id="cj7mmqb29000cbw41a0inz110" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/12/07/max-quieued-messages/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          max_queued_messagesオプションの動作
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/05/mosquitto-sub-c-option/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">disable-clean-sessionオプション</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

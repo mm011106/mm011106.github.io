@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>WebCamをつなげてみる | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebCamをつなげてみる">
+<meta property="og:url" content="https://mm011106.github.io/2015/01/25/webcam/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WebCamをつなげてみる">
+<meta name="twitter:description" content="今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-webcam" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/01/25/webcam/" class="article-date">
+  <time datetime="2015-01-25T00:20:05.000Z" itemprop="datePublished">2015-01-25</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Raspi/">Raspi</a>►<a class="article-category-link" href="/categories/Raspi/webcam/">webcam</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      WebCamをつなげてみる
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今回はwebカムの接続を試して見ました。いろいろ話を聞いていると、データロガーが提示するデータだけでは情報が足りない、ということが多かったです。せっかくオンラインにするなら、写真とか「雰囲気」を伝えてくれるとありがたい、という意見が多かったです。言われてみれば、データだけなら今までのシステムでもできるし、とおもいましたので絵も転送できるようなケイパビリティを持たせたいなと思った次第。</p>
+<a id="more"></a>
+<p>webカムはRaspberry Piに接続できるのかどうか調べてみると、意外と簡単に接続できそうです。一昔前は結構苦労していたように感じたので、時代は進んだなあと。</p>
+<p>で、キャプチャするソフトをリストアップしてみると。</p>
+<ul>
+<li>fswebcam　スチル撮影</li>
+<li>motion　画像の変化を検出して記録</li>
+<li>guvcview 動画のキャプチャ（GUI必要？）</li>
+</ul>
+<p>と言ったところが皆さんに使われているようです。特に監視カメラ用途ではmotionが便利そうです。</p>
+<p>今回は、能動的にシャッターを切って記録する用途ですので、fswebcamを使うことにしました。</p>
+<hr>
+<p>###USBカメラを接続してみる</p>
+<p>とりあえずUSBカメラを何も考えずRaspberry Piにつないでみます。</p>
+<p>認識されているか確認してみると</p>
+<figure class="highlight sh"><figcaption><span>UBS device list</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ lsusb</div><div class="line">Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. </div><div class="line">Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub</div><div class="line">Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. </div><div class="line">Bus 001 Device 006: ID 046d:080a Logitech, Inc. Portable Webcam C905</div></pre></td></tr></table></figure>
+<p>こんなかんじで認識されています。</p>
+<p>次に、fswebcamをインストール。参考にしたのは<a href="http://www.raspberrypi.org/documentation/usage/webcams/" target="_blank" rel="external">こちら</a></p>
+<p>続けて試し撮りなどしてみます。</p>
+<figure class="highlight sh"><figcaption><span>install fswebcam</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install fswebcam</div><div class="line"></div><div class="line">$ fswebcam -v   <span class="comment">#こうすると色々教えてくれます。</span></div><div class="line">--- Opening /dev/video0...</div><div class="line">Trying <span class="built_in">source</span> module v4l2...</div><div class="line">/dev/video0 opened.</div><div class="line">src_v4l2_get_capability,87: /dev/video0 information:</div><div class="line">src_v4l2_get_capability,88: cap.driver: <span class="string">"uvcvideo"</span></div><div class="line">src_v4l2_get_capability,89: cap.card: <span class="string">"UVC Camera (046d:080a)"</span></div><div class="line">src_v4l2_get_capability,90: cap.bus_info: <span class="string">"usb-bcm2708_usb-1.4"</span></div><div class="line">src_v4l2_get_capability,91: cap.capabilities=0x84000001</div><div class="line">src_v4l2_get_capability,92: - VIDEO_CAPTURE</div><div class="line">src_v4l2_get_capability,103: - STREAMING</div><div class="line">No input was specified, using the first.</div><div class="line">src_v4l2_set_input,181: /dev/video0: Input 0 information:</div><div class="line">src_v4l2_set_input,182: name = <span class="string">"Camera 1"</span></div><div class="line">src_v4l2_set_input,183: <span class="built_in">type</span> = 00000002</div><div class="line">src_v4l2_set_input,185: - CAMERA</div><div class="line">src_v4l2_set_input,186: audioset = 00000000</div><div class="line">src_v4l2_set_input,187: tuner = 00000000</div><div class="line">src_v4l2_set_input,188: status = 00000000</div><div class="line">src_v4l2_set_pix_format,541: Device offers the following V4L2 pixel formats:</div><div class="line">src_v4l2_set_pix_format,554: 0: [0x56595559] <span class="string">'YUYV'</span> (YUV 4:2:2 (YUYV))</div><div class="line">src_v4l2_set_pix_format,554: 1: [0x47504A4D] <span class="string">'MJPG'</span> (MJPEG)</div><div class="line">Using palette MJPEG</div><div class="line">Adjusting resolution from 384x288 to 352x288.</div><div class="line">src_v4l2_set_mmap,693: mmap information:</div><div class="line">src_v4l2_set_mmap,694: frames=4</div><div class="line">src_v4l2_set_mmap,741: 0 length=102400</div><div class="line">src_v4l2_set_mmap,741: 1 length=102400</div><div class="line">src_v4l2_set_mmap,741: 2 length=102400</div><div class="line">src_v4l2_set_mmap,741: 3 length=102400</div><div class="line">--- Capturing frame...</div><div class="line">verify_jpeg_dht,94: Inserting DHT segment into JPEG frame.</div><div class="line">Captured frame <span class="keyword">in</span> 0.00 seconds.</div><div class="line">--- Processing captured image...</div><div class="line">There are unsaved changes to the image.</div><div class="line"></div><div class="line">$ fswebcam -r 1000 ./test.jpg</div><div class="line">--- Opening /dev/video0...</div><div class="line">Trying <span class="built_in">source</span> module v4l2...</div><div class="line">/dev/video0 opened.</div><div class="line">No input was specified, using the first.</div><div class="line">Adjusting resolution from 1000x-1 to 960x720.</div><div class="line">--- Capturing frame...</div><div class="line">Captured frame <span class="keyword">in</span> 0.00 seconds.</div><div class="line">--- Processing captured image...</div><div class="line">Writing JPEG image to <span class="string">'./test.jpg'</span>.</div></pre></td></tr></table></figure>
+<p>上の例では解像度1000pxぐらいの絵をとってtest.jpgで保存してもらう例です。実際にはカメラの撮影可能な解像度に適宜調整されるようです。</p>
+<p>撮影したのはいいですが、このままでは本当にとれているのか絵を觀ることができないので判りません。scpなどのコマンドで転送してもいいですが、すぐにMQTTで転送することを考えなきゃいけないので、とりあえず手動でmosquittoを使って転送してみます。</p>
+<p>プロトコルとしては、どんなファイルでも（中身に関係なく）送れるのですが、mosquittoはコマンドラインということもあり、メッセージをサブスクライブしたときペイロードの内容を出力したあと改行コードを出力してしまいます。文字情報の時は便利なのですが、バイナリのときはちょっと厄介です。<br>それを抑止するために-N オプションがあり、これを使うとバイナリファイルも比較的扱いやすくなるはずです。</p>
+<p>これを試してみます。</p>
+<figure class="highlight sh"><figcaption><span>binary file subscription via MQTT</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#サブスクライブ側を用意</span></div><div class="line">$ mosquitto_sub -N -h MY.BROKER -t MY/DEVICE/photo &gt; test.jpg</div><div class="line"></div><div class="line"><span class="comment">#写真をとったエッジデバイス側でファイルまるごとパブリッシュ</span></div><div class="line">$ mosquitto_pub -h MY.BROKER -t MY/DEVICE/photo -f ./test.jpg</div></pre></td></tr></table></figure>
+<p>このあと、サブスクライブ側をCtrl−Cで中断して、サブスクライブしたtest.jpgを確認してください。</p>
+<p>手動で中断しないといけないのが、イマイチですが一応転送はできます。</p>
+<p>スクリプトによる写真データのサブスクリプションは、mosquitto_subでは対処しきれない感じがします。<br>ここは、paho版の出番になりそうですね。(もちろん、mosquittoのライブラリをつかってCで書いてもいいのですけど、わたしはCができませんので。。。。)</p>
+<p>##おまけ</p>
+<p>このままじゃあまり役立たないので、webサーバを動かして写真を配信する設定を試して見ました。<br>こちらの<a href="http://nofx2.txt-nifty.com/it/2013/07/raspberry-pi-ng.html" target="_blank" rel="external">ページ</a>丸写しです。ありがとうございます。</p>
+<p>webサーバにはいまどきの、nginxを選びました。apacheは昔苦労した記憶があり、めんどくさいし時間がかかりそうというイメージでしたので今時流行りを。</p>
+<figure class="highlight sh"><figcaption><span>install nginx</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Nginxインストール</span></div><div class="line">$ sudo apt-get install nginx</div><div class="line"><span class="comment"># 1.2.1-2.2+wheezy3がインストールされました。</span></div><div class="line"></div><div class="line"><span class="comment"># web page 用ディレクトリの作成</span></div><div class="line">$ <span class="built_in">cd</span> ~</div><div class="line">$ mkdir www</div><div class="line"></div><div class="line"><span class="comment"># Nginxの設定の変更</span></div><div class="line">$ sudo vi /etc/nginx/sites-available/default</div><div class="line"><span class="comment"># 設定フアイルは/etc/nginx/nginx.confにもありますが、</span></div><div class="line"><span class="comment">#　ここらへんの使い分けはよくわかっていません。</span></div><div class="line"><span class="comment"># server &#123;　&#125;</span></div><div class="line"><span class="comment">#   の中にある公開するweb pageディレクトリを先ほど作ったディレクトリに変更します</span></div><div class="line"></div><div class="line">    <span class="comment">#root /usr/share/nginx/www;</span></div><div class="line">    root /home/pi/www;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># サイトを有効にするため、シンボリックリンクを張る。</span></div><div class="line">$ sudo ln -s /etc/nginx/sites-available/pi /etc/nginx/sites-enabled/</div><div class="line"><span class="comment">#  ここらへんは詳細不明です。</span></div><div class="line"><span class="comment">#　多分これがなくても先ほどの設定変更はdefaultに対して行ったので、</span></div><div class="line"><span class="comment">#　有効になると思います。</span></div><div class="line"><span class="comment">#　すでに、/etc/nginx/sites-enabled/には</span></div><div class="line"><span class="comment">#  /etc/nginx/sites-available/defaultのリンクが置かれていました。</span></div><div class="line"></div><div class="line"><span class="comment"># Nginxの設定ファイルに問題が無いかチェック</span></div><div class="line">$ sudo nginx -t</div><div class="line">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</div><div class="line">nginx: configuration file /etc/nginx/nginx.conf <span class="built_in">test</span> is successful</div><div class="line"></div><div class="line"><span class="comment"># Nginx再起動</span></div><div class="line">$ sudo service nginx restart</div><div class="line"></div><div class="line"><span class="comment"># 自動起動設定</span></div><div class="line">$ sudo update-rc.d nginx defaults</div><div class="line"></div><div class="line"><span class="comment"># index.htmlの作成</span></div><div class="line"><span class="comment">#　とりあえず、nginxの初期設定のindex.htmlをコピー</span></div><div class="line"></div><div class="line">cp /usr/share/nginx/www/index.html ~/www/</div></pre></td></tr></table></figure>
+<p>ここまでできたら、webサーバにアクセスしてみてください。<br>なにか反応があるはずです。</p>
+<p>次に、とった写真を見れるようにします。</p>
+<p>###　写真入りindex.htmlを用意</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">$ vi ~/www/index.html</div><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;Welcome to nginx!&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body bgcolor=<span class="string">"white"</span> text=<span class="string">"black"</span>&gt;</div><div class="line">&lt;center&gt;&lt;h1&gt;&lt;img src=<span class="string">"./test.jpg"</span> alt=<span class="string">"test picture"</span> &gt;&lt;/h1&gt;&lt;/center&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div><div class="line"></div><div class="line"><span class="comment"># 写真をとってwwwディレクトリに入れてみます。</span></div><div class="line"></div><div class="line">$ fswebcam ~/www/test.jpg</div></pre></td></tr></table></figure>
+<p>ここでwebをアクセスすると写真が見えるはずです。</p>
+<p>一段落。</p>
+<p>さて、このファイルはフラッシュメモリ上に展開されているので、あまり派手に何回もとっては消しをすると、あっという間にフラッシュメモリが使えなくなります。そこで、ramdiskを写真の置き場に使うことにします。<br>webサーバは指定したwebページ保存場所以外のファイルは読めないようなので、最初にramdisk上の写真ファイルのリンクをwwwディレクトリ上に作っておきます。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ ln -s /run/shm/picture.jpg ~/www/test.jpg </div><div class="line"># /run/shmのディレクトリはRAM-DISKになっています。</div><div class="line"></div><div class="line">$ fswebcam /run/shm/picture.jpg</div><div class="line">#　これでwebページ上の写真が、今撮ったものに変わるはずです。</div></pre></td></tr></table></figure>
+<p>ここまで来ると、立派な定点カメラの出来上がり、という感じです。</p>
+<p>MQTTのサブスクライバをつければ、シャッタや解像度のコントロールがMQTT経由でできますね。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/01/25/webcam/" data-id="cj7mmqb410014bw41dkgewktt" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/01/31/shutdown-switch/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Raspberry Pi にシャットダウンスイッチをつける
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/01/21/update-mosquitto/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">mosquittoをアップデートする</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

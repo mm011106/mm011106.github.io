@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>接続の暗号化 | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="接続の暗号化">
+<meta property="og:url" content="https://mm011106.github.io/2015/01/11/secure-connection/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="接続の暗号化">
+<meta name="twitter:description" content="普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-secure-connection" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/01/11/secure-connection/" class="article-date">
+  <time datetime="2015-01-11T02:05:38.000Z" itemprop="datePublished">2015-01-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      接続の暗号化
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>普通にMQTTを応用しようとすると、避けては通れない暗号化です。あまり素人が手出しするべき所ではないかもしれませんが、勉強のため考えて見ました。</p>
+<a id="more"></a>
+<p>mosquitto.confを眺めてみると、mosquittoでは2つのやり方が準備されているようです。</p>
+<ul>
+<li><p>公開鍵認証・暗号化</p>
+<p>  公開鍵をお互いにやり取りして、お互いを認証・暗号化する普通のやり方ですね。</p>
+</li>
+<li><p>証明書ベース認証・暗号化</p>
+<p>  HTTPで一般的に使われている証明書による認証ですね。https で始まるwebサイトでは暗号化されるように、この仕組みを使えばMQTTでも通信が暗号化されます。<br>  サーバーがオープンで誰でもが接続できるような状況にするためには、必須です。</p>
+</li>
+</ul>
+<p>mosquittoではユーザ（サブスクライバ、パブリッシャ）認証のためにユーザ名、パスワード方式が使えますが、認証時に平文でこれらがやり取りされるという事ですので、通信経路そのものの暗号化が欠かせません。</p>
+<p>MQTTブローカに頼らない暗号化という意味では ssh しかないでしょうか。<br>ブローカがオープンでない場合であれば、ポートフォワードと合わせ技で安全性が高められるかもしれません。<br>ただ、この場合、ネットワーク環境によってはsshのトンネリングができない（ポリシー的に）という場合もあるかと思うので、環境の調査が必要かと思います。</p>
+<p>最近は<a href="http://jpmens.net/2014/07/03/the-mosquitto-mqtt-broker-gets-websockets-support/" target="_blank" rel="external">websocket</a>という接続方法もあるので、MQTTブローカをweb applicationでラップしてセキュアにするというやり方もあるかもしれません。</p>
+<p>今回はsshのポートフォワードで暗号化してみましたので報告です。</p>
+<p>まず、何はなくとも検索。ssh mosquittoあたりでgoogleさんに聞いてみたところ、<a href="http://diabolicalws.blogspot.jp/2012/02/tunneling-mqtt-over-ssh.html" target="_blank" rel="external">この</a>サイトがヒット。正しくやろうとしていたことです。</p>
+<p>このページの最終目標としては、簡易的なVPNとしてのsshによるトンネリングを使ってMQTTプロトコルをセキュアにしようという事のようです。</p>
+<p>手順としては、</p>
+<ol>
+<li><p>トンネリングの設定 </p>
+</li>
+<li><p>トンネルを使った通信の設定</p>
+</li>
+<li><p>パスフレーズなしでの接続方法とセキュリティ設定 </p>
+</li>
+</ol>
+<p>順を追ってやってみます。</p>
+<h2 id="トンネリングの設定"><a href="#トンネリングの設定" class="headerlink" title="トンネリングの設定"></a>トンネリングの設定</h2><p>まずクライアント側の設定です。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh -f -L 22883:127.0.0.1:1883 SSHusername@MQTT -N</div></pre></td></tr></table></figure>
+<p>とすることで、クライアント側のポート22883 に対する通信が暗号化された上でサーバ”MQTT”の1883に接続されます。ユーザ名は”SSHusername”です。<br>各オプションの意味は以下のとおりです。</p>
+<p> -f : バックグラウンドで動作</p>
+<p> -L : ローカル側でのポートフォワード（クライアント側のポート変換が設定されます）</p>
+<p> -N : サーバ側でコマンドを実行しないように指定</p>
+<p>この例ではポートは標準の22となっています。必要に応じて-pオプションでssh通信そのもののポート番号を指定してください。 sshのポート番号も専用のものにしておくことで、更にセキュリティを確保できるかもしれません。<br>ここらへんはsshのポートフォワード設定を参照してもらったほうが正しい理解が得られるかと。  </p>
+<p>この接続をするためには、クライアント、サーバ共にsshが動く環境であることが必要です。適宜設定してください。</p>
+<p>このコマンドを実行するとパスワードを聞かれるはずです。実際の無人運用ではこれが問題になりますが、これは後ほど解決してもらえます。</p>
+<h2 id="トンネルを使った通信の設定"><a href="#トンネルを使った通信の設定" class="headerlink" title="トンネルを使った通信の設定"></a>トンネルを使った通信の設定</h2><p>上記の操作でセキュアな通信経路が22883ポートに設定されましたので、これを使って実際にMQTTプロトコルのデータを流してみます。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mosquitto_sub -h 127.0.0.1 -p 22883 -u dan -P password -t <span class="string">'test/#'</span></div></pre></td></tr></table></figure>
+<p>-P, -uでユーザ名とパスワードを指定してブローカにサブスクライバとしてログインしています。ホストはローカルホスト、ポートは先程トンネルを設定した22883に指定します。<br>-P, -uは必須ではないです。私はこれらナシでつかってます。</p>
+<p>トピックを適切に設定してあれば、なにかメッセージを受け取れるはずです。</p>
+<h2 id="パスフレーズなしでの接続方法とセキュリティ設定"><a href="#パスフレーズなしでの接続方法とセキュリティ設定" class="headerlink" title="パスフレーズなしでの接続方法とセキュリティ設定"></a>パスフレーズなしでの接続方法とセキュリティ設定</h2><p>参考にしたページでは、”Key-Based authentification”と説明されていますが、公開キーを事前にやり取りしている間柄なら、十分信用できるだろうという事で、鍵を持っている相手はパスフレーズなしでログインさせましょう、という設定です。<br>この設定では、ssh接続に際しパスフレーズなしで接続できるようになってしまうので、鍵を他の用途で使うとセキュリティに問題が出る可能性があります。そのため、「このトンネリングだけに使う専用の鍵を用意するように」と注意書きがあります。</p>
+<p>パスフレーズ無しでキーを作り、それをサーバに登録します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ssh-keygen</div><div class="line">ssh-copy-id SSHusername@MQTT</div></pre></td></tr></table></figure>
+<p>サーバ側のセキュリティ確保のため、クライアントのキー記述の最初の部分に以下のような設定を追記します。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">from=<span class="string">"192.168.1.*"</span>,no-pty,permitopen=<span class="string">"127.0.0.1:1883"</span>,<span class="built_in">command</span>=<span class="string">"/bin/false"</span> ssh-rsa........</div></pre></td></tr></table></figure>
+<p>この例では</p>
+<ul>
+<li>接続先のIP制限 from=</li>
+<li>ターミナルのアサインをしない no-pty</li>
+<li>ローカルホストの指定ポートのみオープン可能にする permitopen=</li>
+<li>ログイン時に実行するコマンドを /bin/falseに設定</li>
+</ul>
+<p>ということを指定しています。<br>具体的には、192.168.1.*のネットワークからの接続に限定、ターミナルをアサインしない、ローカルホストの1883への接続のみを許可する、リモートから接続するときに指定されたコマンドを実行しない。<br>という事になりそうです。<br>くわしくは、<a href="http://www.nxmnpg.com/ja/8/sshd#9" target="_blank" rel="external">ここらへん</a>を参照してください。</p>
+<blockquote>
+<p>この設定を書くときの注意ですが、設定同士の区切りはコンマですが、設定と鍵本体の区切りは、コンマでなくスペースです。ここを間違えて、2時間ほどハマりました。<br>ここをコンマにすると鍵が正しく認識できないのでパスワードを要求されます。</p>
+<p>公開鍵をやり取りしていて有効であれば、パスフレーズを聞かれるか何もなしでログインできるかのどちらかです。</p>
+</blockquote>
+<p>私の実験では、IPアドレスの制限をしない設定、で実行してうまく動いています。</p>
+<p>本来的には、証明書ベースの認証システムを組むのがいいのでしょうけれど、証明書の発行など、よくわかっていないと事故に繋がりそうなので、今回は初学者向けということでトンネリングを実験して見ました。<br>小規模なシステムでネットワーク環境もある程度わかっているところにデバイスを配置するには十分な感じかと思います。</p>
+<p>また、MQTTプロトコル上からデバイスがつながっているシステムの操作をするときに、重要なパラメタの制御は1箇所でできないようにするとか、あるデバイスの許可とペアで設定して初めてアクチュエートするなど、システム上でのセキュリティ構築も必要かもしれません。</p>
+<h2 id="2015-1-14-追記"><a href="#2015-1-14-追記" class="headerlink" title="2015/1/14 追記"></a>2015/1/14 追記</h2><p>authorized_keysに記入する設定で、<code>permitopen</code>というパラメタがありますが、これを設定すると”コマンドからのsshでは接続出来なくて、configを用いた接続は可能”という変な状態になりました。</p>
+<p>具体的には、</p>
+<p><code>ssh -f -L 22883:localhost:1883 user@broker -i rsa_key</code></p>
+<p>と指定すると、一応sshは動いてトンネリングはできますが、接続しようとするとエラーになります。</p>
+<p>一方全く同じパラメタをconfigファイルに書きこんで、configに設定したhost名でsshを起動すると普通に接続できます。</p>
+<p>謎です。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/01/11/secure-connection/" data-id="cj7mmqb3l000vbw41qovf493c" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/01/12/autossh/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          autossh
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/31/font-size/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">引用のフォントサイズ</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

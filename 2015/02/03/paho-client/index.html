@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Paho-mqttでバイナリファイルを受信してみる | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Paho-mqttでバイナリファイルを受信してみる">
+<meta property="og:url" content="https://mm011106.github.io/2015/02/03/paho-client/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Paho-mqttでバイナリファイルを受信してみる">
+<meta name="twitter:description" content="バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-paho-client" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/02/03/paho-client/" class="article-date">
+  <time datetime="2015-02-03T12:01:10.000Z" itemprop="datePublished">2015-02-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/phao-mqtt/">phao-mqtt</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Paho-mqttでバイナリファイルを受信してみる
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>バイナリファイルの受信はmosquitto_subではちょっと面倒じゃないかな、なんてこと言ってましたが、Paho-mqttで簡単なクライアントを作ってバイナリファイルの転送を試して見ました。</p>
+<a id="more"></a>
+<p>コードは先の<a href="http://mm011106.github.io/blog/2014/12/29/vim/">投稿</a>で拾ってきたPaho-mqtt(python)のテストコードをちょちょいと改造しました。</p>
+<figure class="highlight python"><figcaption><span>test code for binary-file subscription</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">import</span> paho.mqtt.client <span class="keyword">as</span> mqtt</div><div class="line"></div><div class="line"><span class="comment"># The callback for when the client receives a CONNACK response from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(client, userdata, rc)</span>:</span></div><div class="line">    print(<span class="string">"Connected with result code "</span>+str(rc))</div><div class="line">  <span class="comment"># Subscribing in on_connect() means that if we lose the connection and</span></div><div class="line">  <span class="comment"># reconnect then subscriptions will be renewed.</span></div><div class="line">    client.subscribe(<span class="string">"topic/binary/jpeg"</span>)</div><div class="line"></div><div class="line"><span class="comment"># The callback for when a PUBLISH message is received from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(client, userdata, msg)</span>:</span></div><div class="line">    <span class="comment"># print(msg.topic+" "+str(msg.payload))</span></div><div class="line">    outfile=open(<span class="string">'./test.jpg'</span> , <span class="string">'w'</span>)</div><div class="line">    outfile.write(msg.payload)</div><div class="line">    outfile.close</div><div class="line">    </div><div class="line"></div><div class="line">client = mqtt.Client()</div><div class="line">client.on_connect = on_connect</div><div class="line">client.on_message = on_message</div><div class="line"></div><div class="line">client.connect(<span class="string">"my.broker.jp"</span>, <span class="number">1883</span>, <span class="number">60</span>)</div><div class="line"></div><div class="line"><span class="comment"># Blocking call that processes network traffic, dispatches callbacks and</span></div><div class="line"><span class="comment"># handles reconnecting.</span></div><div class="line"><span class="comment"># Other loop*() functions are available that give a threaded interface and a</span></div><div class="line"><span class="comment"># manual interface.</span></div><div class="line">client.loop_forever()</div></pre></td></tr></table></figure>
+<p>これを実行しておいて、別のコンソール（あるいはPC）から、jpgファイルをパブリッシュしてみます。　　<br>こちらは、mosquitto。<br><code>sh publish a binary file as a test data
+$ mosquitto_pub -h my.broker.jp -t topic/binary/jpeg -f mypicture.jpg</code> </p>
+<p>とします。</p>
+<p>すると、先程のpythonスクリプトからtest.jpgのファイルが出力されました。実際に表示させてみると、問題なく絵を見ることが出来ました。</p>
+<p>mosquitto_subのコマンドラインからですと、出力したファイルはコマンドを終了しない限りずっとオープンしっぱなしなので、スクリプトなどで横取りすることできませんでした。今回のこのpaho版では、ファイルを読み込んだら一回クローズしてしまいますので、横取りできます。</p>
+<p>ま、きちんとpythonで全部のスクリプトを書く、というのが筋でしょうけど。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/02/03/paho-client/" data-id="cj7mmqb4j001dbw417fjq9bwj" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/02/07/raspi2-speed/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Raspberry Pi 2　を試して見ました
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/03/ore-ore-certificate4/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">オレオレ証明書を作ってみようかと　実践3</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

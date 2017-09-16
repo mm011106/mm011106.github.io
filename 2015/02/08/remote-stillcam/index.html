@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Paho mqttでリモートカメラ | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。  2015/2/28 UPDATE!!">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Paho mqttでリモートカメラ">
+<meta property="og:url" content="https://mm011106.github.io/2015/02/08/remote-stillcam/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。  2015/2/28 UPDATE!!">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Paho mqttでリモートカメラ">
+<meta name="twitter:description" content="Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。  2015/2/28 UPDATE!!">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-remote-stillcam" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/02/08/remote-stillcam/" class="article-date">
+  <time datetime="2015-02-08T00:49:46.000Z" itemprop="datePublished">2015-02-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Paho mqttでリモートカメラ
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Paho MQTTでリモートでシャッターを切れるカメラを作ってみました。撮った写真もMQTTで送られてきます。</p>
+<blockquote>
+<p>2015/2/28 UPDATE!! </p>
+</blockquote>
+<a id="more"></a>
+<p>##カメラ側の設定</p>
+<p>まずは、デバイス（カメラ）側のスクリプト</p>
+<p>ハードウエアとして、Raspberry Pi B+に専用のカメラモジュールをつけています。</p>
+<figure class="highlight python"><figcaption><span>remotecam.py </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment">#</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> paho.mqtt.client <span class="keyword">as</span> mqtt</div><div class="line"><span class="keyword">import</span> os</div><div class="line"></div><div class="line"><span class="comment"># The callback for when the client receives a CONNACK response from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(client, userdata, rc)</span>:</span></div><div class="line">    print(<span class="string">"Connected with result code "</span>+str(rc))</div><div class="line">  <span class="comment"># Subscribing in on_connect() means that if we lose the connection and</span></div><div class="line">  <span class="comment"># reconnect then subscriptions will be renewed.</span></div><div class="line">    client.subscribe(<span class="string">"my/device/stillcam/command"</span>)</div><div class="line"></div><div class="line"><span class="comment"># The callback for when a PUBLISH message is received from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(client, userdata, msg)</span>:</span></div><div class="line">    cmd = str(msg.payload)</div><div class="line">    print(msg.topic+<span class="string">" "</span>+str(msg.payload))</div><div class="line">    <span class="keyword">if</span> cmd == <span class="string">"shoot"</span>:</div><div class="line">        <span class="keyword">print</span> <span class="string">"Say cheeees!"</span></div><div class="line"></div><div class="line">        dummy = os.system(<span class="string">"raspistill -w 1024 -h 768 -t 10 -o /run/shm/temp.jpg"</span>)</div><div class="line">        dummy = os.system(<span class="string">"mosquitto_pub -h my.broker.jp -t my/device/stillcam -f /run/shm/temp.jpg"</span>)</div><div class="line"></div><div class="line">client = mqtt.Client()</div><div class="line">client.on_connect = on_connect</div><div class="line">client.on_message = on_message</div><div class="line"></div><div class="line">client.connect(<span class="string">"my.broker.jp"</span>, <span class="number">1883</span>, <span class="number">60</span>)</div><div class="line"></div><div class="line"><span class="comment"># Blocking call that processes network traffic, dispatches callbacks and</span></div><div class="line"><span class="comment"># handles reconnecting.</span></div><div class="line"><span class="comment"># Other loop*() functions are available that give a threaded interface and a</span></div><div class="line"><span class="comment"># manual interface.</span></div><div class="line">client.loop_forever()</div></pre></td></tr></table></figure>
+<p>パブリッシュ設定したメッセージが来ると、on_messageがコールされます。<br>メッセージが”shoot”だったら、osコマンド”raspistill”を実行して写真を撮ります。<br>さらにそのデータをosコマンド”mosquitto_pub”でパブリッシュします。</p>
+<p>ちょっと格好悪いですけど、MQTTで写真データを送るのにmosquittoを使っています。<del>ざっくり試した感じですと、paho-mqttではバイナリのペイロードをうまくハンドリングできないようで、多分なんか設定があるのだと思います。探してみます。</del></p>
+<h4 id="2015-2-11追記："><a href="#2015-2-11追記：" class="headerlink" title="2015/2/11追記："></a>2015/2/11追記：</h4><p>####上記のバイナリデータのハンドリングの件ですが、うまく行かない理由は私のスキル不足です。多分python内部での変数のデータ扱いをうまく変換してやる必要が有りそうです。  只今勉強中。</p>
+<blockquote>
+<h3 id="2015-2-28-追記："><a href="#2015-2-28-追記：" class="headerlink" title="2015/2/28  追記："></a>2015/2/28  追記：</h3><p>上記、バイナリデータの送信の件ですが、<br>実際に出てくるエラーは<br><code>UnicodeDecodeError: &#39;ascii&#39; codec can&#39;t decode</code><br>というものでしたので、そのまま検索をかけてみると、デコードがうまく行っていない、旨のエラーのようです。<br>であれば、変換をしないように設定すればいいのかなあ、どうするのかなあ、と思いつつソースコードを（わからないなりに）眺めていると、</p>
+</blockquote>
+<figure class="highlight sh"><figcaption><span>http://git.eclipse.org/c/paho/org.eclipse.paho.mqtt.python.git/tree/src/paho/mqtt/client.py</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> isinstance(payload, str):</div><div class="line">    upayload = payload.encode(<span class="string">'utf-8'</span>)</div><div class="line">    payloadlen = len(upayload)</div><div class="line"><span class="keyword">elif</span> isinstance(payload, bytearray):</div><div class="line">    payloadlen = len(payload)</div><div class="line"><span class="keyword">elif</span> isinstance(payload, unicode):</div><div class="line">    upayload = payload.encode(<span class="string">'utf-8'</span>)</div><div class="line">    payloadlen = len(upayload)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>という記述を見つけ、payloadのタイプによってエンコードを分けていることがわかりました。<code>bytearray</code>なら何もせずにそのままのデータが送られるので<code>bytearray</code>にすればいい。<br>再び検索して、読み込んだファイルをbytearray型で変数に代入する方法を調べ、結果として次のようなソースコードになりました。 </p>
+</blockquote>
+<figure class="highlight sh"><figcaption><span>replace with 'mosquitto_pub ......'</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 撮影した写真ファイルは/run/shm/temp.jpg</span></div><div class="line">       with open(<span class="string">'/run/shm/temp.jpg'</span>, <span class="string">'rb'</span>) as <span class="built_in">source</span>:</div><div class="line">            payload_pub = bytearray(source.read())</div><div class="line"></div><div class="line"><span class="comment"># bytearray 型にして変数に代入、それをそのままペイロードとしてパブリッシュ</span></div><div class="line">        client.publish(topic_root+topic_pub, payload_pub)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>これで無事バイナリファイルを送信することが出来ました。</p>
+</blockquote>
+<p>USBのカメラを使う場合はraspistillのコマンドを適宜変更すればいいかと思います。</p>
+<p>このスクリプトを実行可能に設定して、実行させます。これで待ち受け状態。</p>
+<p>##コントローラ側</p>
+<p>別のPCでは、</p>
+<ul>
+<li>シャッターを切るコマンドを発行する</li>
+<li>送られてきた写真のデータを保管する</li>
+</ul>
+<p>という作業があります。</p>
+<p>まずは、送られてきたデータを保管するスクリプトを作ります。</p>
+<figure class="highlight python"><figcaption><span>photo_sub.py</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment">#</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> paho.mqtt.client <span class="keyword">as</span> mqtt</div><div class="line"><span class="keyword">import</span> datetime</div><div class="line"></div><div class="line"><span class="comment"># The callback for when the client receives a CONNACK response from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(client, userdata, rc)</span>:</span></div><div class="line">    print(<span class="string">"Connected with result code "</span>+str(rc))</div><div class="line">  <span class="comment"># Subscribing in on_connect() means that if we lose the connection and</span></div><div class="line">  <span class="comment"># reconnect then subscriptions will be renewed.</span></div><div class="line">    client.subscribe(<span class="string">"my/device/stillcam"</span>)</div><div class="line"></div><div class="line"><span class="comment"># The callback for when a PUBLISH message is received from the server.</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(client, userdata, msg)</span>:</span></div><div class="line">    </div><div class="line">    <span class="comment"># print(msg.topic+" "+str(msg.payload))</span></div><div class="line">    filename = <span class="string">"./image/"</span> + datetime.datetime.today().strftime(<span class="string">"%H%M%S%f"</span>) + <span class="string">".jpg"</span></div><div class="line">    outfile=open( filename , <span class="string">'w'</span>)</div><div class="line">    outfile.write(msg.payload)</div><div class="line">    <span class="keyword">print</span> <span class="string">"subscribe: "</span> + filename</div><div class="line">    outfile.close</div><div class="line"></div><div class="line">client = mqtt.Client()</div><div class="line">client.on_connect = on_connect</div><div class="line">client.on_message = on_message</div><div class="line"></div><div class="line">client.connect(<span class="string">"my.broker.jp"</span>, <span class="number">1883</span>, <span class="number">60</span>)</div><div class="line"></div><div class="line"><span class="comment"># Blocking call that processes network traffic, dispatches callbacks and</span></div><div class="line"><span class="comment"># handles reconnecting.</span></div><div class="line"><span class="comment"># Other loop*() functions are available that give a threaded interface and a</span></div><div class="line"><span class="comment"># manual interface.</span></div><div class="line">client.loop_forever()</div></pre></td></tr></table></figure>
+<p>このスクリプトでは、my/device/stillcamというトピックにパブリッシュされたデータを取り込んでファイル名（タイムスタンプ）をつけて保存します。</p>
+<p>このスクリプトを実行して、データを待ち受けます。</p>
+<p>最後にシャッタを切るコマンドを送ります。<br>とりあえずは、コマンドラインからです。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ mosquitto_pub -h my.broker.jp -t my/device/stillcam/<span class="built_in">command</span> -m <span class="string">"shoot"</span></div></pre></td></tr></table></figure>
+<p>これで、メッセージ”shoot”をトリガにして、写真を撮影し、それを転送して保存するまでの一連の作業が行われます。</p>
+<p>デバイス側の処理負荷を確認するため1秒に1回シャッターを切る動作を続けて見ました。<br>結果的には、カメラと転送の処理で数%程度の負荷のようです。<br>ちなみにこのカメラ、この設定では1秒間隔以上のスピードで連続して撮影することはできませんでした。</p>
+<p>カメラがRaspi用のモジュールですので、かなりオーバーヘッドが小さい感じもします。<br>CPU的には処理が軽くていいのですが、ハードウエア的には取り回しが悪く、ちょっといまいちな感じもします。<br>応用のシーンによりますが、今回私が想定しているケースでは使いにくいです。</p>
+<p>あとで、USBcamでやってみようと思います。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/02/08/remote-stillcam/" data-id="cj7mmqb4t001hbw41zohb77tm" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/02/21/autossh-2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          autosshでポートフォワード
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/02/07/raspi2-speed/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Raspberry Pi 2　を試して見ました</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

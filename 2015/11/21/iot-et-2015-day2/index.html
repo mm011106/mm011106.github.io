@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ET/IoT 2015　コンファレンスレポート 2日目 | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="二日目のレポートです。雨模様でした。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ET&#x2F;IoT 2015　コンファレンスレポート 2日目">
+<meta property="og:url" content="https://mm011106.github.io/2015/11/21/iot-et-2015-day2/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="二日目のレポートです。雨模様でした。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ET&#x2F;IoT 2015　コンファレンスレポート 2日目">
+<meta name="twitter:description" content="二日目のレポートです。雨模様でした。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-iot-et-2015-day2" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/11/21/iot-et-2015-day2/" class="article-date">
+  <time datetime="2015-11-21T02:12:50.000Z" itemprop="datePublished">2015-11-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ET/IoT 2015　コンファレンスレポート 2日目
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>二日目のレポートです。雨模様でした。</p>
+<a id="more"></a>
+<hr>
+<h1 id="11-19-10-00〜11-30"><a href="#11-19-10-00〜11-30" class="headerlink" title="11/19 10:00〜11:30"></a>11/19 10:00〜11:30</h1><h2 id="TSI4-つながるIoTシステムのセキュリティ確保に向けて-重要生活機器連携セキュリティ協議会-伊藤-公祐さん"><a href="#TSI4-つながるIoTシステムのセキュリティ確保に向けて-重要生活機器連携セキュリティ協議会-伊藤-公祐さん" class="headerlink" title="TSI4  つながるIoTシステムのセキュリティ確保に向けて　　重要生活機器連携セキュリティ協議会 伊藤 公祐さん"></a>TSI4  <em>つながるIoTシステムのセキュリティ確保に向けて</em>　　重要生活機器連携セキュリティ協議会 伊藤 公祐さん</h2><p>セキュリティのお話で、なかなかまとまった話をweb上で見つけられないのでいい機会でした。</p>
+<p><strong>内容：</strong></p>
+<ol>
+<li>クラッカーの視点から　（事例紹介）  </li>
+<li>IoT標準か動向  </li>
+<li>セキュリティ対策のポイント　-&gt;　開発プロセスの検討  </li>
+</ol>
+<hr>
+<ol>
+<li><p>事例紹介</p>
+<ul>
+<li><p>Jeepのcase</p>
+<ul>
+<li>wifiがインターネットにつながっていて、外から入れる。</li>
+<li><p>VPNの脆弱性（電話会社のサービス）</p>
+<p>クラッカーとしては、内部のファームウエアを書き換える際に、「動くファーム」を作ることが大変だった。経路確保や書き換えそのものはおおきな作業ではない。</p>
+</li>
+</ul>
+</li>
+<li><p>プラントのセンサネットからメインのネットへの侵入<br>通常（インターネットからイントラへ）と逆向きの侵入。<br>センサネットの脆弱性を狙った。</p>
+</li>
+<li><p>ライフルの照準機へのクラッキング<br>対象物の危険性とリスクを考慮した「重要度」の位置づけ</p>
+</li>
+<li><p><strong>教訓：</strong><br>設計でセキュリティを作り込む。製品を取り巻く環境まで含めて「製品の一部」として考えてセキュリティの確保をいかにするか。<br>デバグのためのハードウエアのポート（GPIO）でさえも、バックドアになる可能性。</p>
+<p>ハードウエアはリバースエンジニアリングされる前提で設計する。</p>
+<p>クラッキングの最短ルートは「ファームウエアの書き換え」</p>
+</li>
+<li><p>クラッカーの視点</p>
+<ul>
+<li>ターゲット：　高価値なものの自由を奪いたい</li>
+<li>そのシステムがどう動いているのか理解するため分解、解析をする</li>
+<li>コントロールを奪う糸口を探す</li>
+<li>できるだけ汎用のインターフェイスを使ってローコストに作業する</li>
+</ul>
+<p>インターネットにつながっている機器の口を見つけるサイト：<br><a href="https://www.shodan.io/" target="_blank" rel="external">SHODAN</a></p>
+</li>
+</ul>
+</li>
+<li><p>標準化</p>
+<ul>
+<li><a href="http://www.onem2m.org/" target="_blank" rel="external">oneM2M</a> 接続レベルの標準化</li>
+<li>ITU-T JCA-IoT  IoTの標準化を見守るような立場</li>
+<li>SAE 自動車の中で使われる標準化のなかでIoTの検討</li>
+<li>ETSI 自動車向け標準化組織</li>
+<li><p><a href="https://www.car-2-car.org/index.php?id=22" target="_blank" rel="external">C2C</a> 自動車同士の接続　TAL(Trust Assurance Level)というのを定義していて、「お互いどれだけ信頼できるのか」ということを知らせ合い、情報の優先度選択ができるようになっている</p>
+<p>TALのような考え方は車だけでなくIoT全般に必要となる。</p>
+<p>セキュリティとセーフティの両立：同じアナロジーで考えてみる      </p>
+</li>
+<li>IEC61508-1　プラント・工場の安全性</li>
+<li><p>EN50126-5(draft)  鉄道の安全性</p>
+<p>日本の状況</p>
+</li>
+<li>NISC 2015　セキュリティ方針</li>
+<li><p>IPA ガイドライン</p>
+<p>セーフティオリエンテッドデザインとともにセキュリティオリエンテッドな考え方も入れるべき。ISO27001, IEC61508<br>ただ、IoTにはヘビーな面も。。。。</p>
+<p>セキュリティコストと製品の価格のバランスが必要（でも、最低限は）</p>
+</li>
+</ul>
+</li>
+<li><p>IoTセキュリティ対策</p>
+<p> 脆弱性はどこにあるか<br> <a href="http://jvndb.jvn.jp/" target="_blank" rel="external">JVN iPedia</a>に一般的なクラッキングターゲットとなる<a href="https://www.ipa.go.jp/security/vuln/CWE.html" target="_blank" rel="external">脆弱性</a>が書かれている。ここから検討していく</p>
+<ul>
+<li><p>設計プロセスでの対応</p>
+<ul>
+<li>セキュリティ要件（どの程度）</li>
+<li>セキュリティのアーキテクチャ（どうやって）</li>
+<li>コーディングの工夫（リバースされにくいコーディング）</li>
+<li>テスト（テスト、ファジング）</li>
+</ul>
+</li>
+<li><p>従来行程から加えるべきもの</p>
+<ul>
+<li>セキュリティ要件、定義</li>
+<li>セキュリティ設計</li>
+<li>verification</li>
+<li>validation </li>
+</ul>
+<p>具体的な検討方法　-&gt;　<a href="https://www.ipa.go.jp/security/vuln/CVSS.html" target="_blank" rel="external">CVSS</a></p>
+</li>
+<li>含まれる欠陥、脆弱性の定義</li>
+<li><p>あり得る可能性をリストアップ（脅威分析）<br>フォルトツリー解析と同様な手法　脆弱性と可能性の積で定量的な「脅威」をはかる</p>
+<p>IoTに特有なものがあり脆弱なポイントは多い</p>
+</li>
+<li>物理的なものへの影響度がある</li>
+<li>自動的に動作するものについての深刻度・重要度評価</li>
+<li>「きちんと動作する」というのはどういうことか。正常と異常の定義</li>
+<li><p>複雑さに対する考慮（多数の機器がつながっている場合）</p>
+<p>最適な対策を最適な部分にデプロイすることが大切。むやみにやっても危険は減らない。<br>何が脅威でどうやってリジェクトするのか。</p>
+</li>
+<li>構成要素がすべて自分の製品の一部と考えること。他人任せにしない</li>
+<li>ファームウエアアップデート手法の最適化</li>
+<li>リバースしにくいハードウエア</li>
+<li>広い視野で危機を検討</li>
+<li>他人からみてもらう</li>
+</ul>
+</li>
+</ol>
+<h3 id="感想："><a href="#感想：" class="headerlink" title="感想："></a>感想：</h3><p>セキュリティというとネットワークの話で、「SSLがどうした」とか言うことかと思ったらもっと全体的な話をしてくれたので、面白かった。<br>特にジープのインシデントはいかに最近のクラッキングが高度になっているかということがよくわかった（リバースエンジニアリングでファームウエアを作るってすごい）。<br>またセキュリティを安全性と同様なスキームで考えるとわかりやすい、という点は「なるほど」という感じ。具体的な脅威についての考察はひつようだけれど全体を見渡す大切さを教えてもらった。</p>
+<hr>
+<h1 id="2015-11-19-12-00〜13-00"><a href="#2015-11-19-12-00〜13-00" class="headerlink" title="2015/11/19 12:00〜13:00"></a>2015/11/19 12:00〜13:00</h1><h2 id="Big-Dataのボトルネック-矢野さん-日立製作所技師長"><a href="#Big-Dataのボトルネック-矢野さん-日立製作所技師長" class="headerlink" title="Big Dataのボトルネック　　矢野さん　日立製作所技師長"></a><em>Big Dataのボトルネック</em>　　矢野さん　日立製作所技師長</h2><p>話はAIの宣伝で、タイトルとは全く関係ない感じでしたが、これもまとまった話を聞く機会がないので面白く聞かせていただきました。</p>
+<p>パラダイムのシフト  </p>
+<ul>
+<li>旧：ソフトに従ってコンピュータが処理する</li>
+<li>今：ビッグデータをもとにAIが処理する</li>
+</ul>
+<p>AIとは（定義）</p>
+<ul>
+<li>目的、入出力は人間が決める（どんなデータを入れて何をして何を最適化するのか、の指示）</li>
+<li>問題に対するロジックを与えない</li>
+<li>既存システムに追加することができる（システムを変更しない）</li>
+</ul>
+<p>ブランコを漕ぐロボットの例-&gt;５分ぐらいで最適な漕ぎ方を学習<br>=&gt;企業戦略に応用できないか</p>
+<p>人間の行動も含めてシステムとして入力して、AIが最適化する（工場の例）</p>
+<p>アナロジーとしては「ソフトを作るソフト」　</p>
+<p>###感想：<br>AIの宣伝だったけど、日立がやっているあたりちょっと怖い感じもする。<br>本当に企業戦略立案に入れたらその企業は間違いなく「ブラック」になるとおもう。試行錯誤の中では到底人間には受け入れられない仕事が出てくるはず。ま、そこら辺も含めて評価関数に入れてしまえばいいのだけれどね。<br>あと、気になったのが、人間の作ったシステム、特に金融系やソーシャルなものに対して応用すると、何かのきっかけで系が相変化してしまって応答特性が全くかわってしまった場合、収束が難しくなるような気がする。試行錯誤のTATが十分短ければいいけれど、人間系のシステムはたいてい時定数が長いので答えを収束させている間に系が変化するというのはあり得る話。<br>結局「十分長い時間でみれば”知能”だけど、人間的時定数からすると”試行錯誤”マシン」というところか。人間の「知恵」というのは、「即決」できるところだと思うけどね。</p>
+<hr>
+<h1 id="2015-11-19-14-00〜14-45"><a href="#2015-11-19-14-00〜14-45" class="headerlink" title="2015/11/19 14:00〜14:45"></a>2015/11/19 14:00〜14:45</h1><h2 id="IoTを現実のものにするプログラマブル-デバイス技術動向-吉澤さん-cypress-semiconductor"><a href="#IoTを現実のものにするプログラマブル-デバイス技術動向-吉澤さん-cypress-semiconductor" class="headerlink" title="IoTを現実のものにするプログラマブル デバイス技術動向 　吉澤さん　cypress semiconductor"></a><em>IoTを現実のものにするプログラマブル デバイス技術動向</em> 　吉澤さん　cypress semiconductor</h2><p>デバイス動向の話。</p>
+<p>デバイスの数量的成長は落ちているが、新しいものはどんどん出てきている。特にリーンスタートのためのプログラムブルデバイスとARMベースのプロセッサ。</p>
+<p>cypressでのサポート</p>
+<ul>
+<li>spansionとの合併によりFlashメモリ、元富士通のMPU,アナログ系のIPの取り込み</li>
+<li>デジタルではプログラマブルでバイスとプロセッサの融合が進んでいるが、cypressではマイクロプロセッサとコンフィギュアラブルなアナログ回路を融合している</li>
+</ul>
+<p>PSocシリーズの紹介</p>
+<ul>
+<li><p>新しく出るもの  </p>
+<ul>
+<li>1pAレベルのノイズの電流アンプ（トランスコンダクタンスアンプ）が入ったデバイス。</li>
+<li>PSoC 7:工業用ARM-M7内蔵</li>
+<li>PSoC 6:コンシューマー用ARM-M4,M0+ 内蔵</li>
+<li>汎用インターフェイス内蔵：USB,USART,Ethernet,CANなど</li>
+<li>アナログインターフェイス回路</li>
+</ul>
+</li>
+<li><p>新しく出たもの</p>
+<ul>
+<li>PsoC4 BLE: Lowpower版　メモリを256kBに拡張</li>
+</ul>
+</li>
+</ul>
+<h3 id="感想：-1"><a href="#感想：-1" class="headerlink" title="感想："></a>感想：</h3><p>どうもCypressのデバイスは型番が整理されていない印象があって、わかりづらい。<br>今回もこのプレゼンの後にwebでしらべてみたけれど、型番とシリーズの関連が読みづらい（なれればわかるのかもしれないけど）。<br>ちょっと面白そうだけど、そこら辺にいまいち感があるものは、ツールや設定方法もいまいち感がある場合が多いので二の足を踏んでいる感じ。<br>（昔評価キットを買いましたが、使ってません）</p>
+<hr>
+<h1 id="2015-11-19-15-00〜15-45"><a href="#2015-11-19-15-00〜15-45" class="headerlink" title="2015/11/19 15:00〜15:45"></a>2015/11/19 15:00〜15:45</h1><h2 id="ARM-搭載-SoC-FPGA、最新情報と実装例-小山-さん、吉田さん-Altera"><a href="#ARM-搭載-SoC-FPGA、最新情報と実装例-小山-さん、吉田さん-Altera" class="headerlink" title="ARM 搭載 SoC FPGA、最新情報と実装例　　小山 さん、吉田さん　Altera"></a><em>ARM 搭載 SoC FPGA、最新情報と実装例</em>　　小山 さん、吉田さん　Altera</h2><p>アルテラのFPGAの技術動向</p>
+<p>微細プロセスへの対応  </p>
+<ul>
+<li>現状最先端は10nmプロセス（インテルのファブで製作）</li>
+<li>製品としては14nm（FPGA）</li>
+<li>一般的なASSP(ASIC)では65nmなのでだいぶアドバンテージがある</li>
+</ul>
+<p>次世代FPGA(Altera Common Architecture)  </p>
+<ul>
+<li><strong>Cedar</strong> : Cyclone の次世代版　14nmで64bitコアを２コア</li>
+<li><strong>Oak</strong> : Arriaの次世代版 14nmでA53を４コア</li>
+<li><strong>Sequoia</strong> : Stratixの次世代版 10nm CPU未定</li>
+</ul>
+<p>事例：  </p>
+<ul>
+<li>自動運転 Cyclone V</li>
+<li>PLC（工業用シーケンサ）</li>
+<li>3Dスキャナ</li>
+</ul>
+<p>ツール：  </p>
+<ul>
+<li>Quartus Prime　（IIの次世代版）= SpectraQエンジンを搭載</li>
+<li>OpenCL プロセッサ＋周辺回路の設計時のソリューション<ul>
+<li>ロジックのみときはHLS</li>
+</ul>
+</li>
+</ul>
+<p>OpenCL  </p>
+<ul>
+<li>(ここら辺間違いを書くといけないので、<a href="https://www.altera.co.jp/products/design-software/embedded-software-developers/opencl/overview.html" target="_blank" rel="external">こちら参照</a>）</li>
+</ul>
+<p>私の受け取ったところを書くと、</p>
+<ul>
+<li>OpenCLで並列処理システムとして、ARMプロセッサとロジック回路の構造を記述しPC上でシミュレーション、デバッグをしてからFPGAにでプロイする。</li>
+<li>HDLでコードをかかなくとも（真偽のほどは？）OpenCLの記述で回路も構成できる。</li>
+<li>回路だけ書きたいなら”HLS”　（VHDLとかの新しいバージョン？調べてみたらsystemCとかに近い立ち位置なのかしら？）</li>
+</ul>
+<p>説明の中でも、「FPGAだけがターゲットであればC/C++で記述してデバグしたものをHLSに落としてさらにHDLに」というようなことを言っていたような気がする。</p>
+<p>画像処理の例：  </p>
+<p>「視的感覚から状況を判断して動作するオブジェクト」を作ることをターゲットとした。<br>従来、機能フローに対して最適なデバイス（FPGAやCPU）を使っていたが、SoCではすべてが1chipに入っている。<br>前処理に近いところをFPGA, 後処理をプロセッサ</p>
+<p>アプリケーション：</p>
+<ul>
+<li>自動運転支援システム</li>
+<li>街灯のインテリジェント化（カメラ、センサ）</li>
+<li>deep learning </li>
+</ul>
+<p>OpenCLでの<a href="https://www.altera.co.jp/support/support-resources/design-examples/design-software/opencl/opencl.html" target="_blank" rel="external">デザイン例</a>をダウンロード可能。</p>
+<h3 id="感想：-2"><a href="#感想：-2" class="headerlink" title="感想："></a>感想：</h3><p>Intelと一緒になってどうなるかと思っていましたが、最先端プロセスを手に入れて一歩先をいく感じでしょうか。10nmはすんごい速いんだろうなあ。<br>Intelとしても、ファシリティの減価償却をシェアできるというのはちょっと楽になるですね。<br>気になるのは最先端プロセスの値段です。１個10万円とかになっちゃう感じですかね。</p>
+<hr>
+<h1 id="2015-11-19-16-00〜16-45"><a href="#2015-11-19-16-00〜16-45" class="headerlink" title="2015/11/19 16:00〜16:45"></a>2015/11/19 16:00〜16:45</h1><h2 id="簡単に始められるアルテラ-MAX-10-FPGA開発-福原-さん-Altera"><a href="#簡単に始められるアルテラ-MAX-10-FPGA開発-福原-さん-Altera" class="headerlink" title="簡単に始められるアルテラ MAX 10 FPGA開発　　福原  さん　Altera"></a><em>簡単に始められるアルテラ MAX 10 FPGA開発</em>　　福原  さん　Altera</h2><p>Max10は１０世代目製品のうちの一つ</p>
+<ul>
+<li>MAX10　55nm　Flashメモリのプロセスを利用（不揮発）</li>
+<li>Arria10　20nm　TSMCのプロセス</li>
+<li>Stratix10 14nm　Intelのプロセス</li>
+</ul>
+<p>MAX10の特徴として</p>
+<ul>
+<li>コンフィグメモリ２つ（切り替えて使える）　10ms程度でコンフィグできる</li>
+<li>DSPブロック、RAM、DDRコントローラ、オンチップオシレータ、電源内蔵</li>
+<li>NIOSII実装可能</li>
+</ul>
+<p>Enpirionという電源チップも用意　電源シーケンスを自動で管理</p>
+<p>NIOSIIは遅い動作でよければ600〜700LE、速いものでも1000LE〜1500LE程度で実装できる</p>
+<p>開発ソフト  </p>
+<ul>
+<li>Quartus Primeを使う。</li>
+<li>Qsys : IPの接続をウイザード形式でやってくれる（実際に配線する必要なし）</li>
+<li>最初にプロジェクトを作るときは、テンプレートから作成することをおすすめ　-&gt;　Desgin Store</li>
+<li>NiOSIIのコンパイラはEclips環境</li>
+</ul>
+<p>キット</p>
+<ul>
+<li>10M08版(8000LE)　で　$50ぐらい</li>
+</ul>
+<p>トラ技３月ごろキット本を出版予定</p>
+<h3 id="感想：-3"><a href="#感想：-3" class="headerlink" title="感想："></a>感想：</h3><p>MAX10も使ってみたいと思います。でも利用するアプリケーションがない。<br>現在の開発環境をアップデートする必要あり。また設定し直すのが面倒くさい。。。。<br>キット購入しましょう。（以前マクニカのIoT用のキットを買ったけれど、使い方がいまいちわからず放置中）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2015/11/21/iot-et-2015-day2/" data-id="cj7mmqb5c001ybw41ro40mf0y" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/11/22/iot-et-2015-day3/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          ET/IoT 2015　コンファレンスレポート3日目
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/11/18/iot-et-2015/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">ET/IoT 2015　コンファレンスレポート</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>手始めに、色々と試してみます | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="シェルコマンドの表示例です。 12echo $&amp;#123;test&amp;#125;cat /var/log/syslog | grep &apos;test_log&apos; &amp;gt; temp.txt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="手始めに、色々と試してみます">
+<meta property="og:url" content="https://mm011106.github.io/2014/11/29/first-step/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="シェルコマンドの表示例です。 12echo $&amp;#123;test&amp;#125;cat /var/log/syslog | grep &apos;test_log&apos; &amp;gt; temp.txt">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana_small.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana_small.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:image" content="https://mm011106.github.io/images/hana.jpg">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.169Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="手始めに、色々と試してみます">
+<meta name="twitter:description" content="シェルコマンドの表示例です。 12echo $&amp;#123;test&amp;#125;cat /var/log/syslog | grep &apos;test_log&apos; &amp;gt; temp.txt">
+<meta name="twitter:image" content="https://mm011106.github.io/images/hana.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-first-step" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/11/29/first-step/" class="article-date">
+  <time datetime="2014-11-29T05:52:11.000Z" itemprop="datePublished">2014-11-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/日本語/">日本語</a>►<a class="article-category-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a>►<a class="article-category-link" href="/categories/日本語/Fromat-Examples/test/">test</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      手始めに、色々と試してみます
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>シェルコマンドの表示例です。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">echo</span> <span class="variable">$&#123;test&#125;</span></div><div class="line">cat /var/<span class="built_in">log</span>/syslog | grep <span class="string">'test_log'</span> &gt; temp.txt</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">rake watch</div></pre></td></tr></table></figure>
+<p>を別のコンソールから起動しておけば、ポスト用のテキストファイルを保存するたびにrake generateしてくれます。エラーも出るので構文がエラーしているとすぐフィードバックしてくれます。これは結構便利。</p>
+<p>カテゴリは、カテゴリ名にスペースが入るとダメ（スペースで分けられて個別のカテゴリになってしまう）。スペースが入るときは[]で囲って、コンマで区切る。<br>日本語も大丈夫。</p>
+<p>改行するときは行末に２文字の半角空白を置くと、<br>こんなふうに改行できます。</p>
+<p>現在、octopressのディレクトリ内からソースファイルをエディットして、自動でgenerate、適当なところで手動でweb用のリポジトリ内にコピー、そこからcommit &amp; pushしています。<br>ちょっと効率が悪い、ソースがローカルに保存されてしまう、という欠点があるので何とかしたいと思います。<br>世の中には rake setup_github_pages というものがあるらしいが、詳しく調べてみる。<br>やはり大元の<a href="http://octopress.org/docs/deploying/github/" target="_blank" rel="external">ここ</a>が詳しいか？</p>
+<h2 id="写真"><a href="#写真" class="headerlink" title="写真"></a>写真</h2><p>本題に入る前に、区切り線の挿入。<br>区切り線の前の行は文字が大きくなり、タイトルっぽくなります。  </p>
+<p>大切な写真の埋め込み例をやります。  まずは、markdownの標準のやりかた<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">![これは写真です](/images/hana.jpg &quot;HANA!&quot;)</div></pre></td></tr></table></figure></p>
+<p><img src="/images/hana.jpg" alt="これは写真です" title="HANA!"><br>写真の次のテキストはこんな位置に来ます。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">![これは小さい写真です](/images/hana_small.jpg &quot;Shrinked HANA!&quot;)</div></pre></td></tr></table></figure>
+<p><img src="/images/hana_small.jpg" alt="これは小さい写真です" title="Shrinked HANA!"></p>
+<p>改行を１行入れたあとの、写真の次のテキストはこんな位置に来ます。<br>次に、octopressでのタグフォーマットです。<br>フォーマットはこんな形になります。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;% img [class names] /path/to/image [width] [height] [title text [alt text]] %&#125;</div></pre></td></tr></table></figure></p>
+<p>class name の選択肢がわかりませんが、とりあえず例を参考にすると。。。。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;% img /images/hana.jpg &apos;HANA!&apos; %&#125;</div></pre></td></tr></table></figure>
+<img src="/images/hana.jpg" title="HANA!">
+<p>このフォーマットだと左右に寄せることができ、サイズも指定できます。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;% img center /images/hana.jpg 400 &apos;center 400 HANA!&apos; %&#125;</div></pre></td></tr></table></figure></p>
+<img src="/images/hana.jpg" class="center" width="400" title="center 400 HANA!">
+<p>すぐ次の行に文字を入れるとこんなかんじです。<br>多分写真の下に文字が来ると思いますが。。。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;% img left /images/hana.jpg 300 &apos;300 HANA!&apos; %&#125;</div></pre></td></tr></table></figure>
+<img src="/images/hana.jpg" class="left" width="300" title="300 HANA!">
+<p>写真の埋め込みコマンドの次の行です。ここに文章を入れないとすこしフォーマットがおかしくなる感じですね<br>写真の縦の高さ分、文字がないと、次の写真を今の写真の右側に流し込もうとして変な感じになります。  </p>
+<p>それは、それで正しいフォーマッティングかと思います。<br>この行数では、safari上で行数が足りません。firefoxよりも文字が小さく表示されるようです。  </p>
+<h2 id="この状態で「区切り」を入れてみます。"><a href="#この状態で「区切り」を入れてみます。" class="headerlink" title="この状態で「区切り」を入れてみます。"></a>この状態で「区切り」を入れてみます。</h2><p>やっぱりうまく行きませんね。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;% img right /images/hana_small.jpg &apos;Shrinked HANA!&apos;　&apos;ハナさん&apos; %&#125;</div></pre></td></tr></table></figure>
+<img src="/images/hana_small.jpg" class="right" title="Shrinked HANA! ハナさん">
+<p>ここにも少し文章が必要です。<br>ブログページの最後が写真で左右寄せに指定するときには、最後のところに少し文章が必要ですね。次のページのスタートが崩れます。  
+  　　  
+　　  
+　　  
+　　　　  </p>
+<p>右寄せの写真、左寄せの写真を続けて挿入すると。。。。</p>
+<img src="/images/hana.jpg" class="left" width="200" title="left HANA!">
+<img src="/images/hana.jpg" class="right" width="200" title="right HANA!">
+<p>そして、この文章は写真の次の行です。<br>写真と写真の間に流し込まれているかしら？  </p>
+<p>　　</p>
+<p>　　</p>
+<p>　　
+　　</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2014/11/29/first-step/" data-id="cj7mmqb0n0001bw41pynoxstf" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/11/29/motivation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          このwebでは...
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

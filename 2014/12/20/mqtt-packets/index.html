@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>MQTTのパケットを覗いてみた(1) | MQTT and ...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MQTTのパケットを覗いてみた(1)">
+<meta property="og:url" content="https://mm011106.github.io/2014/12/20/mqtt-packets/index.html">
+<meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-14T10:06:52.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MQTTのパケットを覗いてみた(1)">
+<meta name="twitter:description" content="mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。">
+  
+    <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MQTT and ...</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">My first IoT.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://mm011106.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-mqtt-packets" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/12/20/mqtt-packets/" class="article-date">
+  <time datetime="2014-12-20T03:24:00.000Z" itemprop="datePublished">2014-12-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/mqtt/">mqtt</a>►<a class="article-category-link" href="/categories/mqtt/wireshark/">wireshark</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MQTTのパケットを覗いてみた(1)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mosquitto_pubなど、mosquittoのクライアント用コマンドで接続した時、どんなことになっているのかちょっと気になったので調べて見ることにしました。<br>ここでは、サブスクライブ要求した時にどんなことが行われているか、また、mosquitto_subをkillで殺した時、なにか通信しているのか、ということを確認しました。<br><a id="more"></a></p>
+<h2 id="mosquitto-sub-でサブスクライブ要求した場合"><a href="#mosquitto-sub-でサブスクライブ要求した場合" class="headerlink" title="mosquitto_sub でサブスクライブ要求した場合"></a>mosquitto_sub でサブスクライブ要求した場合</h2><p>まずは、パケットをキャプチャするものを用意しなければいけません。<br>定番、ということでwiresharkをインストールして、キャプチャ用のソフトにデバイスへのアクセスのパーミッションを付与します。<br><a href="http://www005.upp.so-net.ne.jp/develop-tom/deb/wireshark-deb.html" target="_blank" rel="external">こちらのページ</a>にわかりやすく記載されています（ありがとうございます）。</p>
+<p>まとめておくと、<br><figure class="highlight sh"><figcaption><span>Install wireshark and configure...</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">:<span class="comment"># apt-get install wireshark</span></div><div class="line">:<span class="comment"># setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap</span></div></pre></td></tr></table></figure></p>
+<p>キャプチャインターフェイスをeth0にし、IPアドレスのフィルタにブローカのアドレスを指定してキャプチャを始めます。</p>
+<p>サブスクライブを要求します。</p>
+<pre><code>:$ mosquitto_sub -v -t \$SYS/broker/messages/# -h mqtt.broker.host.name
+</code></pre><p>MQTTプロトコルメッセージの最初2バイトは固定ヘッダーになります。MQTTプロトコルメッセージの最小単位です。</p>
+<p>TCPレベルでの接続作業があって、MQTTの接続が始まります。</p>
+<hr>
+<h3 id="STEP-1-接続要求-Client-gt-Broker"><a href="#STEP-1-接続要求-Client-gt-Broker" class="headerlink" title="STEP 1: 接続要求　Client -&gt; Broker"></a>STEP 1: 接続要求　Client -&gt; Broker</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">0000   10 22 00 06 4d 51 49 73 64 70 03 02 00 3c 00 14  .<span class="string">"..MQIsdp...&lt;..</span></div><div class="line"><span class="string">0010   6d 6f 73 71 5f 73 75 62 5f 33 35 38 35 5f 75 62  mosq_sub_3585_ub</span></div><div class="line"><span class="string">0020   75 6e 74 75                                      untu</span></div></pre></td></tr></table></figure>
+<ul>
+<li><p>固定ヘッダ：<br>0000 : メッセージタイプ (メッセージ’１’＝CONNECT）<br>0001 : 長さ (続く可変ヘッダーのメッセージ長、ここでは34byte)  </p>
+</li>
+<li><p>可変ヘッダー<br>0002 : 次のメッセージの長さ　MSB<br>0003 : LSB　（ここでは6byte）<br>0004 : “MQIsdp” （ここは定型句のようです）<br>000A : プロトコルバージョン “03”<br>000B : FLAGs (CleanSession=’1’)<br>000C : Keep Alive timer[s] MSB<br>000D : Keep Alive timer[s] LSB  （ここでは60秒）<br>000E : 次のメッセージの長さ　MSB<br>000F :  　　LSB　（ここでは20byte)<br>0010 : クライアント識別子 (オプション–idで指定したものが入ります。この例ではデフォルト値）</p>
+</li>
+</ul>
+<p>まず、ブローカにMQTTプロトコルの接続要求をだします。自分のIDを指定していますので、ブローカは誰が何のトピックをサブスクライブしているか、をこのときのIDをキーにして把握します。</p>
+<hr>
+<h3 id="STEP-2-要求の返事-Client-lt-Broker"><a href="#STEP-2-要求の返事-Client-lt-Broker" class="headerlink" title="STEP 2 : 要求の返事　Client &lt;- Broker"></a>STEP 2 : 要求の返事　Client &lt;- Broker</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">0000   20 02 00 00                                       ...</div></pre></td></tr></table></figure>
+<ul>
+<li><p>固定ヘッダ：<br>0000 : メッセージタイプ (メッセージ’2’＝CONNACK）<br>0001 : 長さ 2byte</p>
+</li>
+<li><p>可変ヘッダ：<br>0002 : トピック名圧縮要求(予約：未使用）<br>0003 : 接続要求戻りコード（ここでは’00’で接続許可。’00’以外は接続拒否）</p>
+</li>
+</ul>
+<p>先の接続要求に対して、許可の返事がブローカから来ます。</p>
+<hr>
+<h3 id="STEP-3-サブスクライブ要求-Client-gt-Broker"><a href="#STEP-3-サブスクライブ要求-Client-gt-Broker" class="headerlink" title="STEP 3: サブスクライブ要求　Client -&gt; Broker"></a>STEP 3: サブスクライブ要求　Client -&gt; Broker</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">0000   82 1b 00 01 00 16 24 53 59 53 2f 62 72 6f 6b 65  ......$SYS/broke</div><div class="line">0010   72 2f 6d 65 73 73 61 67 65 73 2f 23 00           r/messages/#.</div></pre></td></tr></table></figure>
+<ul>
+<li><p>固定ヘッダ：<br>0000 メッセージタイプ (メッセージ’8’＝SUBSCRIBE, このメッセージ自身をQoS=1で送信）<br>0001 長さ　27byte</p>
+</li>
+<li><p>可変ヘッダ：<br>0002 メッセージID　16bit (MSB,LSB)<br>0004 ペイロード長さ　16bit (MSB,LSB) ここでは22byte<br>0005 ペイロード本体　ここではサブスクライブ要求するトピックを指定。<br>001C QoS指定　要求するサブスクライブのQoS指定　QoS=’0’  </p>
+</li>
+</ul>
+<p>サブスクライブ要求をします。同時にどのトピックを購読するのかを指定します。</p>
+<p>複数トピックを指定した場合は、可変ヘッダに「ペイロード長さ指定+ペイロード本体（トピック名）+QoS指定」が続きます。</p>
+<hr>
+<h3 id="STEP-4-データの送付-Client-lt-Broker"><a href="#STEP-4-データの送付-Client-lt-Broker" class="headerlink" title="STEP 4: データの送付　Client &lt;- Broker"></a>STEP 4: データの送付　Client &lt;- Broker</h3><p>本当は、ここでSUBACKがブローカから送られてくるはずなのですが、それが無く、いきなりデータが送られてきました。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">0000   31 1f 00 1b 24 53 59 53 2f 62 72 6f 6b 65 72 2f  1...$SYS/broker/</div><div class="line">0010   6d 65 73 73 61 67 65 73 2f 73 74 6f 72 65 64 37  messages/stored7</div><div class="line">0020   32 31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  21$..$SYS/broker</div><div class="line">0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv</div><div class="line">0040   65 64 37 33 38 33 30 31 20 00 19 24 53 59 53 2f  ed738301 ..$SYS/</div><div class="line">0050   62 72 6f 6b 65 72 2f 6d 65 73 73 61 67 65 73 2f  broker/messages/</div><div class="line">0060   73 65 6e 74 35 39 34 34 31                       sent59441</div></pre></td></tr></table></figure>
+<p>固定ヘッダ：<br>0000 : メッセージタイプ (メッセージ’3’＝PUBLISH, このメッセージ自身をQoS=1で送信）<br>0001 : 長さ　31byte</p>
+<p>可変ヘッダ：<br>0002 : トピック名長さ　16bit (MSB,LSB) ここでは27byte<br>0004 : トピック名　‘$SYS/broker/messages/stored’<br>  (QoSによっては、ここにメッセージID（16bit）が入る）<br>001F : ペイロード　上記トピックのデータが来る<br>　（ここまでが固定ヘッダで指定された長さ）</p>
+<p> 複数トピックが同時に同じパケットで配信される場合、「固定ヘッダ(PUBLISHメッセージ)+可変ヘッダ(トピックとデータ）」が続きます。</p>
+<p>この例でも、0021から他のトピックのデータが繰り返されているのがわかります。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">0020      31 24 00 1d 24 53 59 53 2f 62 72 6f 6b 65 72  .1$..$SYS/broker</div><div class="line">0030   2f 6d 65 73 73 61 67 65 73 2f 72 65 63 65 69 76  /messages/receiv</div><div class="line">0040   65 64 37 33 38 33 30</div></pre></td></tr></table></figure>
+<hr>
+<p>よくわからなかったのが、固定ヘッダの1バイトでどうやって長いメッセージの長さを表現するのか、というところです。</p>
+<p>仕様をよく見ると下記のように書いてありました。</p>
+<blockquote>
+<p>The variable length encoding scheme uses a single byte for messages up to 127 bytes long. Longer messages are handled as follows.  </p>
+<p>Seven bits of each byte encode the Remaining Length data, and the eighth bit indicates any following bytes in the representation.<br>Each byte encodes 128 values and a “continuation bit”.<br>For example, the number 64 decimal is encoded as a single byte, decimal value 64, hex 0x40.<br>The number 321 decimal (= 65 + 2*128) is encoded as two bytes, least significant first. The first byte 65+128 = 193. Note that the top bit is set to indicate at least one following byte. The second byte is 2.</p>
+</blockquote>
+<p>この日本語訳もよくわからないし、英語も何が言いたいのかよくわからずに、仕様書にある例をつらつら眺めると。。。<br>つまりは、</p>
+<ul>
+<li>全体の長さをバイナリで示して、下から7ビット切り離す</li>
+<li>切った残りのbitに’1’がのこっているのなら、切り取った7bitの最上位に’1’をつけて、最初の「長さを示す値(1byte)」とする</li>
+<li>さらに残ったものを同じように処理して、残りが0になるまでやる</li>
+</ul>
+<p>という事がわかりました。</p>
+<p>仕様では、長さを示す数値は4バイトまで長くできる、ということなので<br>単純に<code>7 x 4 = 28 bit</code>長の変数(unsigned int)だ、ということです。 </p>
+<p>固定長でフィールドを用意するのではなく、短いメッセージをできるだけ効率良く送出するために、こんな工夫をしているのだなあと思った次第。</p>
+<hr>
+<p>mosquitto_subを起動した状態から、killあるいはCtrl-Cでプロセスを止めた場合ですが、</p>
+<p>これは、ご想像通り、TCPのセッションは切れますが、MQTTプロトコル上でのUNSUBSCRIBEはなされません。ですので、同じIDを指定して接続した場合、再度同じトピックが配信されます。<br>しかし、mosquittoのクライアントでは、単純に接続する、というだけのコマンドが無いので、新たにトピックをサブスクライブする指定しかできません。その場合、前のサブスクライブでclean sessionをどのように指定していたか、で結果が変わります。</p>
+<p>clean sessionでサブスクライブしていたもの（mosquitto_subではこれがデフォルト）はセッションが切れて、新たにセッションが開始されます。<br>clean sessionをDisable していたセッションも、あらたに発行したサブスクライブセッションがclean sessionだと、以前のセッションは切断されます。<br>最初のサブスクライブも次のサブスクライブもclean sessionをdisableしていると両方のサブスクライブセッションが維持されて（多分、一つにマージされる）、両方のデータが配信されます。</p>
+<p>今回、パケットを確認してみて、mosquittoのクライアントソフトではあまり行儀のいいクライアントスクリプトは書けないなあ、という感じがしました。<br>デバイス側はRaspiからmbedに移行しようという計画なので、その時にいいクライアントをつくりましょ。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2014/12/20/mqtt-packets/" data-id="cj7mmqb3a000nbw41d8nx7d0z" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/12/21/paho-mqtt/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Paho MQTT のインストール
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/19/disable-clean-session/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">2つのトピックが。。。</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">January 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">November 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/03/">March 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/02/">February 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/01/">January 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/12/">December 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/11/">November 2014</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/renewthesite/">HTMLジェネレータを新しくしました</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/23/installation-of-mbedos/">mbedでedge deviceを作ってみる（という予定）</a>
+          </li>
+        
+          <li>
+            <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Masa M<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
