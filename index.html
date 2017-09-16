@@ -66,6 +66,52 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Gitlab-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/16/Gitlab-install/" class="article-date">
+  <time datetime="2017-09-16T01:50:06.000Z" itemprop="datePublished">2017-09-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Gitlab-docker/">Gitlab docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/16/Gitlab-install/">Gitlabのinstall</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">docker pull gitlab/gitlab-ce</div><div class="line"></div><div class="line">sudo docker run --detach --hostname localhost --publish 10443:443 --publish 10080:80 --publish 10022:22 --name gitlab_test --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest</div></pre></td></tr></table></figure>
+<p>で、一応動く。ポートを10080に設定したので、<br><code>http://localhost:10080/</code>でアクセスしてみる。</p>
+<p>最初、「応答が遅くなっています」というエラーメッセージがでるが、しばらく待って再度アクセスするとgitlabが見えるようになる。</p>
+<h2 id="おまけ-docker-composeを入れる"><a href="#おまけ-docker-composeを入れる" class="headerlink" title="おまけ: docker-composeを入れる"></a>おまけ: docker-composeを入れる</h2><p>最新バージョンの番号を<a href="https://github.com/docker/compose/releases" target="_blank" rel="external">ここ</a>で確認して、必要なものを入れる。<br>今回、1.16.1が最新版だったので、下記のようにした。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2017/09/16/Gitlab-install/" data-id="cj7mpvl6800263l416reyga7s" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-dockerCE-install" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/09/16/dockerCE-install/" class="article-date">
@@ -101,7 +147,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2017/09/16/dockerCE-install/" data-id="cj7mmqb5s0027bw4180ow0dm8" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2017/09/16/dockerCE-install/" data-id="cj7mpvl6f00293l41wi13ogu7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li></ul>
@@ -148,7 +194,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2017/09/13/renewthesite/" data-id="cj7mmqb5q0026bw41100uia4l" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2017/09/13/renewthesite/" data-id="cj7mpvl6b00273l415zvi5oxz" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
@@ -196,7 +242,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2016/01/23/installation-of-mbedos/" data-id="cj7mmqb5n0024bw41dazksruh" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2016/01/23/installation-of-mbedos/" data-id="cj7mpvl6500243l41b8f4tw2p" class="article-share-link">Share</a>
       
       
     </footer>
@@ -241,7 +287,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2016/01/10/edge-device-with-nodejs/" data-id="cj7mmqb5j0023bw41xm2m7fi4" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2016/01/10/edge-device-with-nodejs/" data-id="cj7mpvl6200233l4106i2cfpv" class="article-share-link">Share</a>
       
       
     </footer>
@@ -287,7 +333,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/12/06/python-and-trello-api/" data-id="cj7mmqb5e0021bw41hjq5lvft" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2015/12/06/python-and-trello-api/" data-id="cj7mpvl5y00213l41ys2fvgi1" class="article-share-link">Share</a>
       
       
     </footer>
@@ -332,7 +378,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/11/22/iot-et-2015-day3/" data-id="cj7mmqb5d0020bw41u5srhsv3" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2015/11/22/iot-et-2015-day3/" data-id="cj7mpvl5x00203l41jjk09od8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -377,7 +423,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/11/21/iot-et-2015-day2/" data-id="cj7mmqb5c001ybw41ro40mf0y" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2015/11/21/iot-et-2015-day2/" data-id="cj7mpvl5w001y3l418pci10ds" class="article-share-link">Share</a>
       
       
     </footer>
@@ -423,7 +469,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/11/18/iot-et-2015/" data-id="cj7mmqb5a001xbw419moz9txk" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2015/11/18/iot-et-2015/" data-id="cj7mpvl5u001x3l410fqld68i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -468,52 +514,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/03/29/ibm-iot-foundation/" data-id="cj7mmqb58001ubw41dfb5l7tb" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-send-email-via-gmail" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2015/03/08/send-email-via-gmail/" class="article-date">
-  <time datetime="2015-03-08T01:53:20.000Z" itemprop="datePublished">2015-03-08</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/python-gmail/">python, gmail</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/08/send-email-via-gmail/">gmailでメールを送る</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>gmailでメールを送るスクリプトを作り直しました。<br>プロトタイプの時に作ったスクリプトがあったのですが、googleのセキュリティアップデート(?)でSSL接続以外では基本的に接続できないようになったため、以前のシンプルな認証手順のスクリプトは動作しなくなりました。<br>
-        
-          <p class="article-more-link">
-            <a href="/2015/03/08/send-email-via-gmail/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2015/03/08/send-email-via-gmail/" data-id="cj7mmqb56001sbw41ol1irc48" class="article-share-link">Share</a>
+      <a data-url="https://mm011106.github.io/2015/03/29/ibm-iot-foundation/" data-id="cj7mpvl5s001u3l418ehx41yy" class="article-share-link">Share</a>
       
       
     </footer>
@@ -536,7 +537,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker-gitlab/">docker gitlab</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/ET2015-mqtt-IoT/">ET2015, mqtt, IoT</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Gitlab-docker/">Gitlab docker</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/">MQTT</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQTT/mosquitto-sub/">mosquitto_sub</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Paho-mqtt-webcam-raspi/">Paho-mqtt, webcam, raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/">Raspi</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/ipconfig/">ipconfig</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi/webcam/">webcam</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Raspi-init-d/">Raspi, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/">SSL</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/">CA certificate</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/SSL/CA-certificate/mosquitto/">mosquitto</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Trello-python/">Trello, python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh/">autossh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/autossh-init-d/">autossh, init.d</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/awk/">awk</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker-gitlab/">docker gitlab</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo-git/">hexo, git</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/init-d-environment/">init.d, environment</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/markdown/">markdown</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mbed/">mbed</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto/ubuntu/">ubuntu</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mosquitto-ssh/">mosquitto ssh</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/">mqtt</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/">mosquitto</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/mosquitto/raspi/">raspi</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/">paho</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/paho/python/">python</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt/wireshark/">wireshark</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/mqtt-cloud/">mqtt, cloud</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/">nginx</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/">TLS</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/nginx/TLS/SSL/">SSL</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/node-js-IoT-logger/">node.js, IoT, logger</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress/">octopress</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/octopress-oct2/">octopress, oct2</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/paho-mqtt/">paho-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/phao-mqtt/">phao-mqtt</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python-gmail/">python, gmail</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/raspi/">raspi</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/report/">report</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/report/ET2014/">ET2014</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/">autossh</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/autossh/tunneling/">tunneling</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/">ssl</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/">tls</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ssl/tls/CA-certificate/">CA certificate</a></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/">ubuntu</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/ubuntu/octopress/">octopress</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/">日本語</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/">Fromat Examples</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/日本語/Fromat-Examples/test/">test</a></li></ul></li></ul></li></ul>
     </div>
   </div>
 
@@ -578,6 +579,10 @@
       <ul>
         
           <li>
+            <a href="/2017/09/16/Gitlab-install/">Gitlabのinstall</a>
+          </li>
+        
+          <li>
             <a href="/2017/09/16/dockerCE-install/">dockerCEのインストール</a>
           </li>
         
@@ -591,10 +596,6 @@
         
           <li>
             <a href="/2016/01/10/edge-device-with-nodejs/">milkcocoaにnode.jsでアクセスする</a>
-          </li>
-        
-          <li>
-            <a href="/2015/12/06/python-and-trello-api/">TrelloにPythonでアクセスしてみる</a>
           </li>
         
       </ul>

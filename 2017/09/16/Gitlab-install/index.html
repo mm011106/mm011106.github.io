@@ -3,15 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Category: Raspi | MQTT and ...</title>
+  <title>Gitlabのinstall | MQTT and ...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="MQTT and ...">
-<meta property="og:url" content="https://mm011106.github.io/categories/Raspi/index.html">
+  <meta name="description" content="123docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost --publish 10443:443 --publish 10080:80 --publish 10022:22 --name gitlab_test --restart always --volume /srv/gitlab/config:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gitlabのinstall">
+<meta property="og:url" content="https://mm011106.github.io/2017/09/16/Gitlab-install/index.html">
 <meta property="og:site_name" content="MQTT and ...">
+<meta property="og:description" content="123docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost --publish 10443:443 --publish 10080:80 --publish 10022:22 --name gitlab_test --restart always --volume /srv/gitlab/config:">
 <meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-09-16T02:51:39.155Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MQTT and ...">
+<meta name="twitter:title" content="Gitlabのinstall">
+<meta name="twitter:description" content="123docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost --publish 10443:443 --publish 10080:80 --publish 10022:22 --name gitlab_test --restart always --volume /srv/gitlab/config:">
   
     <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
   
@@ -64,58 +68,61 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/01/25/webcam/" class="archive-article-date">
-  <time datetime="2015-01-25T00:20:05.000Z" itemprop="datePublished">Jan 25</time>
+        <section id="main"><article id="post-Gitlab-install" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/16/Gitlab-install/" class="article-date">
+  <time datetime="2017-09-16T01:50:06.000Z" itemprop="datePublished">2017-09-16</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Gitlab-docker/">Gitlab docker</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/01/25/webcam/">WebCamをつなげてみる</a>
+    <h1 class="article-title" itemprop="name">
+      Gitlabのinstall
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2015/01/13/ipaddress/" class="archive-article-date">
-  <time datetime="2015-01-13T11:43:51.000Z" itemprop="datePublished">Jan 13</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/01/13/ipaddress/">自分のIPアドレスを送信する</a>
-    </h1>
-  
+        <a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">docker pull gitlab/gitlab-ce</div><div class="line"></div><div class="line">sudo docker run --detach --hostname localhost --publish 10443:443 --publish 10080:80 --publish 10022:22 --name gitlab_test --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest</div></pre></td></tr></table></figure>
+<p>で、一応動く。ポートを10080に設定したので、<br><code>http://localhost:10080/</code>でアクセスしてみる。</p>
+<p>最初、「応答が遅くなっています」というエラーメッセージがでるが、しばらく待って再度アクセスするとgitlabが見えるようになる。</p>
+<h2 id="おまけ-docker-composeを入れる"><a href="#おまけ-docker-composeを入れる" class="headerlink" title="おまけ: docker-composeを入れる"></a>おまけ: docker-composeを入れる</h2><p>最新バージョンの番号を<a href="https://github.com/docker/compose/releases" target="_blank" rel="external">ここ</a>で確認して、必要なものを入れる。<br>今回、1.16.1が最新版だったので、下記のようにした。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose</div></pre></td></tr></table></figure>
 
-    </header>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://mm011106.github.io/2017/09/16/Gitlab-install/" data-id="cj7mpvl6800263l416reyga7s" class="article-share-link">Share</a>
+      
+      
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/09/16/dockerCE-install/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">dockerCEのインストール</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
 
 </section>
         
