@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>max_queued_messagesオプションの動作 | MQTT and ...</title>
+  <title>Archives: 2017/10 | MQTT and ...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="ということで、先のmax_queued_messagesオプションを試してみました。 結論から言うと、バッファリングしているのは指定した数の最も古いデータでした。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="max_queued_messagesオプションの動作">
-<meta property="og:url" content="https://mm011106.github.io/2014/12/07/max-quieued-messages/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="MQTT and ...">
+<meta property="og:url" content="https://mm011106.github.io/archives/2017/10/index.html">
 <meta property="og:site_name" content="MQTT and ...">
-<meta property="og:description" content="ということで、先のmax_queued_messagesオプションを試してみました。 結論から言うと、バッファリングしているのは指定した数の最も古いデータでした。">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-09-14T10:06:52.169Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="max_queued_messagesオプションの動作">
-<meta name="twitter:description" content="ということで、先のmax_queued_messagesオプションを試してみました。 結論から言うと、バッファリングしているのは指定した数の最も古いデータでした。">
+<meta name="twitter:title" content="MQTT and ...">
   
     <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
   
@@ -68,83 +64,39 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-max-quieued-messages" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/12/07/max-quieued-messages/" class="article-date">
-  <time datetime="2014-12-07T01:14:05.000Z" itemprop="datePublished">2014-12-07</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/MQTT/">MQTT</a>►<a class="article-category-link" href="/categories/MQTT/mosquitto-conf/">mosquitto.conf</a>►<a class="article-category-link" href="/categories/MQTT/mosquitto-conf/max-queued-messages/">max_queued_messages</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="article-title" itemprop="name">
-      max_queued_messagesオプションの動作
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2017" class="archive-year">2017</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2017/10/01/blockchain/" class="archive-article-date">
+  <time datetime="2017-10-01T05:28:43.000Z" itemprop="datePublished">Oct 1</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2017/10/01/blockchain/">blockchain</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>ということで、先の<code>max_queued_messages</code>オプションを試してみました。</p>
-<p>結論から言うと、バッファリングしているのは<strong>指定した数の最も古いデータ</strong>でした。</p>
-<a id="more"></a>
-<p>確認手順：</p>
-<ul>
-<li><p>mosquitto.confに<code>max_queued_messages 30</code>と設定<br>これで、30個のデータが保持されるはず。</p>
-</li>
-<li><p>ブローカが動いている計算機から <code>$ sudo /etc/init.d/mosquitto restart</code>　で設定を反映</p>
-</li>
-<li><p>QoS１、clear_sessionをfalseでブローカにサブスクライブ要求します。</p>
-</li>
-<li><p>適当に中断</p>
-</li>
-<li><p>適当に再開<br>今回は寝る前に止めて朝起きて再接続してみました。<br>あとでデータを確認できるよう<code>reconnect.txt</code>というファイルに保存。データの第一フィールドは送信時のタイムスタンプになっています。</p>
-</li>
-</ul>
-<p>で、送られたデータを確認してみると。。。。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ cat reconnect.txt | awk -F , <span class="string">'&#123; command = "date -d @" $1 ; printf NR"   " ; system(command) &#125;'</span></div><div class="line">1   Sat Dec  6 21:33:01 JST 2014</div><div class="line">2   Sat Dec  6 21:34:02 JST 2014</div><div class="line">3   Sat Dec  6 21:35:01 JST 2014</div><div class="line">  (...snip..)</div><div class="line">27   Sat Dec  6 21:59:01 JST 2014</div><div class="line">28   Sat Dec  6 22:00:01 JST 2014</div><div class="line">29   Sat Dec  6 22:01:01 JST 2014</div><div class="line">30   Sat Dec  6 22:02:02 JST 2014 &lt;指定した数だけ古いデータがあって</div><div class="line">31   Sun Dec  7 09:57:01 JST 2014 &lt;そのあと最新の配信データが届く</div><div class="line">32   Sun Dec  7 09:58:02 JST 2014</div></pre></td></tr></table></figure>
-<p>ということで、停止してすぐのデータが指定数だけ保存されている、という結論です。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://mm011106.github.io/2014/12/07/max-quieued-messages/" data-id="cj88bfik8000cst417zp3aod1" class="article-share-link">Share</a>
-      
-      
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2014/12/07/ubuntu-problem/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          ubuntuのランチャとかが消えてしまう件
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2014/12/06/again/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">mosquitto.conf 再び</div>
-    </a>
-  
-</nav>
-
-  
 </article>
+  
+  
+    </div></section>
+  
 
 </section>
         
