@@ -5,17 +5,17 @@
   
   <title>Gitlabのinstall | MQTT and ...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="12345678910docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost \--publish 10443:443 \--publish 10080:80 \--publish 10022:22 \--name gitlab_test --restart always \--volume /srv/g">
+  <meta name="description" content="Gitlabをインストールします。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Gitlabのinstall">
 <meta property="og:url" content="https://mm011106.github.io/2017/09/16/Gitlab-install/index.html">
 <meta property="og:site_name" content="MQTT and ...">
-<meta property="og:description" content="12345678910docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost \--publish 10443:443 \--publish 10080:80 \--publish 10022:22 \--name gitlab_test --restart always \--volume /srv/g">
+<meta property="og:description" content="Gitlabをインストールします。">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-09-16T02:56:21.258Z">
+<meta property="og:updated_time" content="2017-10-01T01:01:52.552Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gitlabのinstall">
-<meta name="twitter:description" content="12345678910docker pull gitlab/gitlab-cesudo docker run --detach --hostname localhost \--publish 10443:443 \--publish 10080:80 \--publish 10022:22 \--name gitlab_test --restart always \--volume /srv/g">
+<meta name="twitter:description" content="Gitlabをインストールします。">
   
     <link rel="alternate" href="/atom.xml" title="MQTT and ..." type="application/atom+xml">
   
@@ -94,7 +94,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <a id="more"></a>
+        <p>Gitlabをインストールします。</p>
+<a id="more"></a>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">docker pull gitlab/gitlab-ce</div><div class="line"></div><div class="line">sudo docker run --detach --hostname localhost \</div><div class="line">--publish 10443:443 \</div><div class="line">--publish 10080:80 \</div><div class="line">--publish 10022:22 \</div><div class="line">--name gitlab_test --restart always \</div><div class="line">--volume /srv/gitlab/config:/etc/gitlab \</div><div class="line">--volume /srv/gitlab/logs:/var/log/gitlab \</div><div class="line">--volume /srv/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest</div></pre></td></tr></table></figure>
 <p>で、一応動く。ポートを10080に設定したので、<br><code>http://localhost:10080/</code>でアクセスしてみる。</p>
 <p>最初、「応答が遅くなっています」というエラーメッセージがでるが、しばらく待って再度アクセスするとgitlabが見えるようになる。</p>
