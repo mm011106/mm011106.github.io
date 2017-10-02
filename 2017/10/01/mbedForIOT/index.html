@@ -13,7 +13,7 @@
 <meta property="og:description" content="mbedでMilkcocoaのクライアントデバイスを作ってみました。 結果的には、とりあえず動く、ものは簡単に作れましたが、RaspberryPIで作った物と同じようなスペックにしようと思うと、結構色々と考える必要がある、という感じです。 作成中">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://mm011106.github.io/image/20171001_01.png">
-<meta property="og:updated_time" content="2017-10-02T12:14:07.209Z">
+<meta property="og:updated_time" content="2017-10-02T12:15:32.670Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mbedでedge deviceを試してみた">
 <meta name="twitter:description" content="mbedでMilkcocoaのクライアントデバイスを作ってみました。 結果的には、とりあえず動く、ものは簡単に作れましたが、RaspberryPIで作った物と同じようなスペックにしようと思うと、結構色々と考える必要がある、という感じです。 作成中">
@@ -103,7 +103,7 @@
 <h2 id="仕様"><a href="#仕様" class="headerlink" title="仕様"></a>仕様</h2><p>以前RaspberryPiで作ったデバイスを置き換える、ということをターゲットとしました。そのため、以下のようなスペックが必要となります。</p>
 <ol>
 <li>RTCによりデバイス自身によってデータのタイムスタンプを押す</li>
-<li>後処理の簡単のためデータ構造（JSON）を階層構造にする</li>
+<li>後処理の簡単のためデータ構造（JSON）を階層構造にする { “Readings”:{ “temp”:”12.5”,”hum”:”60.0”},”State”:{“Location”:”12.533443-45.00121”,”Power”:”10.5”}}のような感じ</li>
 </ol>
 <h2 id="使うmbedデバイス"><a href="#使うmbedデバイス" class="headerlink" title="使うmbedデバイス"></a>使うmbedデバイス</h2><p>今回はEthernetが標準装備である事が必須となります。また、仕事も多いので比較的メモリの大きい物が必要となる可能性、販売から時間が経っていて実例の多い物、という条件から <a href="https://os.mbed.com/platforms/FRDM-K64F/" target="_blank" rel="external">FRDM-K64F</a>を選びました。</p>
 <p>チャレンジするならNUCLEO-F207ZGでやってみたい所ですが、まずは動かす事を優先にしました。</p>
