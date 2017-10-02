@@ -13,7 +13,7 @@
 <meta property="og:description" content="mbedでmiklcocoaのクライアントデバイスを作ってみました。 結果的には、とりあえず動く、ものは簡単に作れましたが、RaspberryPIで作った物と同じようなスペックにしようと思うと、結構色々と考える必要がある、という感じです。 作成中">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://mm011106.github.io/image/20171001_01.png">
-<meta property="og:updated_time" content="2017-10-01T11:22:07.191Z">
+<meta property="og:updated_time" content="2017-10-02T11:12:11.029Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mbedでedge deviceを試してみた">
 <meta name="twitter:description" content="mbedでmiklcocoaのクライアントデバイスを作ってみました。 結果的には、とりあえず動く、ものは簡単に作れましたが、RaspberryPIで作った物と同じようなスペックにしようと思うと、結構色々と考える必要がある、という感じです。 作成中">
@@ -110,6 +110,10 @@
 <h2 id="RTCの用意"><a href="#RTCの用意" class="headerlink" title="RTCの用意"></a>RTCの用意</h2><p>あまり意識していませんでしたがFRDM-K64FにはRTCが用意されています。しかし、バックアップが無いので、電源を入れるたびにリセットされてしまいます。</p>
 <p>そのため、RTC用の電源端子へ3.3Vを供給しているラインを切って、ダイオードを入れ、その先（CPU側）に電気二重層コンデンサを入れるようにしました。</p>
 <p><img src="/image/20171001_01.png" alt="RTC電源回路改造" title="Circuit Diagram"></p>
+<p>これで、電源が入っているときにコンデンサに蓄電し、電源がなくなったら、溜まった電荷でRTCを維持できます。</p>
+<p>で、どれぐらい持つか、というと。。。。</p>
+<p>Vbatの最低電圧は1.5Vぐらいというふうにspec sheetに書かれていたので、電源電圧との差（正確には電源電圧からダイオードのフォワード電圧を引いた電圧、2.6Vぐらい）から大体、電圧差１V、コンデンサの容量は1Fなので、取り出せる電荷は１クーロン。</p>
+<p>Vbatの電流は１μA程度なので、10^6秒程度バックアップできる設計になります。大体280時間ぐらいですね。</p>
 
       
     </div>
